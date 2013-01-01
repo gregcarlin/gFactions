@@ -22,17 +22,11 @@ public class gPlayerManager {
 	 */
 	public gPlayer getPlayer(String name) {
 		for(gPlayer p : players) {
-			if(p.getName().equals(name)) {
+			if(p.getName().equalsIgnoreCase(name)) {
 				return p;
 			}
 		}
-		
-		gPlayer rt = gFac.getDataSource().getPlayer(name);
-		if(rt == null) {
-			rt = new gPlayer(name, gFac.getConfig().getStartPower());
-		}
-		players.add(rt);
-		return rt;
+		return null;
 	}
 	
 	/**
@@ -40,5 +34,39 @@ public class gPlayerManager {
 	 */
 	public void save() {
 		gFac.getDataSource().save(players.toArray(new gPlayer[0]));
+	}
+	
+	/**
+	 * Should be called when a player logs in.
+	 * 
+	 * @param name The name of the player.
+	 */
+	public void initPlayer(String name) {
+		if(getPlayer(name) == null) {
+			gPlayer rt = gFac.getDataSource().getPlayer(name);
+			if(rt == null) {
+				rt = new gPlayer(name, gFac.getConfig().getStartPower());
+			}
+			players.add(rt);
+			
+			if(rt.getPower() < rt.maxPower) {
+				etc.getServer().addToServerQueue(new PowerAdder(rt));
+			}
+		}
+	}
+	
+	private class PowerAdder implements Runnable {
+		private final gPlayer gp;
+		
+		public PowerAdder(gPlayer gp) {
+			this.gp = gp;
+		}
+		
+		@Override
+		public void run() {
+			if(gp.isOnline() && !gp.increasePower()) { //power won't increase unless player is online
+				etc.getServer().addToServerQueue(new PowerAdder(gp));
+			}
+		}
 	}
 }

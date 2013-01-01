@@ -128,16 +128,30 @@ public class FactionCommand extends BaseCommand {
 				} else {
 					return f.getWho((Faction) null);
 				}
-			} else if(arg0 instanceof Player) { //tell player their faction
+			} else if(arg0 instanceof Player) { // tell player their faction
 				Faction f = fManager.getFaction(((Player) arg0).getName());
 				return f.getWho(f);
-			} else { //retarded server owner using console
+			} else { // retarded server owner using console
 				return Utils.rose("Usage: /f %s [faction]", args[1]);
 			}
 		} else if(lArgs[1].equals("map")) {
-			
+			//TODO
 		} else if(lArgs[1].equals("power") || lArgs[1].equals("pow")) {
-			
+			if(lArgs.length > 2) {
+				gPlayer gp = fManager.par.getPlayerManager().getPlayer(lArgs[1]);
+				if(gp == null) {
+					return Utils.rose("Player %s%s %swas not found.", Colors.Red, args[1], Colors.Rose);
+				} else if(arg0 instanceof Player) {
+					return String.format("%s%s%s: %d/%d", fManager.par.getRelationManager().getRelation(((Player) arg0).getName(), args[1]).getColor(), gp.getFormattedName(), Colors.Yellow, gp.getPower(), gp.maxPower);
+				} else {
+					return String.format("%s: %d/%d", gp.getFormattedName(), gp.getPower(), gp.maxPower);
+				}
+			} else if(arg0 instanceof Player) {
+				gPlayer gp = fManager.par.getPlayerManager().getPlayer(((Player) arg0).getName());
+				return String.format("%s%s%s: %d/%d", Colors.LightGreen, gp.getFormattedName(), Colors.Yellow, gp.getPower(), gp.maxPower);
+			} else {
+				return String.format("Usage: /f %s [player]", args[1]);
+			}
 		} else if(lArgs[1].equals("join")) {
 			
 		} else if(lArgs[1].equals("leave")) {
@@ -147,7 +161,14 @@ public class FactionCommand extends BaseCommand {
 		} else if(lArgs[1].equals("home")) {
 			
 		} else if(lArgs[1].equals("create")) {
-			
+			try {
+				fManager.createFaction(((Player) arg0).getName(), lArgs[2]);
+				return String.format("%1$sFaction %2$s%3$s %1$screated.", Colors.Yellow, Colors.Gold, lArgs[2]);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				return Utils.rose("Usage: /f create [name]");
+			} catch (ClassCastException e) {
+				return "Only in game players can create factions.";
+			}
 		} else if(lArgs[1].equals("desc")) {
 			
 		} else if(lArgs[1].equals("tag") || lArgs[1].equals("name")) {

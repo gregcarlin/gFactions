@@ -24,4 +24,16 @@ public class RelationManager {
 		}
 		return Relation.Type.NEUTRAL;
 	}
+	
+	/**
+	 * Returns the relation between two players.
+	 * 
+	 * @param one The first player.
+	 * @param two The second player.
+	 * @return Relation.Type
+	 */
+	public Relation.Type getRelation(String one, String two) {
+		FactionManager fm = Utils.fManager;
+		return getRelation(fm.getFaction(one), fm.getFaction(two));
+	}
 }

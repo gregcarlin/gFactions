@@ -107,7 +107,7 @@ public class FactionManager {
 	 */
 	public Faction getFactionByName(String name) {
 		for(Faction f : factions) {
-			if(f.getName().equals(name)) {
+			if(f.getName().equalsIgnoreCase(name)) {
 				return f;
 			}
 		}
@@ -124,5 +124,34 @@ public class FactionManager {
 				ds.save((CachedFaction) f);
 			}
 		}
+	}
+	
+	/**
+	 * Creates a new faction.
+	 * 
+	 * @param creator The player that is creating the faction (will become the faction admin).
+	 * @param factionName The name of the faction being created.
+	 * @return true if successful, false if a faction with the given name already existed.
+	 */
+	public boolean createFaction(String creator, String factionName) {
+		if(getFactionByName(factionName) != null) {
+			return false;
+		}
+		factions.add(new CachedFaction(getNextId(), factionName, par.getConfig().isDefaultFactionOpen(), false, creator, null));
+		return true;
+	}
+	
+	/**
+	 * Returns the id for the next created faction.
+	 * Fills in gaps created by deleted factions.
+	 * 
+	 * @return int
+	 */
+	private int getNextId() {
+		int id = 0;
+		while(getFaction(id) != null) {
+			id++;
+		}
+		return id;
 	}
 }

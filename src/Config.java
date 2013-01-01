@@ -20,6 +20,7 @@ public class Config {
 		
 		defaults.put("data-source", "oodb");
 		defaults.put("start-power", new Integer(10));
+		defaults.put("faction-open-by-default", new Boolean(false));
 		
 		for(Entry<String, Object> e : defaults.entrySet()) {
 			String key = e.getKey();
@@ -64,5 +65,14 @@ public class Config {
 	 */
 	public int getStartPower() {
 		return props.getInt("start-power");
+	}
+	
+	/**
+	 * Returns whether or not newly created factions allow anyone to join.
+	 * 
+	 * @return boolean
+	 */
+	public boolean isDefaultFactionOpen() {
+		return props.getBoolean("faction-open-by-default");
 	}
 }

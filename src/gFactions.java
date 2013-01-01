@@ -45,9 +45,14 @@ public class gFactions extends Plugin {
     	PlayerCommands.getInstance().add("f", new FactionCommand(fManager));
     	
     	PluginLoader loader = etc.getLoader();
-    	PluginLoader.Hook[] hooks = {PluginLoader.Hook.COMMAND};
+    	PluginLoader.Hook[] hooks = {PluginLoader.Hook.LOGIN};
     	for(PluginLoader.Hook h : hooks) {
     		loader.addListener(h, listener, this, PluginListener.Priority.MEDIUM);
+    	}
+    	
+    	// in case plugin is enabled when players are already online
+    	for(Player p : etc.getServer().getPlayerList()) {
+    		listener.onLogin(p);
     	}
     	
         log.info(name + " version " + version + " initialized.");
@@ -70,6 +75,9 @@ public class gFactions extends Plugin {
     }
     
     private class gFactionsListener extends PluginListener {
-        
+        @Override
+        public void onLogin(Player player) {
+        	pManager.initPlayer(player.getName());
+        }
     }
 }
