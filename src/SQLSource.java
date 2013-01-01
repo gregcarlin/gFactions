@@ -29,4 +29,22 @@ public class SQLSource implements Datasource {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void save(CachedFaction faction) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void save(gPlayer[] players) {
+		// TODO Auto-generated method stub
+		
+	}
 }

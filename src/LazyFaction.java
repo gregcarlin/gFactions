@@ -8,8 +8,7 @@ public class LazyFaction extends Faction {
 	private final int id;
 	private CachedFaction alreadyCached; //caching the cache. wat.
 	
-	public LazyFaction(FactionManager fManager, int id) {
-		super(fManager);
+	public LazyFaction(int id) {
 		this.id = id;
 	}
 	
@@ -25,7 +24,7 @@ public class LazyFaction extends Faction {
 	
 	private CachedFaction cache() {
 		if(alreadyCached != null) {
-			alreadyCached = fManager.cache(this);
+			alreadyCached = Utils.fManager.cache(this);
 		}
 		return alreadyCached;
 	}

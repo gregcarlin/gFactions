@@ -19,6 +19,8 @@ public class gFactions extends Plugin {
     
     @Override
     public void disable() {
+    	fManager.save();
+    	dataSource.close();
         log.info(name + " version " + version + " disabled.");
     }
     
@@ -36,6 +38,7 @@ public class gFactions extends Plugin {
 			log.severe("Error retrieving initial data from datasource!");
 		}
     	fManager = new FactionManager(this);
+    	Utils.fManager = fManager;
     	config.fManager = fManager; //living life on the edge
     	rManager = new RelationManager();
     	pManager = new gPlayerManager(this);

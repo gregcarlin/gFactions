@@ -8,7 +8,7 @@ import java.util.ArrayList;
  */
 public class FactionManager {
 	private static final int PAGESIZE = 8;
-	private final Faction wilderness = new Wilderness(this);
+	private final Faction wilderness = new Wilderness();
 	private ArrayList<Faction> factions = new ArrayList<Faction>(); //Should have every faction on the server
 	public final gFactions par;
 	
@@ -112,5 +112,17 @@ public class FactionManager {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Saves all CachedFactions to the datasource.
+	 */
+	public void save() {
+		Datasource ds = par.getDataSource();
+		for(Faction f : factions) {
+			if(f instanceof CachedFaction) {
+				ds.save((CachedFaction) f);
+			}
+		}
 	}
 }

@@ -17,4 +17,8 @@ public class DatasourceException extends Exception {
 	public DatasourceException(IOException e) {
 		super(e.getMessage());
 	}
+
+	public DatasourceException(String string, Object... args) {
+		super(String.format(string, args));
+	}
 }

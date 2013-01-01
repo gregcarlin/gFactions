@@ -21,12 +21,6 @@ public abstract class Faction {
 		}
 	}
 	
-	final FactionManager fManager;
-	
-	public Faction(FactionManager fManager) {
-		this.fManager = fManager;
-	}
-	
 	/**
 	 * Returns the UUID for the faction.
 	 * 
@@ -94,7 +88,7 @@ public abstract class Faction {
 	 * @return String[]
 	 */
 	public String[] getWho(String playerRelativeTo) {
-		return getWho(fManager.getFaction(playerRelativeTo));
+		return getWho(Utils.fManager.getFaction(playerRelativeTo));
 	}
 	
 	/**

@@ -1,8 +1,5 @@
 
 public abstract class SpecialFaction extends Faction {
-	public SpecialFaction(FactionManager fManager) {
-		super(fManager);
-	}
 	
 	@Override
 	public int getId() {

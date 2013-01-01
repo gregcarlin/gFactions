@@ -32,4 +32,23 @@ public interface Datasource {
 	 * @return gPlayer
 	 */
 	public gPlayer getPlayer(String name);
+	
+	/**
+	 * Closes all open resources used by the datasource.
+	 */
+	public void close();
+	
+	/**
+	 * Saves the given faction to storage.
+	 * 
+	 * @param faction The CachedFaction to save.
+	 */
+	public void save(CachedFaction faction);
+	
+	/**
+	 * Saves the given gPlayers to storage.
+	 * 
+	 * @param players The gPlayers to save.
+	 */
+	public void save(gPlayer[] players);
 }

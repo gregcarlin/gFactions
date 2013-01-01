@@ -34,4 +34,11 @@ public class gPlayerManager {
 		players.add(rt);
 		return rt;
 	}
+	
+	/**
+	 * Saves all gPlayers to the datasource.
+	 */
+	public void save() {
+		gFac.getDataSource().save(players.toArray(new gPlayer[0]));
+	}
 }

@@ -44,7 +44,7 @@ public class FileSource implements Datasource {
 			if(oVal < 0 || oVal > 3) {
 				Utils.warning("%d is an invalid value for open/peaceful/both.", oVal);
 			}
-			CachedFaction f = new CachedFaction(fManager, Integer.parseInt(split[0]), split[1], isOpen, isPeaceful, split[3], expand(split[4]));
+			CachedFaction f = new CachedFaction(Integer.parseInt(split[0]), split[1], isOpen, isPeaceful, split[3], expand(split[4]));
 			f.addMods(split[5].split(","));
 			f.addMembers(split[6].split(","));
 			f.log(split[7].split(","));
@@ -113,5 +113,20 @@ public class FileSource implements Datasource {
 			rt.add(gp);
 		}
 		return rt.toArray(new gPlayer[0]);
+	}
+
+	@Override
+	public void close() {
+		// everything is already closed
+	}
+
+	@Override
+	public void save(CachedFaction faction) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void save(gPlayer[] players) {
+		// TODO Auto-generated method stub
 	}
 }

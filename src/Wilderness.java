@@ -1,9 +1,5 @@
 
 public class Wilderness extends SpecialFaction {
-	
-	public Wilderness(FactionManager fManager) {
-		super(fManager);
-	}
 
 	@Override
 	public String getName() {
@@ -12,6 +8,6 @@ public class Wilderness extends SpecialFaction {
 
 	@Override
 	public boolean isMember(String player) {
-		return fManager.getFaction(player).equals(this);
+		return Utils.fManager.getFaction(player).equals(this);
 	}
 }

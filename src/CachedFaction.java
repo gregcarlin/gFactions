@@ -17,8 +17,7 @@ public class CachedFaction extends Faction {
 	private final ArrayList<String> members = new ArrayList<String>();
 	private final ArrayList<String> log = new ArrayList<String>();
 	
-	public CachedFaction(FactionManager fManager, int id, String name, boolean isOpen, boolean isPeaceful, String admin, Location home) {
-		super(fManager);
+	public CachedFaction(int id, String name, boolean isOpen, boolean isPeaceful, String admin, Location home) {
 		this.id = id;
 		this.name = name;
 		this.isOpen = isOpen;
@@ -101,7 +100,7 @@ public class CachedFaction extends Faction {
 	@Override
 	public String[] getWho(Faction relativeTo) {
 		String[] rt = new String[5];
-		String relationColor = fManager.par.getRelationManager().getRelation(this, relativeTo).getColor();
+		String relationColor = Utils.fManager.par.getRelationManager().getRelation(this, relativeTo).getColor();
 		rt[0] = String.format("%1$s------------ %2$s%3$s %1$s------------", Colors.Gold, relationColor, relativeTo.getName());
 		rt[1] = String.format("%1$sOpen: %2$s    %1$sPeaceful: %3$s", Colors.Yellow, Utils.readBool(isOpen()), Utils.readBool(isPeaceful()));
 		rt[2] = "TODO"; //TODO: land/power/maxpower
@@ -123,7 +122,7 @@ public class CachedFaction extends Faction {
 		StringBuilder offline = new StringBuilder();
 		for(String member : getAllMembers()) {
 			String rank = getRank(member).getPrefix();
-			String title = fManager.par.getPlayerManager().getPlayer(member).title;
+			String title = Utils.fManager.par.getPlayerManager().getPlayer(member).title;
 			if(title != null && !title.isEmpty()) {
 				title += " ";
 			}

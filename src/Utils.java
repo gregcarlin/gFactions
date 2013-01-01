@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 public class Utils {
 	private static final Logger log = Logger.getLogger("Minecraft");
+	public static FactionManager fManager;
 	
 	/**
 	 * Returns the given string colored rose.

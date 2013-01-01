@@ -18,7 +18,7 @@ public class Config {
 		
 		HashMap<String, Object> defaults = new HashMap<String, Object>();
 		
-		defaults.put("use-sql", new Boolean(false));
+		defaults.put("data-source", "oodb");
 		defaults.put("start-power", new Integer(10));
 		
 		for(Entry<String, Object> e : defaults.entrySet()) {
@@ -29,6 +29,8 @@ public class Config {
 					props.setBoolean(key, (Boolean) val);
 				} else if(val instanceof Integer) {
 					props.setInt(key, (Integer) val);
+				} else if(val instanceof String) {
+					props.setString(key, (String) val);
 				} else {
 					Utils.warning("Unknown data type found in defaults. PM gregthegeek, he's retarted.");
 				}
@@ -43,7 +45,16 @@ public class Config {
 	 * @throws DatasourceException
 	 */
 	public Datasource getDataSource() throws DatasourceException {
-		return props.getBoolean("use-sql") ? new SQLSource() : new FileSource(fManager);
+		String data = props.getString("data-source").toLowerCase();
+		if(data.equals("oodb") || data.equals("db4o")) {
+			return new OODBSource();
+		} else if(data.equals("file") || data.equals("flat-file")) {
+			return new FileSource(fManager);
+		} else if(data.equals("sql") || data.equals("mysql")) {
+			return new SQLSource();
+		} else {
+			throw new DatasourceException("%s is an invalid datasource!", data);
+		}
 	}
 	
 	/**
