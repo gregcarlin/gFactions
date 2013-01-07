@@ -6,18 +6,24 @@
  */
 public abstract class Faction {
 	public enum PlayerRank {
-		ADMIN("**"),
-		MODERATOR("*"),
-		MEMBER("");
+		ADMIN("**", FactionCommand.CommandUsageRank.FACTION_ADMIN),
+		MODERATOR("*", FactionCommand.CommandUsageRank.FACTION_MOD),
+		MEMBER("", FactionCommand.CommandUsageRank.FACTION_MEMBER);
 		
 		private final String prefix;
+		private final FactionCommand.CommandUsageRank cRank;
 		
-		private PlayerRank(String prefix) {
+		private PlayerRank(String prefix, FactionCommand.CommandUsageRank cRank) {
 			this.prefix = prefix;
+			this.cRank = cRank;
 		}
 		
 		public String getPrefix() {
 			return prefix;
+		}
+		
+		public FactionCommand.CommandUsageRank getCommandRank() {
+			return cRank;
 		}
 	}
 	
@@ -82,7 +88,6 @@ public abstract class Faction {
 	/**
 	 * Returns an array of messages that describe the faction.
 	 * Used by /f who
-	 * @see FactionCommand#parseCommand(MessageReceiver, String[])
 	 * 
 	 * @param playerRelativeTo The player the messages are formatted relative to (for enemy/ally/neutral).
 	 * @return String[]
@@ -94,7 +99,17 @@ public abstract class Faction {
 	/**
 	 * Returns an array of messages that describe the faction.
 	 * Used by /f who
-	 * @see FactionCommand#parseCommand(MessageReceiver, String[])
+	 * 
+	 * @param relativeTo
+	 * @return
+	 */
+	public String[] getWho(MessageReceiver relativeTo) {
+		return relativeTo instanceof Player ? getWho(((Player) relativeTo).getName()) : getWho((Faction) null);
+	}
+	
+	/**
+	 * Returns an array of messages that describe the faction.
+	 * Used by /f who
 	 * 
 	 * @param relativeTo The faction the messages are formatted relative to (for enemy/ally/neutral).
 	 * @return String[]

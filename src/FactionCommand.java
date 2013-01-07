@@ -5,6 +5,24 @@
  *
  */
 public class FactionCommand extends BaseCommand {
+	public enum CommandUsageRank {
+		NO_FACTION(6),
+		FACTION_MEMBER(11),
+		FACTION_MOD(27),
+		FACTION_ADMIN(32),
+		SERVER_ADMIN(37);
+		
+		private final int commandMax;
+		
+		private CommandUsageRank(int commandMax) {
+			this.commandMax = commandMax;
+		}
+		
+		public int getListMax() {
+			return commandMax;
+		}
+	}
+	
 	private static final String[] c = new String[38]; // c = commands
 	static {
 		// commands for all players
@@ -14,10 +32,12 @@ public class FactionCommand extends BaseCommand {
 		c[3] = "/f map - Displays a map of nearby factions.";
 		c[4] = "/f power (player) - Displays the power possesed by a player.";
 		c[5] = "/f join [faction] - Join a faction.";
-		c[6] = "/f leave - Leave your current faction.";
-		c[7] = "/f chat (faction/ally/public) - Switch chat modes.";
-		c[8] = "/f home - Teleport to your faction's home.";
-		c[9] = "/f create [name] - Create a faction.";
+		c[6] = "/f create [name] - Create a faction.";
+		
+		// commands for faction members
+		c[7] = "/f leave - Leave your current faction.";
+		c[8] = "/f chat (faction/ally/public) - Switch chat modes.";
+		c[9] = "/f home - Teleport to your faction's home.";
 		c[10] = "/f ownerlist - List the owners of a land plot.";
 		c[11] = "/f money - View commands related to faction banking.";
 		
@@ -55,85 +75,93 @@ public class FactionCommand extends BaseCommand {
 		c[37] = "/f version - View the running version of gFactions.";
 	}
 	
-	private final FactionManager fManager;
+	private static final FactionSubCommand[] subCommands = new FactionSubCommand[37];
+	static {
+		subCommands[0] = new FactionSubCommand(new String[] {"help", "h", "?"}, "View the list of commands.", "(page)") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				try {
+					int page = args.length > 1 ? Integer.parseInt(args[0]) : 0;
+					int max = Utils.getCommandRank(caller).getListMax();
+					String[] rt = new String[5];
+					for(int i=0; i<rt.length; i++) {
+						int index = page * rt.length + i;
+						rt[i] = index <= max ? subCommands[index].toString() : Utils.rose("No more!");
+					}
+					return rt;
+				} catch (NumberFormatException e) {
+					return new String[] {Utils.rose("%s is not a number!", args[0])};
+				}
+			}
+		};
+			
+		subCommands[1] = new FactionSubCommand(new String[] {"list", "ls"}, "Lists active factions.", "(page)") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				try {
+					int page = args.length > 1 ? Integer.parseInt(args[0]) : 0;
+					return Utils.fManager.getList(page);
+				} catch (NumberFormatException e) {
+					return new String[] {Utils.rose("%s is not a number!", args[0])};
+				}
+			}
+		};
+		
+		subCommands[2] = new FactionSubCommand(new String[] {"show", "who"}, "Gives information about a faction.", "(faction)") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				if(args.length > 0) { // other faction specified
+					Faction f = Utils.fManager.getFactionByName(args[0]);
+					if(f == null) {
+						return new String[] {Utils.rose("Faction %s was not found.", args[0])};
+					} else {
+						return f.getWho(caller);
+					}
+				} else if(caller instanceof Player) {
+					Faction f = Utils.fManager.getFaction(((Player) caller).getName());
+					return f.getWho(f);
+				} else {
+					return new String[] {Utils.rose(toString())};
+				}
+			}
+		};
+		
+		subCommands[3] = new FactionSubCommand(new String[] {"map"}, "Displays a map of nearby factions.", "") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[4] = new FactionSubCommand(new String[] {"power", "pow"} "Displays the power possessed by a player.", "(player)") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null;
+			}
+		};
+	}
 	
-	public FactionCommand(FactionManager fManager) {
+	public FactionCommand() {
 		super("- Base command for working with factions.", String.format("%s/f help %sfor a list of available commands.", Colors.Red, Colors.Rose), 2);
-		this.fManager = fManager;
 	}
 
 	@Override
 	protected void execute(MessageReceiver arg0, String[] args) {
-		Object msg = executeWrapper(arg0, args);
-		if(msg != null) {
-			if(msg instanceof String) {
-				arg0.notify((String) msg);
-			} else if(msg instanceof String[]) {
-				Utils.sendMsgs(arg0, (String[]) msg);
+		String[] msgs = null;
+		for(FactionSubCommand cmd : subCommands) {
+			if(cmd.isCalledBy(args[1])) {
+				msgs = cmd.executeWrapper(arg0, Utils.trim(args, 2));
+				break;
 			}
+		}
+		if(msgs == null) {
+			arg0.notify(String.format("%1$sInvalid command. %2$s/f help %1$sfor a list of available commands.", Colors.Rose, Colors.Red));
+		} else {
+			Utils.sendMsgs(arg0, msgs);
 		}
 	}
 	
-	private Object executeWrapper(MessageReceiver arg0, String[] args) {
-		if(!permCheck(arg0, "/f")) {
-			return Utils.rose("You do not have permission to use this command.");
-		}
-		String[] lArgs = lower(args);
-		if(lArgs[1].equals("help") || lArgs[1].equals("h") || lArgs[1].equals("?")) {
-			try {
-				int page = lArgs.length > 2 ? Integer.parseInt(lArgs[2]) : 0;
-				int max = 0;
-				if(arg0 instanceof Player) {
-					if(((Player) arg0).canUseCommand("/fadmin")) {
-						max = 37;
-					} else {
-						String pName = ((Player) arg0).getName();
-						Faction f = fManager.getFaction(pName);
-						if(f == null) {
-							max = 11;
-						} else {
-							Faction.PlayerRank rank = f.getRank(pName);
-							if(rank == Faction.PlayerRank.MEMBER) {
-								max = 11;
-							} else if(rank == Faction.PlayerRank.MODERATOR) {
-								max = 27;
-							} else {
-								assert rank == Faction.PlayerRank.ADMIN;
-								max = 32;
-							}
-						}
-					}
-				}
-				String[] rt = new String[5];
-				for(int i=0; i<rt.length; i++) {
-					int index = page * 5 + i;
-					rt[i] = index <= max ? c[index] : Utils.rose("No more!");
-				}
-				return rt;
-			} catch (NumberFormatException e) {
-				return Utils.rose("%d is not a number!", lArgs[2]);
-			}
-		} else if(lArgs[1].equals("list") || lArgs[1].equals("ls")) {
-			try {
-				int page = lArgs.length > 2 ? Integer.parseInt(lArgs[2]) : 0;
-				return fManager.getList(page);
-			} catch (NumberFormatException e) {
-				return Utils.rose("%d is not a number!", lArgs[2]);
-			}
-		} else if(lArgs[1].equals("show") || lArgs[1].equals("who")) {
-			if(lArgs.length > 2) { //other faction specified
-				Faction f = fManager.getFactionByName(args[2]);
-				if(f == null) {
-					return Utils.rose("Faction %s was not found.", args[2]);
-				} else {
-					return f.getWho((Faction) null);
-				}
-			} else if(arg0 instanceof Player) { // tell player their faction
-				Faction f = fManager.getFaction(((Player) arg0).getName());
-				return f.getWho(f);
-			} else { // retarded server owner using console
-				return Utils.rose("Usage: /f %s [faction]", args[1]);
-			}
+	/*private Object executeWrapper(MessageReceiver arg0, String[] args) {
 		} else if(lArgs[1].equals("map")) {
 			//TODO
 		} else if(lArgs[1].equals("power") || lArgs[1].equals("pow")) {
@@ -231,14 +259,7 @@ public class FactionCommand extends BaseCommand {
 			}
 		}
 		return String.format("%1$sInvalid command. %2$s/f help %1$sfor a list of available commands.", Colors.Rose, Colors.Red);
-	}
-	
-	private static boolean permCheck(MessageReceiver mr, String cmd) {
-		if(mr instanceof Player) {
-			return ((Player) mr).canUseCommand(cmd);
-		}
-		return true;
-	}
+	}*/
 	
 	private static String[] lower(String[] arr) {
 		String[] rt = new String[arr.length];

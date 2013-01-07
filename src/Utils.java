@@ -110,4 +110,51 @@ public class Utils {
 			throw new DatasourceException(e);
 		}
 	}
+	
+	/**
+	 * Returns whether or not this messagereceiver has permission to use this command.
+	 * 
+	 * @param mr The messagereceiver to check.
+	 * @param cmd The command to check.
+	 * @return boolean
+	 */
+	public static boolean permCheck(MessageReceiver mr, String cmd) {
+		if(mr instanceof Player) {
+			return ((Player) mr).canUseCommand(cmd);
+		}
+		return true;
+	}
+	
+	/**
+	 * Returns the commandusagerank of a messagereceiver
+	 * 
+	 * @param player The messagereceiver to check.
+	 * @return FactionCommand.CommandUsageRank
+	 */
+	public static FactionCommand.CommandUsageRank getCommandRank(MessageReceiver player) {
+		if(!(player instanceof Player) || ((Player) player).canUseCommand("/fadmin")) {
+			return FactionCommand.CommandUsageRank.SERVER_ADMIN;
+		}
+		String pName = player.getName();
+		Faction faction = Utils.fManager.getFaction(pName);
+		if(faction == null) {
+			return FactionCommand.CommandUsageRank.NO_FACTION;
+		}
+		return faction.getRank(pName).getCommandRank();
+	}
+	
+	/**
+	 * Returns part of a given string array.
+	 * 
+	 * @param arr The array to trim.
+	 * @param start The starting point of the trim.
+	 * @return String[]
+	 */
+	public static String[] trim(String[] arr, int start) {
+		String[] rt = new String[arr.length - start];
+		for(int i=0; i<rt.length; i++) {
+			rt[i] = arr[i + start];
+		}
+		return rt;
+	}
 }

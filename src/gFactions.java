@@ -42,7 +42,7 @@ public class gFactions extends Plugin {
     	config.fManager = fManager; //living life on the edge
     	rManager = new RelationManager();
     	pManager = new gPlayerManager(this);
-    	PlayerCommands.getInstance().add("f", new FactionCommand(fManager));
+    	PlayerCommands.getInstance().add("f", new FactionCommand());
     	
     	PluginLoader loader = etc.getLoader();
     	PluginLoader.Hook[] hooks = {PluginLoader.Hook.LOGIN};
