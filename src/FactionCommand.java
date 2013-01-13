@@ -8,9 +8,9 @@ public class FactionCommand extends BaseCommand {
 	public enum CommandUsageRank {
 		NO_FACTION(6),
 		FACTION_MEMBER(11),
-		FACTION_MOD(27),
-		FACTION_ADMIN(32),
-		SERVER_ADMIN(37);
+		FACTION_MOD(28),
+		FACTION_ADMIN(33),
+		SERVER_ADMIN(38);
 		
 		private final int commandMax;
 		
@@ -75,7 +75,7 @@ public class FactionCommand extends BaseCommand {
 		c[37] = "/f version - View the running version of gFactions.";
 	}
 	
-	private static final FactionSubCommand[] subCommands = new FactionSubCommand[37];
+	private static final FactionSubCommand[] subCommands = new FactionSubCommand[39];
 	static {
 		subCommands[0] = new FactionSubCommand(new String[] {"help", "h", "?"}, "View the list of commands.", "(page)") {
 			@Override
@@ -133,10 +133,175 @@ public class FactionCommand extends BaseCommand {
 			}
 		};
 		
-		subCommands[4] = new FactionSubCommand(new String[] {"power", "pow"} "Displays the power possessed by a player.", "(player)") {
+		subCommands[4] = new FactionSubCommand(new String[] {"power", "pow"}, "Displays the power possessed by a player.", "(player)") {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null;
+				/*if(args.length > 0) {
+					gPlayer gp = Utils.fManager.par.getPlayerManager().getPlayer(args[1]);
+					if(gp == null) {
+						return new String[] {Utils.rose("Player %s%s %swas not found.", Colors.Red, args[0], Colors.Rose)};
+					} else if(caller instanceof Player) {
+						return new String[] {String.format("%s%s%s: %d/%d", Utils.fManager.par.getRelationManager().getRelation(((Player) caller).getName(), args[0]).getColor(), gp.getFormattedName(), Colors.Yellow, gp.getPower(), gp.maxPower)};
+					} else {
+						return new String[] {String.format("%s: %d/%d", gp.getFormattedName(), gp.getPower(), gp.maxPower)};
+					}
+				} else if(caller instanceof)*/
+				String player = args.length > 0 ? args[0] : (caller instanceof Player ? ((Player) caller).getName() : null);
+				gPlayer gp = Utils.fManager.par.getPlayerManager().getPlayer(player);
+				if(player == null) {
+					return new String[] {Utils.rose("Usage: /f power [player]")};
+				} else if(caller instanceof Player) {
+					return new String[] {String.format("%s%s%s: %d/%d", Utils.fManager.par.getRelationManager().getRelation(((Player) caller).getName(), player).getColor(), gp.getFormattedName(), Colors.Yellow, gp.getPower(), gp.maxPower)};
+				} else {
+					return new String[] {String.format("%s: %d/%d", gp.getFormattedName(), gp.getPower(), gp.maxPower)};
+				}
+			}
+		};
+		
+		subCommands[5] = new FactionSubCommand(new String[] {"join"}, "Join a faction.", "[faction]") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[6] = new FactionSubCommand(new String[] {"create"}, "Create a faction.", "[name]") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				try {
+					Utils.fManager.createFaction(((Player) caller).getName(), args[0]);
+					return new String[] {String.format("%1$sFaction %2$s%3$s %1$screated.", Colors.Yellow, Colors.Gold, args[0])};
+				} catch (ArrayIndexOutOfBoundsException e) {
+					return new String[] {Utils.rose("Usage: /f create [name]")};
+				} catch (ClassCastException e) {
+					return new String[] {"Only in game players can create factions."};
+				}
+			}
+		};
+		
+		subCommands[7] = new FactionSubCommand(new String[] {"leave"}, "Leave your current faction.", "") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[8] = new FactionSubCommand(new String[] {"chat", "c"}, "Switch chat modes.", "(faction/f/ally/a/public/p)") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[9] = new FactionSubCommand(new String[] {"home"}, "Teleport to your faction's home.", "") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[10] = new FactionSubCommand(new String[] {"ownerlist"}, "List the owners of a land plot.", "") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[11] = new FactionSubCommand(new String[] {"money"}, "View commands related to faction banking.", "") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[12] = new FactionSubCommand(new String[] {"desc"}, "Set your faction's description.", "[desc]") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[13] = new FactionSubCommand(new String[] {"tag"}, "Set your faction's tag (aka name).", "[tag]") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[14] = new FactionSubCommand(new String[] {"open"}, "Allow anyone to join your faction.", "") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[15] = new FactionSubCommand(new String[] {"close"}, "Only allow those invited to join your faction.", "") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[16] = new FactionSubCommand(new String[] {"invite", "inv"}, "Invite a player to your faction.", "[player]") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[17] = new FactionSubCommand(new String[] {"deinvite", "deinv"}, "Revoke a faction invitation.", "[player]") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[18] = new FactionSubCommand(new String[] {"sethome"}, "Set the faction's home.", "") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[19] = new FactionSubCommand(new String[] {"claim"}, "Claim land for your faction.", "") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[20] = new FactionSubCommand(new String[] {"autoclaim"}, "Toggle the automatic claiming of land for your faction.", "") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[21] = new FactionSubCommand(new String[] {"unclaim"}, "Unclaim land for your faction.", "") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[22] = new FactionSubCommand(new String[] {"unclaimall"}, "Unclaim all faction-owned land.", "") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[23] = new FactionSubCommand(new String[] {"owner"}, "Toggles build rights for players on land.", "(player)") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
+			}
+		};
+		
+		subCommands[24] = new FactionSubCommand(new String[] {"kick"}, "Kick a player from the faction.", "[player]") {
+			@Override
+			String[] execute(MessageReceiver caller, String[] args) {
+				return null; // TODO
 			}
 		};
 	}
@@ -162,24 +327,6 @@ public class FactionCommand extends BaseCommand {
 	}
 	
 	/*private Object executeWrapper(MessageReceiver arg0, String[] args) {
-		} else if(lArgs[1].equals("map")) {
-			//TODO
-		} else if(lArgs[1].equals("power") || lArgs[1].equals("pow")) {
-			if(lArgs.length > 2) {
-				gPlayer gp = fManager.par.getPlayerManager().getPlayer(lArgs[1]);
-				if(gp == null) {
-					return Utils.rose("Player %s%s %swas not found.", Colors.Red, args[1], Colors.Rose);
-				} else if(arg0 instanceof Player) {
-					return String.format("%s%s%s: %d/%d", fManager.par.getRelationManager().getRelation(((Player) arg0).getName(), args[1]).getColor(), gp.getFormattedName(), Colors.Yellow, gp.getPower(), gp.maxPower);
-				} else {
-					return String.format("%s: %d/%d", gp.getFormattedName(), gp.getPower(), gp.maxPower);
-				}
-			} else if(arg0 instanceof Player) {
-				gPlayer gp = fManager.par.getPlayerManager().getPlayer(((Player) arg0).getName());
-				return String.format("%s%s%s: %d/%d", Colors.LightGreen, gp.getFormattedName(), Colors.Yellow, gp.getPower(), gp.maxPower);
-			} else {
-				return String.format("Usage: /f %s [player]", args[1]);
-			}
 		} else if(lArgs[1].equals("join")) {
 			
 		} else if(lArgs[1].equals("leave")) {
@@ -188,15 +335,6 @@ public class FactionCommand extends BaseCommand {
 			
 		} else if(lArgs[1].equals("home")) {
 			
-		} else if(lArgs[1].equals("create")) {
-			try {
-				fManager.createFaction(((Player) arg0).getName(), lArgs[2]);
-				return String.format("%1$sFaction %2$s%3$s %1$screated.", Colors.Yellow, Colors.Gold, lArgs[2]);
-			} catch (ArrayIndexOutOfBoundsException e) {
-				return Utils.rose("Usage: /f create [name]");
-			} catch (ClassCastException e) {
-				return "Only in game players can create factions.";
-			}
 		} else if(lArgs[1].equals("desc")) {
 			
 		} else if(lArgs[1].equals("tag") || lArgs[1].equals("name")) {
