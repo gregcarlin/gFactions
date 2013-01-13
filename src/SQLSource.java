@@ -21,7 +21,6 @@ public class SQLSource implements Datasource {
 	@Override
 	public void fix() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -33,18 +32,20 @@ public class SQLSource implements Datasource {
 	@Override
 	public void close() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void save(CachedFaction faction) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void save(gPlayer[] players) {
 		// TODO Auto-generated method stub
-		
+	}
+
+	@Override
+	public void save(Relation[] relations) {
+		// TODO Auto-generated method stub
 	}
 }

@@ -129,4 +129,9 @@ public class FileSource implements Datasource {
 	public void save(gPlayer[] players) {
 		// TODO Auto-generated method stub
 	}
+
+	@Override
+	public void save(Relation[] relations) {
+		// TODO Auto-generated method stub
+	}
 }

@@ -36,4 +36,11 @@ public class RelationManager {
 		FactionManager fm = Utils.fManager;
 		return getRelation(fm.getFaction(one), fm.getFaction(two));
 	}
+	
+	/**
+	 * Saves all relations to storage.
+	 */
+	public void save() {
+		Utils.fManager.par.getDataSource().save(relations.toArray(new Relation[0]));
+	}
 }

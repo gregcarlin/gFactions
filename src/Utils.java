@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 
-public class Utils {
+public abstract class Utils {
 	private static final Logger log = Logger.getLogger("Minecraft");
 	public static FactionManager fManager;
 	
@@ -156,5 +156,14 @@ public class Utils {
 			rt[i] = arr[i + start];
 		}
 		return rt;
+	}
+	
+	/**
+	 * Saves all data.
+	 */
+	public static void saveAll() {
+		fManager.save();
+    	fManager.par.getPlayerManager().save();
+    	fManager.par.getRelationManager().save();
 	}
 }

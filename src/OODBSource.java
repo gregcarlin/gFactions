@@ -11,6 +11,7 @@ import com.db4o.ObjectSet;
 public class OODBSource implements Datasource {
 	private final ObjectContainer factionDB = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), Config.FOLDER + "factions.db");
 	private final ObjectContainer playerDB = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), Config.FOLDER + "players.db");
+	private final ObjectContainer relationDB = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), Config.FOLDER + "relations.db");
 	
 	public OODBSource() {
 		
@@ -43,6 +44,7 @@ public class OODBSource implements Datasource {
 	public void close() {
 		factionDB.close();
 		playerDB.close();
+		relationDB.close();
 	}
 
 	@Override
@@ -54,6 +56,13 @@ public class OODBSource implements Datasource {
 	public void save(gPlayer[] players) {
 		for(gPlayer gp : players) {
 			playerDB.store(gp);
+		}
+	}
+
+	@Override
+	public void save(Relation[] relations) {
+		for(Relation r : relations) {
+			relationDB.store(r);
 		}
 	}
 }

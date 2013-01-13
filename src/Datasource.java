@@ -51,4 +51,11 @@ public interface Datasource {
 	 * @param players The gPlayers to save.
 	 */
 	public void save(gPlayer[] players);
+	
+	/**
+	 * Saves the given relations to storage.
+	 * 
+	 * @param relations
+	 */
+	public void save(Relation[] relations);
 }

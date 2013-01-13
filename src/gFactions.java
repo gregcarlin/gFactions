@@ -19,7 +19,7 @@ public class gFactions extends Plugin {
     
     @Override
     public void disable() {
-    	fManager.save();
+    	Utils.saveAll();
     	dataSource.close();
         log.info(name + " version " + version + " disabled.");
     }

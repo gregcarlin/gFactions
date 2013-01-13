@@ -19,6 +19,10 @@ public abstract class FactionSubCommand {
 		this(aliases, description, argHelp, 0, minRank);
 	}
 	
+	public FactionSubCommand(String[] aliases, String description, String argHelp, int minArgs) {
+		this(aliases, description, argHelp, minArgs, FactionCommand.CommandUsageRank.NO_FACTION);
+	}
+	
 	public FactionSubCommand(String[] aliases, String description, String argHelp, int minArgs, FactionCommand.CommandUsageRank minRank) {
 		this.aliases = aliases;
 		this.description = description;
