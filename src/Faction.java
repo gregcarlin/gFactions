@@ -93,7 +93,7 @@ public abstract class Faction {
 	 * @return String[]
 	 */
 	public String[] getWho(String playerRelativeTo) {
-		return getWho(Utils.fManager.getFaction(playerRelativeTo));
+		return getWho(Utils.plugin.getFactionManager().getFaction(playerRelativeTo));
 	}
 	
 	/**

@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 public abstract class Utils {
 	private static final Logger log = Logger.getLogger("Minecraft");
-	public static FactionManager fManager;
+	public static gFactions plugin;
 	
 	/**
 	 * Returns the given string colored rose.
@@ -57,13 +57,23 @@ public abstract class Utils {
 	}
 	
 	/**
-	 * Returns a green 'yes' if the boolean is true, and a red 'no' if it's not.
+	 * Returns a green 'Yes' if the boolean is true, and a red 'No' if it's not.
 	 * 
 	 * @param b The boolean to read.
 	 * @return String
 	 */
 	public static String readBool(boolean b) {
 		return b ? Colors.Green + "Yes" : Colors.Red + "No";
+	}
+	
+	/**
+	 * Returns a green 'ON' if the boolean is true, and a red 'OFF' if it's not.
+	 * 
+	 * @param b The boolean to read.
+	 * @return String
+	 */
+	public static String readBoolS(boolean b) {
+		return b ? Colors.Green + "ON" : Colors.Red + "OFF";
 	}
 	
 	/**
@@ -136,7 +146,7 @@ public abstract class Utils {
 			return FactionCommand.CommandUsageRank.SERVER_ADMIN;
 		}
 		String pName = player.getName();
-		Faction faction = Utils.fManager.getFaction(pName);
+		Faction faction = plugin.getFactionManager().getFaction(pName);
 		if(faction == null) {
 			return FactionCommand.CommandUsageRank.NO_FACTION;
 		}
@@ -162,6 +172,7 @@ public abstract class Utils {
 	 * Saves all data.
 	 */
 	public static void saveAll() {
+		FactionManager fManager = plugin.getFactionManager();
 		fManager.save();
     	fManager.par.getPlayerManager().save();
     	fManager.par.getRelationManager().save();

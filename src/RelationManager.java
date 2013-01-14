@@ -33,7 +33,7 @@ public class RelationManager {
 	 * @return Relation.Type
 	 */
 	public Relation.Type getRelation(String one, String two) {
-		FactionManager fm = Utils.fManager;
+		FactionManager fm = Utils.plugin.getFactionManager();
 		return getRelation(fm.getFaction(one), fm.getFaction(two));
 	}
 	
@@ -41,6 +41,6 @@ public class RelationManager {
 	 * Saves all relations to storage.
 	 */
 	public void save() {
-		Utils.fManager.par.getDataSource().save(relations.toArray(new Relation[0]));
+		Utils.plugin.getDataSource().save(relations.toArray(new Relation[0]));
 	}
 }

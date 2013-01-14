@@ -24,7 +24,7 @@ public class LazyFaction extends Faction {
 	
 	private CachedFaction cache() {
 		if(alreadyCached != null) {
-			alreadyCached = Utils.fManager.cache(this);
+			alreadyCached = Utils.plugin.getFactionManager().cache(this);
 		}
 		return alreadyCached;
 	}

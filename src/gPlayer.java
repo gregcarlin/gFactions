@@ -10,11 +10,13 @@ public class gPlayer {
 	private final Object powerLock = new Object();
 	public int maxPower = 10;
 	public String title;
+	public boolean adminBypass;
 	
 	public gPlayer(String name, int power) {
 		this.name = name;
 		this.power = power;
 		this.title = "";
+		this.adminBypass = false;
 	}
 	
 	/**
@@ -44,7 +46,7 @@ public class gPlayer {
 	 */
 	public String getFormattedName() {
 		String prefix = "";
-		Faction f = Utils.fManager.getFaction(name);
+		Faction f = Utils.plugin.getFactionManager().getFaction(name);
 		if(f != null) {
 			prefix = f.getRank(name).getPrefix();
 		}

@@ -8,6 +8,6 @@ public class Wilderness extends SpecialFaction {
 
 	@Override
 	public boolean isMember(String player) {
-		return Utils.fManager.getFaction(player).equals(this);
+		return Utils.plugin.getFactionManager().getFaction(player).equals(this);
 	}
 }

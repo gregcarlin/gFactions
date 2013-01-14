@@ -50,7 +50,7 @@ public class FactionCommand extends BaseCommand {
 			String[] execute(MessageReceiver caller, String[] args) {
 				try {
 					int page = args.length > 1 ? Integer.parseInt(args[0]) : 0;
-					return Utils.fManager.getList(page);
+					return Utils.plugin.getFactionManager().getList(page);
 				} catch (NumberFormatException e) {
 					return new String[] {Utils.rose("%s is not a number!", args[0])};
 				}
@@ -61,14 +61,14 @@ public class FactionCommand extends BaseCommand {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				if(args.length > 0) { // other faction specified
-					Faction f = Utils.fManager.getFactionByName(args[0]);
+					Faction f = Utils.plugin.getFactionManager().getFactionByName(args[0]);
 					if(f == null) {
 						return new String[] {Utils.rose("Faction %s was not found.", args[0])};
 					} else {
 						return f.getWho(caller);
 					}
 				} else if(caller instanceof Player) {
-					Faction f = Utils.fManager.getFaction(((Player) caller).getName());
+					Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
 					return f.getWho(f);
 				} else {
 					return new String[] {Utils.rose(toString())};
@@ -87,11 +87,11 @@ public class FactionCommand extends BaseCommand {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				String player = args.length > 0 ? args[0] : (caller instanceof Player ? ((Player) caller).getName() : null);
-				gPlayer gp = Utils.fManager.par.getPlayerManager().getPlayer(player);
+				gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(player);
 				if(player == null) {
 					return new String[] {Utils.rose("Usage: /f power [player]")};
 				} else if(caller instanceof Player) {
-					return new String[] {String.format("%s%s%s: %d/%d", Utils.fManager.par.getRelationManager().getRelation(((Player) caller).getName(), player).getColor(), gp.getFormattedName(), Colors.Yellow, gp.getPower(), gp.maxPower)};
+					return new String[] {String.format("%s%s%s: %d/%d", Utils.plugin.getRelationManager().getRelation(((Player) caller).getName(), player).getColor(), gp.getFormattedName(), Colors.Yellow, gp.getPower(), gp.maxPower)};
 				} else {
 					return new String[] {String.format("%s: %d/%d", gp.getFormattedName(), gp.getPower(), gp.maxPower)};
 				}
@@ -109,7 +109,7 @@ public class FactionCommand extends BaseCommand {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				try {
-					Utils.fManager.createFaction(((Player) caller).getName(), args[0]);
+					Utils.plugin.getFactionManager().createFaction(((Player) caller).getName(), args[0]);
 					return new String[] {String.format("%1$sFaction %2$s%3$s %1$screated.", Colors.Yellow, Colors.Gold, args[0])};
 				} catch (ArrayIndexOutOfBoundsException e) {
 					return new String[] {Utils.rose("Usage: /f create [name]")};
@@ -138,7 +138,7 @@ public class FactionCommand extends BaseCommand {
 			String[] execute(MessageReceiver caller, String[] args) {
 				if(caller instanceof Player) {
 					Player p = (Player) caller;
-					Faction f = Utils.fManager.getFaction(p.getName());
+					Faction f = Utils.plugin.getFactionManager().getFaction(p.getName());
 					assert f != null;
 					Location home = f.getHome();
 					if(home == null) {
@@ -324,7 +324,13 @@ public class FactionCommand extends BaseCommand {
 		subCommands[34] = new FactionSubCommand(new String[] {"bypass"}, "Toggle admin bypass mode.", "", CommandUsageRank.SERVER_ADMIN) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				try {
+					gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(((Player) caller).getName());
+					gp.adminBypass = !gp.adminBypass;
+					return new String[] {String.format("%sBypass mode set to: %s", Colors.Yellow, Utils.readBoolS(gp.adminBypass))};
+				} catch (ClassCastException e) {
+					return new String[] {"You are not a real player."};
+				}
 			}
 		};
 		

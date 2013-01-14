@@ -38,7 +38,7 @@ public class gFactions extends Plugin {
 			log.severe("Error retrieving initial data from datasource!");
 		}
     	fManager = new FactionManager(this);
-    	Utils.fManager = fManager;
+    	Utils.plugin = this;
     	config.fManager = fManager; //living life on the edge
     	rManager = new RelationManager();
     	pManager = new gPlayerManager(this);
@@ -60,6 +60,10 @@ public class gFactions extends Plugin {
     
     public Datasource getDataSource() {
     	return dataSource;
+    }
+    
+    public FactionManager getFactionManager() {
+    	return fManager;
     }
     
     public RelationManager getRelationManager() {
