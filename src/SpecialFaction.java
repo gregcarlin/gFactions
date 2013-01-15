@@ -1,4 +1,9 @@
-
+/**
+ * Subclassed by Wilderness and ZoneFaction
+ * 
+ * @author gregthegeek
+ *
+ */
 public abstract class SpecialFaction extends Faction {
 	
 	@Override
@@ -44,5 +49,40 @@ public abstract class SpecialFaction extends Faction {
 	@Override
 	public String[] getMembers() {
 		return new String[0];
+	}
+	
+	@Override
+	public void add(String player) {
+		
+	}
+	
+	@Override
+	public void remove(String player) {
+		
+	}
+	
+	@Override
+	public void setDescription(String desc) {
+		
+	}
+	
+	@Override
+	public void setName(String name) {
+		
+	}
+	
+	@Override
+	public void setOpen(boolean open) {
+		
+	}
+	
+	@Override
+	public void setHome(Location home) {
+		
+	}
+	
+	@Override
+	public void disband() {
+		
 	}
 }

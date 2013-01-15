@@ -19,13 +19,13 @@ public class OODBSource implements Datasource {
 
 	@Override
 	public CachedFaction getFaction(int id) {
-		ObjectSet<CachedFaction> result = factionDB.queryByExample(new CachedFaction(id, null, false, false, null, null));
+		ObjectSet<CachedFaction> result = factionDB.queryByExample(new CachedFaction(id, null, null, false, false, null, null));
 		return result.get(0);
 	}
 
 	@Override
 	public Faction[] getAllFactions() {
-		ObjectSet<CachedFaction> result = factionDB.queryByExample(new CachedFaction(0, null, false, false, null, null));
+		ObjectSet<CachedFaction> result = factionDB.queryByExample(new CachedFaction(0, null, null, false, false, null, null));
 		return result.toArray(new Faction[0]);
 	}
 
@@ -64,5 +64,10 @@ public class OODBSource implements Datasource {
 		for(Relation r : relations) {
 			relationDB.store(r);
 		}
+	}
+
+	@Override
+	public void delete(Faction f) {
+		factionDB.delete(f);
 	}
 }

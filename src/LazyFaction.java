@@ -68,4 +68,39 @@ public class LazyFaction extends Faction {
 	public String[] getMembers() {
 		return cache().getMembers();
 	}
+
+	@Override
+	public void add(String player) {
+		cache().add(player);
+	}
+
+	@Override
+	public void remove(String player) {
+		cache().remove(player);
+	}
+
+	@Override
+	public void setDescription(String desc) {
+		cache().setDescription(desc);
+	}
+
+	@Override
+	public String getDescription() {
+		return cache().getDescription();
+	}
+
+	@Override
+	public void setName(String name) {
+		cache().setName(name);
+	}
+
+	@Override
+	public void setOpen(boolean open) {
+		cache().setOpen(open);
+	}
+
+	@Override
+	public void setHome(Location home) {
+		cache().setHome(home);
+	}
 }

@@ -7,10 +7,10 @@
 public class gPlayer {
 	private final String name;
 	private int power;
-	private final Object powerLock = new Object();
+	private transient final Object powerLock = new Object();
 	public int maxPower = 10;
 	public String title;
-	public boolean adminBypass;
+	public transient boolean adminBypass;
 	
 	public gPlayer(String name, int power) {
 		this.name = name;

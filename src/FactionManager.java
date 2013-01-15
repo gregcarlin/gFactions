@@ -137,7 +137,8 @@ public class FactionManager {
 		if(getFactionByName(factionName) != null) {
 			return false;
 		}
-		factions.add(new CachedFaction(getNextId(), factionName, par.getConfig().isDefaultFactionOpen(), false, creator, null));
+		Config config = par.getConfig();
+		factions.add(new CachedFaction(getNextId(), factionName, config.getDefaultFactionDesc(), config.isDefaultFactionOpen(), false, creator, null));
 		return true;
 	}
 	
@@ -153,5 +154,14 @@ public class FactionManager {
 			id++;
 		}
 		return id;
+	}
+	
+	/**
+	 * Disbands a faction.
+	 * 
+	 * @param f The faction to disband.
+	 */
+	public void disband(Faction f) {
+		factions.remove(f);
 	}
 }

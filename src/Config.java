@@ -21,6 +21,7 @@ public class Config {
 		defaults.put("data-source", "oodb");
 		defaults.put("start-power", new Integer(10));
 		defaults.put("faction-open-by-default", new Boolean(false));
+		defaults.put("default-faction-desc", "Default faction description :(");
 		
 		for(Entry<String, Object> e : defaults.entrySet()) {
 			String key = e.getKey();
@@ -74,5 +75,14 @@ public class Config {
 	 */
 	public boolean isDefaultFactionOpen() {
 		return props.getBoolean("faction-open-by-default");
+	}
+	
+	/**
+	 * Returns the default faction description.
+	 * 
+	 * @return String
+	 */
+	public String getDefaultFactionDesc() {
+		return props.getString("default-faction-desc");
 	}
 }

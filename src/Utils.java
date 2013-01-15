@@ -41,6 +41,9 @@ public abstract class Utils {
 	 * @param msgs The messages to send.
 	 */
 	public static void sendMsgs(MessageReceiver mr, String[] msgs) {
+		if(msgs == null) {
+			return;
+		}
 		for(String s : msgs) {
 			mr.notify(s);
 		}
@@ -57,23 +60,15 @@ public abstract class Utils {
 	}
 	
 	/**
-	 * Returns a green 'Yes' if the boolean is true, and a red 'No' if it's not.
+	 * Returns the yes value in green if true, and the no value in red if it's not.
 	 * 
 	 * @param b The boolean to read.
+	 * @param yes The value to return if true.
+	 * @param no The value to return if false.
 	 * @return String
 	 */
-	public static String readBool(boolean b) {
-		return b ? Colors.Green + "Yes" : Colors.Red + "No";
-	}
-	
-	/**
-	 * Returns a green 'ON' if the boolean is true, and a red 'OFF' if it's not.
-	 * 
-	 * @param b The boolean to read.
-	 * @return String
-	 */
-	public static String readBoolS(boolean b) {
-		return b ? Colors.Green + "ON" : Colors.Red + "OFF";
+	public static String readBool(boolean b, String yes, String no) {
+		return b ? Colors.Green + yes : Colors.Red + no;
 	}
 	
 	/**
@@ -142,7 +137,9 @@ public abstract class Utils {
 	 * @return FactionCommand.CommandUsageRank
 	 */
 	public static FactionCommand.CommandUsageRank getCommandRank(MessageReceiver player) {
-		if(!(player instanceof Player) || ((Player) player).canUseCommand("/fadmin")) {
+		if(!(player instanceof Player)) {
+			return FactionCommand.CommandUsageRank.NO_FACTION;
+		} else if(((Player) player).canUseCommand("/fadmin")) {
 			return FactionCommand.CommandUsageRank.SERVER_ADMIN;
 		}
 		String pName = player.getName();
@@ -172,9 +169,8 @@ public abstract class Utils {
 	 * Saves all data.
 	 */
 	public static void saveAll() {
-		FactionManager fManager = plugin.getFactionManager();
-		fManager.save();
-    	fManager.par.getPlayerManager().save();
-    	fManager.par.getRelationManager().save();
+		plugin.getFactionManager().save();
+    	plugin.getPlayerManager().save();
+    	plugin.getRelationManager().save();
 	}
 }

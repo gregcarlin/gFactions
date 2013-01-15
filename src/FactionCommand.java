@@ -8,20 +8,27 @@ import java.awt.Color;
  */
 public class FactionCommand extends BaseCommand {
 	public enum CommandUsageRank {
-		NO_FACTION(6),
-		FACTION_MEMBER(11),
-		FACTION_MOD(28),
-		FACTION_ADMIN(33),
-		SERVER_ADMIN(38);
+		NO_FACTION(6, "regular member"),
+		FACTION_MEMBER(11, "faction member"),
+		FACTION_MOD(28, "faction moderator"),
+		FACTION_ADMIN(33, "faction admin"),
+		SERVER_ADMIN(38, "server admin");
 		
 		private final int commandMax;
+		private final String userReadable;
 		
-		private CommandUsageRank(int commandMax) {
+		private CommandUsageRank(int commandMax, String userReadable) {
 			this.commandMax = commandMax;
+			this.userReadable = userReadable;
 		}
 		
 		public int getListMax() {
 			return commandMax;
+		}
+		
+		@Override
+		public String toString() {
+			return userReadable;
 		}
 	}
 	
@@ -101,7 +108,25 @@ public class FactionCommand extends BaseCommand {
 		subCommands[5] = new FactionSubCommand(new String[] {"join"}, "Join a faction.", "[faction]", 1) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				if(caller instanceof Player) {
+					String pName = ((Player) caller).getName();
+					FactionManager fManager = Utils.plugin.getFactionManager();
+					Faction old = fManager.getFaction(pName);
+					if(old != null) {
+						return new String[] {Utils.rose("You must leave your current faction first.")};
+					}
+					Faction nFac = fManager.getFactionByName(args[0]);
+					if(nFac == null) {
+						return new String[] {Utils.rose("Faction %s%s %snot found.", Colors.Red, args[0], Colors.Rose)};
+					} else if(nFac.isOpen() || nFac.isInvited(pName) || Utils.plugin.getPlayerManager().getPlayer(pName).adminBypass) {
+						nFac.add(pName);
+						return new String[] {String.format("%1$sYou are now a member of %2$s%3$s %1$s.", Colors.Yellow, Colors.Green, nFac.getName())};
+					} else {
+						return new String[] {Utils.rose("You must be invited to join that faction.")};
+					}
+				} else {
+					return new String[] {"You are not a player! How can you join a faction?"};
+				}
 			}
 		};
 		
@@ -122,7 +147,12 @@ public class FactionCommand extends BaseCommand {
 		subCommands[7] = new FactionSubCommand(new String[] {"leave"}, "Leave your current faction.", "", CommandUsageRank.FACTION_MEMBER) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				String pName = ((Player) caller).getName();
+				Faction f = Utils.plugin.getFactionManager().getFaction(pName);
+				assert f != null && !(f instanceof SpecialFaction);
+				f.remove(pName);
+				return new String[] {String.format("%sYou are no longer in any faction.", Colors.Yellow)};
 			}
 		};
 		
@@ -136,19 +166,16 @@ public class FactionCommand extends BaseCommand {
 		subCommands[9] = new FactionSubCommand(new String[] {"home"}, "Teleport to your faction's home.", "", CommandUsageRank.FACTION_MEMBER) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				if(caller instanceof Player) {
-					Player p = (Player) caller;
-					Faction f = Utils.plugin.getFactionManager().getFaction(p.getName());
-					assert f != null;
-					Location home = f.getHome();
-					if(home == null) {
-						return new String[] {Utils.rose("Your faction does not have a home set.")};
-					} else {
-						p.teleportTo(home);
-						return new String[] {String.format("%sTeleported.", Colors.Green)};
-					}
+				assert caller instanceof Player;
+				Player p = (Player) caller;
+				Faction f = Utils.plugin.getFactionManager().getFaction(p.getName());
+				assert f != null && !(f instanceof SpecialFaction);
+				Location home = f.getHome();
+				if(home == null) {
+					return new String[] {Utils.rose("Your faction does not have a home set.")};
 				} else {
-					return new String[] {"You cannot move."};
+					p.teleportTo(home);
+					return new String[] {String.format("%sTeleported.", Colors.Green)};
 				}
 			}
 		};
@@ -170,49 +197,100 @@ public class FactionCommand extends BaseCommand {
 		subCommands[12] = new FactionSubCommand(new String[] {"desc"}, "Set your faction's description.", "[desc]", 1, CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
+				assert f != null && !(f instanceof SpecialFaction);
+				f.setDescription(args[0]);
+				return new String[] {String.format("%1$sDescription set to %2$s%3$s%1$s.", Colors.Yellow, Colors.Green, args[0])};
 			}
 		};
 		
 		subCommands[13] = new FactionSubCommand(new String[] {"tag", "name"}, "Set your faction's tag (aka name).", "[tag]", 1, CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				FactionManager fManager = Utils.plugin.getFactionManager();
+				Faction other = fManager.getFactionByName(args[0]);
+				if(other == null) {
+					Faction f = fManager.getFaction(((Player) caller).getName());
+					assert f != null && !(f instanceof SpecialFaction);
+					f.setName(args[0]);
+					return new String[] {String.format("%1$sYour faction's name set to %2$s%3$s%1$s.", Colors.Yellow, Colors.Green, args[0])};
+				} else {
+					return new String[] {Utils.rose("A faction with the name %s%s %salready exists!", Colors.Red, args[0], Colors.Rose)};
+				}
 			}
 		};
 		
 		subCommands[14] = new FactionSubCommand(new String[] {"open"}, "Allow anyone to join your faction.", "", CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
+				assert f != null && !(f instanceof SpecialFaction);
+				f.setOpen(true);
+				return new String[] {String.format("%sYour faction is now %s%s", Colors.Yellow, Colors.Green, "Open")};
 			}
 		};
 		
 		subCommands[15] = new FactionSubCommand(new String[] {"close"}, "Only allow those invited to join your faction.", "", CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
+				assert f != null && !(f instanceof SpecialFaction);
+				f.setOpen(false);
+				return new String[] {String.format("%sYour faction is now %s%s", Colors.Yellow, Colors.Red, "Closed")};
 			}
 		};
 		
 		subCommands[16] = new FactionSubCommand(new String[] {"invite", "inv"}, "Invite a player to your faction.", "[player]", 1, CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
+				assert f != null && !(f instanceof SpecialFaction);
+				if(f.invite(args[0])) {
+					return new String[] {Utils.rose("That player has already been invited to your faction.")};
+				} else {
+					Player p = etc.getServer().getPlayer(args[0]);
+					if(p != null) {
+						p.sendMessage(String.format("%sYou have been invited to %s%s", Colors.Yellow, Colors.Gray, f.getName()));
+					}
+					return new String[] {String.format("%s%s %shas been invited to your faction.", Colors.Gray, args[0], Colors.Yellow)};
+				}
 			}
 		};
 		
 		subCommands[17] = new FactionSubCommand(new String[] {"deinvite", "deinv"}, "Revoke a faction invitation.", "[player]", 1, CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
+				assert f != null && !(f instanceof SpecialFaction);
+				if(f.deinvite(args[0])) {
+					Player p = etc.getServer().getPlayer(args[0]);
+					if(p != null) {
+						p.sendMessage(Utils.rose("You are no longer invited to %s%s", Colors.Red, f.getName()));
+					}
+					return new String[] {String.format("%s%s%s's faction invitation was revoked.", Colors.Gray, args[0], Colors.Yellow)};
+				} else {
+					return new String[] {String.format("%s%s %swas never invited to your faction.", Colors.Red, args[0], Colors.Rose)};
+				}
 			}
 		};
 		
 		subCommands[18] = new FactionSubCommand(new String[] {"sethome"}, "Set the faction's home.", "", CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				Player p = (Player) caller;
+				String pName = p.getName();
+				Faction f = Utils.plugin.getFactionManager().getFaction(pName);
+				assert f != null && !(f instanceof SpecialFaction);
+				f.setHome(p.getLocation());
+				f.sendToMembers(String.format("%s%s %sjust set the faction home.", Colors.LightGreen, pName, Colors.Yellow));
+				return null;
 			}
 		};
 		
@@ -254,14 +332,70 @@ public class FactionCommand extends BaseCommand {
 		subCommands[24] = new FactionSubCommand(new String[] {"kick"}, "Kick a player from the faction.", "[player]", 1, CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				/*assert caller instanceof Player;
+				FactionManager fManager = Utils.plugin.getFactionManager();
+				Faction otherFaction = fManager.getFaction(args[0]);
+				String pName = ((Player) caller).getName();
+				Faction myFaction = fManager.getFaction(pName);
+				if(!myFaction.equals(otherFaction)) {
+					return new String[] {Utils.rose("That player is not in your faction.")};
+				}
+				Faction.PlayerRank otherRank = otherFaction.getRank(args[0]);
+				Faction.PlayerRank myRank = myFaction.getRank(pName);
+				if(otherRank.ordinal() <= myRank.ordinal()) {
+					
+				}*/
+				assert caller instanceof Player;
+				String rt = powerOverHelper(((Player) caller).getName(), args[0], "You cannot kick that player from your faction.");
+				if(rt != null) {
+					return new String[] {rt};
+				}
+				Faction f = Utils.plugin.getFactionManager().getFaction(args[0]);
+				f.deinvite(args[0]);
+				f.remove(args[0]);
+				f.sendToMembers(String.format("%s%s %swas kicked from the faction.", Colors.Gray, args[0], Colors.Yellow));
+				Player p = etc.getServer().getPlayer(args[0]);
+				if(p != null) {
+					p.sendMessage(Utils.rose("You were kicked from %s%s", Colors.Red, f.getName()));
+				}
+				return null;
 			}
 		};
 		
 		subCommands[25] = new FactionSubCommand(new String[] {"title"}, "Set a player's faction title.", "[player] [title]", 2, CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				/*assert caller instanceof Player;
+				FactionManager fManager = Utils.plugin.getFactionManager();
+				Faction otherFaction = fManager.getFaction(args[0]);
+				String pName = ((Player) caller).getName();
+				Faction myFaction = fManager.getFaction(pName);
+				if(!myFaction.equals(otherFaction)) {
+					return new String[] {Utils.rose("That player is not in your faction.")};
+				}
+				Faction.PlayerRank otherRank = otherFaction.getRank(args[0]);
+				Faction.PlayerRank myRank = myFaction.getRank(pName);
+				if(otherRank.ordinal() <= myRank.ordinal()) {
+					return new String[] {Utils.rose("You cannot change that player's title.")};
+				} else {
+					Utils.plugin.getPlayerManager().getPlayer(args[0]).title = args[1];
+					Player p = etc.getServer().getPlayer(args[0]);
+					if(p != null) {
+						p.sendMessage(String.format("%sYour title has been set to %s%s", Colors.Yellow, Colors.LightGreen, args[1]));
+					}
+					return new String[] {String.format("%1$s%2$s%3$s's title set to %1$s%4$s%3$s.", Colors.LightGreen, args[0], Colors.Yellow, args[1])};
+				}*/
+				assert caller instanceof Player;
+				String rt = powerOverHelper(((Player) caller).getName(), args[0], "You cannot change that player's title.");
+				if(rt != null) {
+					return new String[] {rt};
+				}
+				Utils.plugin.getPlayerManager().getPlayer(args[0]).title = args[1];
+				Player p = etc.getServer().getPlayer(args[0]);
+				if(p != null) {
+					p.sendMessage(String.format("%sYour title has been set to %s%s", Colors.Yellow, Colors.LightGreen, args[1]));
+				}
+				return new String[] {String.format("%1$s%2$s%3$s's title set to %1$s%4$s%3$s.", Colors.LightGreen, args[0], Colors.Yellow, args[1])};
 			}
 		};
 		
@@ -310,7 +444,12 @@ public class FactionCommand extends BaseCommand {
 		subCommands[32] = new FactionSubCommand(new String[] {"disband"}, "Disband your faction.", "", CommandUsageRank.FACTION_ADMIN) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				String pName = ((Player) caller).getName();
+				Faction f = Utils.plugin.getFactionManager().getFaction(pName);
+				assert f != null && !(f instanceof SpecialFaction);
+				String name = f.getName();
+				return new String[] {String.format("%1$s%2$s %3$swas disbanded by %1$s%4$s%3$s.", Colors.Gray, name, Colors.Yellow, pName)};
 			}
 		};
 		
@@ -324,13 +463,10 @@ public class FactionCommand extends BaseCommand {
 		subCommands[34] = new FactionSubCommand(new String[] {"bypass"}, "Toggle admin bypass mode.", "", CommandUsageRank.SERVER_ADMIN) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				try {
-					gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(((Player) caller).getName());
-					gp.adminBypass = !gp.adminBypass;
-					return new String[] {String.format("%sBypass mode set to: %s", Colors.Yellow, Utils.readBoolS(gp.adminBypass))};
-				} catch (ClassCastException e) {
-					return new String[] {"You are not a real player."};
-				}
+				assert caller instanceof Player;
+				gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(((Player) caller).getName());
+				gp.adminBypass = !gp.adminBypass;
+				return new String[] {String.format("%sBypass mode set to: %s", Colors.Yellow, Utils.readBool(gp.adminBypass, "ON", "OFF"))};
 			}
 		};
 		
@@ -364,6 +500,35 @@ public class FactionCommand extends BaseCommand {
 		};
 	}
 	
+	/**
+	 * Highly specialized internal use only.
+	 * 
+	 * @param one First player.
+	 * @param two Second player.
+	 * @param error
+	 * @return String null if successful.
+	 */
+	private static String powerOverHelper(String one, String two, String error) {
+		FactionManager fManager = Utils.plugin.getFactionManager();
+		Faction factionOne = fManager.getFaction(one);
+		if(factionOne == null || factionOne instanceof SpecialFaction) {
+			return Utils.rose("That player is not in your faction.");
+		}
+		Faction factionTwo = fManager.getFaction(two);
+		if(factionTwo == null || factionTwo instanceof SpecialFaction) {
+			return Utils.rose("That player is not in your faction.");
+		}
+		if(!factionOne.equals(factionTwo)) {
+			return Utils.rose("That player is not in your faction.");
+		}
+		Faction.PlayerRank rankOne = factionOne.getRank(one);
+		Faction.PlayerRank rankTwo = factionTwo.getRank(two);
+		if(rankOne.ordinal() >= rankTwo.ordinal()) {
+			return Utils.rose(error);
+		}
+		return null;
+	}
+	
 	public FactionCommand() {
 		super("- Base command for working with factions.", String.format("%s/f help %sfor a list of available commands.", Colors.Red, Colors.Rose), 2);
 	}
@@ -371,13 +536,15 @@ public class FactionCommand extends BaseCommand {
 	@Override
 	protected void execute(MessageReceiver arg0, String[] args) {
 		String[] msgs = null;
+		boolean found = false;
 		for(FactionSubCommand cmd : subCommands) {
 			if(cmd.isCalledBy(args[1])) {
 				msgs = cmd.executeWrapper(arg0, Utils.trim(args, 2));
+				found = true;
 				break;
 			}
 		}
-		if(msgs == null) {
+		if(!found) {
 			arg0.notify(String.format("%1$sInvalid command. %2$s/f help %1$sfor a list of available commands.", Colors.Rose, Colors.Red));
 		} else {
 			Utils.sendMsgs(arg0, msgs);

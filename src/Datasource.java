@@ -58,4 +58,11 @@ public interface Datasource {
 	 * @param relations
 	 */
 	public void save(Relation[] relations);
+	
+	/**
+	 * Deletes a faction from storage.
+	 * 
+	 * @param f The faction to delete.
+	 */
+	public void delete(Faction f);
 }

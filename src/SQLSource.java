@@ -48,4 +48,10 @@ public class SQLSource implements Datasource {
 	public void save(Relation[] relations) {
 		// TODO Auto-generated method stub
 	}
+
+	@Override
+	public void delete(Faction f) {
+		// TODO Auto-generated method stub
+		
+	}
 }

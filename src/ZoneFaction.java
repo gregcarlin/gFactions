@@ -1,4 +1,9 @@
-
+/**
+ * Subclassed by SafeZone and WarZone
+ * 
+ * @author gregthegeek
+ *
+ */
 public abstract class ZoneFaction extends SpecialFaction {
 	
 	@Override

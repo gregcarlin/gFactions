@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * An interface for all classes that represent a faction.
  * 
@@ -27,6 +29,8 @@ public abstract class Faction {
 		}
 	}
 	
+	private transient final ArrayList<String> invited = new ArrayList<String>();
+	
 	/**
 	 * Returns the UUID for the faction.
 	 * 
@@ -42,11 +46,25 @@ public abstract class Faction {
 	public abstract String getName();
 	
 	/**
+	 * Set the name (tag) of the faction.
+	 * 
+	 * @param name The name to set.
+	 */
+	public abstract void setName(String name);
+	
+	/**
 	 * Returns whether or not the faction allows people to join without invitations.
 	 * 
 	 * @return boolean
 	 */
 	public abstract boolean isOpen();
+	
+	/**
+	 * Set whether or not the faction allows people to join without invitation.
+	 * 
+	 * @param open True if open, false if closed.
+	 */
+	public abstract void setOpen(boolean open);
 	
 	/**
 	 * Returns whether or not the faction is peaceful.
@@ -70,6 +88,13 @@ public abstract class Faction {
 	public abstract Location getHome();
 	
 	/**
+	 * Sets the location of the faction home.
+	 * 
+	 * @param home The new home.
+	 */
+	public abstract void setHome(Location home);
+	
+	/**
 	 * Returns whether or not a player is in the faction.
 	 * 
 	 * @param player The player to check
@@ -80,7 +105,8 @@ public abstract class Faction {
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof Faction) {
-			return ((Faction) obj).getId() == getId();
+			int id = getId();
+			return id == -1 ? ((Faction) obj).getName().equals(getName()) : ((Faction) obj).getId() == getId();
 		}
 		return false;
 	}
@@ -155,15 +181,101 @@ public abstract class Faction {
 	 * Returns the rank of a player.
 	 * 
 	 * @param player
-	 * @return
+	 * @return PlayerRank
 	 */
 	public PlayerRank getRank(String player) {
 		if(getAdmin().equals(player)) {
 			return PlayerRank.ADMIN;
 		} else if(Utils.arrayContains(getMods(), player)) {
 			return PlayerRank.MODERATOR;
-		} else {
+		} else if(Utils.arrayContains(getMembers(), player)){
 			return PlayerRank.MEMBER;
+		} else {
+			return null;
 		}
+	}
+	
+	/**
+	 * Add a player to the list of those invited.
+	 * 
+	 * @param player The player to invite.
+	 * @return boolean True if the player was already invited.
+	 */
+	public boolean invite(String player) {
+		if(invited.contains(player)) {
+			return true;
+		}
+		invited.add(player);
+		return false;
+	}
+	
+	/**
+	 * Removes a player from the list of those invited.
+	 * 
+	 * @param player The player to deinvite.
+	 * @return boolean Whether or not the player was on the list.
+	 */
+	public boolean deinvite(String player) {
+		return invited.remove(player);
+	}
+	
+	/**
+	 * Returns whether or not a player is on the list of those invited.
+	 * 
+	 * @param player The player to check.
+	 * @return boolean
+	 */
+	public boolean isInvited(String player) {
+		return invited.contains(player);
+	}
+	
+	/**
+	 * Adds a player to the faction.
+	 * 
+	 * @param player The name of the player to add.
+	 */
+	public abstract void add(String player);
+	
+	/**
+	 * Removes a player from the faction.
+	 * 
+	 * @param player The name of the player to remove.
+	 */
+	public abstract void remove(String player);
+	
+	/**
+	 * Sets the faction description.
+	 * 
+	 * @param desc The new description.
+	 */
+	public abstract void setDescription(String desc);
+	
+	/**
+	 * Returns the faction description.
+	 * 
+	 * @return String
+	 */
+	public abstract String getDescription();
+	
+	/**
+	 * Sends a message to all online faction members.
+	 * 
+	 * @param message The message to send.
+	 */
+	public void sendToMembers(String message) {
+		Server server = etc.getServer();
+		for(String member : getMembers()) {
+			Player p = server.getPlayer(member);
+			if(p != null) {
+				p.sendMessage(message);
+			}
+		}
+	}
+	
+	/**
+	 * Disbands the faction.
+	 */
+	public void disband() {
+		Utils.plugin.getFactionManager().disband(this);
 	}
 }

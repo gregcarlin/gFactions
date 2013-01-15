@@ -10,4 +10,9 @@ public class Wilderness extends SpecialFaction {
 	public boolean isMember(String player) {
 		return Utils.plugin.getFactionManager().getFaction(player).equals(this);
 	}
+	
+	@Override
+	public String getDescription() {
+		return "";
+	}
 }

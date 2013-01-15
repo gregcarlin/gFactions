@@ -4,7 +4,7 @@ import java.util.ArrayList;
  * Manages the retrieval and storage of flat file data.
  * 
  * factions.txt is stored in the following format:
- * id:name:open/peaceful/both:admin:home:mods:members:log
+ * id:name:desc:open/peaceful/both:admin:home:mods:members:log
  * For open/peaceful/both, value is 0 if neither, 1 if just open, 2 if just peaceful, and 3 if both.
  * 
  * players.txt is stored in the following format:
@@ -35,19 +35,19 @@ public class FileSource implements Datasource {
 		ArrayList<Faction> rt = new ArrayList<Faction>();
 		for(String s : factionFile) {
 			String[] split = s.split(":");
-			if(split.length < 8) {
+			if(split.length < 9) {
 				continue;
 			}
-			int oVal = Integer.parseInt(split[2]);
+			int oVal = Integer.parseInt(split[3]);
 			boolean isOpen = oVal == 1 || oVal == 3;
 			boolean isPeaceful = oVal >= 2;
 			if(oVal < 0 || oVal > 3) {
 				Utils.warning("%d is an invalid value for open/peaceful/both.", oVal);
 			}
-			CachedFaction f = new CachedFaction(Integer.parseInt(split[0]), split[1], isOpen, isPeaceful, split[3], expand(split[4]));
-			f.addMods(split[5].split(","));
-			f.addMembers(split[6].split(","));
-			f.log(split[7].split(","));
+			CachedFaction f = new CachedFaction(Integer.parseInt(split[0]), split[1], split[2], isOpen, isPeaceful, split[4], expand(split[5]));
+			f.addMods(split[6].split(","));
+			f.addMembers(split[7].split(","));
+			f.log(split[8].split(","));
 			rt.add(f);
 		}
 		return rt.toArray(new Faction[0]);
@@ -133,5 +133,11 @@ public class FileSource implements Datasource {
 	@Override
 	public void save(Relation[] relations) {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void delete(Faction f) {
+		// TODO Auto-generated method stub
+		
 	}
 }

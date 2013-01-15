@@ -55,7 +55,7 @@ public abstract class FactionSubCommand {
 	 */
 	public String[] executeWrapper(MessageReceiver caller, String[] args) {
 		if(Utils.getCommandRank(caller).ordinal() < minRank.ordinal()) {
-			return new String[] {Utils.rose("Insufficient permissions.")};
+			return new String[] {Utils.rose("Insufficient permissions: You must be a %s to use this command.", minRank.toString())};
 		} else if(args.length < minArgs) {
 			return new String[] {Utils.rose("/f %s %s", aliases[0], argHelp)};
 		} else {
