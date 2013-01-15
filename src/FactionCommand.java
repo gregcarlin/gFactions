@@ -474,7 +474,10 @@ public class FactionCommand extends BaseCommand {
 		subCommands[35] = new FactionSubCommand(new String[] {"chatspy"}, "Toggle chatspy.", "", CommandUsageRank.SERVER_ADMIN) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(((Player) caller).getName());
+				gp.chatSpy = !gp.chatSpy;
+				return new String[] {String.format("%sChat spy set to %s", Colors.Yellow, Utils.readBool(gp.chatSpy, "ON", "OFF"))};
 			}
 		};
 		

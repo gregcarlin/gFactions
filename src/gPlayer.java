@@ -54,6 +54,7 @@ public class gPlayer {
 	public String title;
 	public transient boolean adminBypass;
 	public transient ChatChannel chatChannel;
+	public transient boolean chatSpy;
 	
 	public gPlayer(String name, int power) {
 		this.name = name;
@@ -61,6 +62,7 @@ public class gPlayer {
 		this.title = "";
 		this.adminBypass = false;
 		this.chatChannel = ChatChannel.PUBLIC;
+		this.chatSpy = false;
 	}
 	
 	/**
@@ -118,6 +120,15 @@ public class gPlayer {
 	 * @return boolean
 	 */
 	public boolean isOnline() {
-		return etc.getServer().getPlayer(name) != null;
+		return toPlayer() != null;
+	}
+	
+	/**
+	 * Returns this gPlayer as a regular player.
+	 * 
+	 * @return Player
+	 */
+	public Player toPlayer() {
+		return etc.getServer().getPlayer(name);
 	}
 }

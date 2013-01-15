@@ -64,9 +64,24 @@ public class gPlayerManager {
 		
 		@Override
 		public void run() {
-			if(gp.isOnline() && !gp.increasePower()) { //power won't increase unless player is online
+			if(gp.isOnline() && !gp.increasePower()) { // power won't increase unless player is online
 				etc.getServer().addToServerQueue(new PowerAdder(gp));
 			}
 		}
+	}
+	
+	/**
+	 * Returns an array of gPlayers that are online and have chatspy enabled.
+	 * 
+	 * @return gPlayer[]
+	 */
+	public gPlayer[] spying() {
+		ArrayList<gPlayer> rt = new ArrayList<gPlayer>();
+		for(gPlayer gp : players) {
+			if(gp.chatSpy && gp.isOnline()) {
+				rt.add(gp);
+			}
+		}
+		return rt.toArray(new gPlayer[0]);
 	}
 }

@@ -101,6 +101,16 @@ public class gFactions extends Plugin {
         	case FACTION:
         		assert f != null && !(f instanceof SpecialFaction);
         		Utils.addItems(f.getOnlineMembers(), receivers);
+        		
+        		gPlayer[] spies = Utils.plugin.getPlayerManager().spying();
+        		for(gPlayer gP : spies) {
+        			Player p = gP.toPlayer();
+        			assert p != null;
+        			if(!receivers.contains(p)) {
+        				receivers.add(p);
+        			}
+        		}
+        		
         		hookParams.setPrefix(new StringBuilder(gp.chatChannel.getColor()).append(gp.getFormattedName()));
         		hookParams.setReceivers(receivers);
         		return hookParams;
