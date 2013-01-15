@@ -173,4 +173,16 @@ public abstract class Utils {
     	plugin.getPlayerManager().save();
     	plugin.getRelationManager().save();
 	}
+	
+	/**
+	 * Adds all the items in an array to an ArrayList.
+	 * 
+	 * @param from The array to add items from.
+	 * @param to The ArrayList to add items to.
+	 */
+	public static <T> void addItems(T[] from, ArrayList<T> to) {
+		for(T obj : from) {
+			to.add(obj);
+		}
+	}
 }

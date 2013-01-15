@@ -70,13 +70,13 @@ public class LazyFaction extends Faction {
 	}
 
 	@Override
-	public void add(String player) {
-		cache().add(player);
+	public void add(String player, PlayerRank rank) {
+		cache().add(player, rank);
 	}
 
 	@Override
-	public void remove(String player) {
-		cache().remove(player);
+	public void remove(String player, PlayerRank oldRank) {
+		cache().remove(player, oldRank);
 	}
 
 	@Override
@@ -102,5 +102,10 @@ public class LazyFaction extends Faction {
 	@Override
 	public void setHome(Location home) {
 		cache().setHome(home);
+	}
+
+	@Override
+	public void setAdmin(String admin) {
+		cache().setAdmin(admin);
 	}
 }

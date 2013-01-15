@@ -43,4 +43,21 @@ public class RelationManager {
 	public void save() {
 		Utils.plugin.getDataSource().save(relations.toArray(new Relation[0]));
 	}
+	
+	/**
+	 * Returns an array of the factions that have a given relation with the given faction.
+	 * 
+	 * @param original The faction to check relations with.
+	 * @param type The type of relation to search for. Should be either ALLY or ENEMY.
+	 * @return Faction[]
+	 */
+	public Faction[] getRelations(Faction original, Relation.Type type) {
+		ArrayList<Faction> rt = new ArrayList<Faction>();
+		for(Relation r : relations) {
+			if(r.isInvolved(original) && r.type == type) {
+				rt.add(r.getOther(original));
+			}
+		}
+		return rt.toArray(new Faction[0]);
+	}
 }

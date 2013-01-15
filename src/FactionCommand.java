@@ -159,7 +159,15 @@ public class FactionCommand extends BaseCommand {
 		subCommands[8] = new FactionSubCommand(new String[] {"chat", "c"}, "Switch chat modes.", "(faction/f/ally/a/public/p)", CommandUsageRank.FACTION_MEMBER) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(((Player) caller).getName());
+				gPlayer.ChatChannel chatChannel = args.length > 0 ? gPlayer.ChatChannel.fromString(args[0]) : gp.chatChannel.increment();
+				if(chatChannel == null) {
+					assert args.length > 0;
+					return new String[] {Utils.rose("Chat channel %s%s %snot found.", Colors.Red, args[0], Colors.Rose)};
+				}
+				gp.chatChannel = chatChannel;
+				return new String[] {String.format("%1$sNow chatting in %2$s%3$s %1$smode.", Colors.Yellow, chatChannel.getColor(), chatChannel.toString())};
 			}
 		};
 		
@@ -332,19 +340,6 @@ public class FactionCommand extends BaseCommand {
 		subCommands[24] = new FactionSubCommand(new String[] {"kick"}, "Kick a player from the faction.", "[player]", 1, CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				/*assert caller instanceof Player;
-				FactionManager fManager = Utils.plugin.getFactionManager();
-				Faction otherFaction = fManager.getFaction(args[0]);
-				String pName = ((Player) caller).getName();
-				Faction myFaction = fManager.getFaction(pName);
-				if(!myFaction.equals(otherFaction)) {
-					return new String[] {Utils.rose("That player is not in your faction.")};
-				}
-				Faction.PlayerRank otherRank = otherFaction.getRank(args[0]);
-				Faction.PlayerRank myRank = myFaction.getRank(pName);
-				if(otherRank.ordinal() <= myRank.ordinal()) {
-					
-				}*/
 				assert caller instanceof Player;
 				String rt = powerOverHelper(((Player) caller).getName(), args[0], "You cannot kick that player from your faction.");
 				if(rt != null) {
@@ -365,26 +360,6 @@ public class FactionCommand extends BaseCommand {
 		subCommands[25] = new FactionSubCommand(new String[] {"title"}, "Set a player's faction title.", "[player] [title]", 2, CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				/*assert caller instanceof Player;
-				FactionManager fManager = Utils.plugin.getFactionManager();
-				Faction otherFaction = fManager.getFaction(args[0]);
-				String pName = ((Player) caller).getName();
-				Faction myFaction = fManager.getFaction(pName);
-				if(!myFaction.equals(otherFaction)) {
-					return new String[] {Utils.rose("That player is not in your faction.")};
-				}
-				Faction.PlayerRank otherRank = otherFaction.getRank(args[0]);
-				Faction.PlayerRank myRank = myFaction.getRank(pName);
-				if(otherRank.ordinal() <= myRank.ordinal()) {
-					return new String[] {Utils.rose("You cannot change that player's title.")};
-				} else {
-					Utils.plugin.getPlayerManager().getPlayer(args[0]).title = args[1];
-					Player p = etc.getServer().getPlayer(args[0]);
-					if(p != null) {
-						p.sendMessage(String.format("%sYour title has been set to %s%s", Colors.Yellow, Colors.LightGreen, args[1]));
-					}
-					return new String[] {String.format("%1$s%2$s%3$s's title set to %1$s%4$s%3$s.", Colors.LightGreen, args[0], Colors.Yellow, args[1])};
-				}*/
 				assert caller instanceof Player;
 				String rt = powerOverHelper(((Player) caller).getName(), args[0], "You cannot change that player's title.");
 				if(rt != null) {
@@ -423,14 +398,40 @@ public class FactionCommand extends BaseCommand {
 		subCommands[29] = new FactionSubCommand(new String[] {"mod"}, "Toggle whether or not another player is a faction mod.", "[player]", 1, CommandUsageRank.FACTION_ADMIN) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player && args.length > 0;
+				FactionManager fManager = Utils.plugin.getFactionManager();
+				Faction f = fManager.getFaction(((Player) caller).getName());
+				assert f != null && !(f instanceof SpecialFaction);
+				Faction other = fManager.getFaction(args[0]);
+				if(!f.equals(other)) {
+					return new String[] {Utils.rose("That player is not a member of your faction.")};
+				}
+				boolean tMod = f.toggleMod(args[0]);
+				String msg = tMod ? "now a faction moderator!" : "no longer a faction moderator.";
+				Player p = etc.getServer().getPlayer(args[0]);
+				if(p != null) {
+					p.sendMessage(String.format("%s%s %s", tMod ? Colors.Green : Colors.Rose, "You are", msg));
+				}
+				return new String[] {String.format("%s%s %sis %s", Colors.LightGreen, args[0], Colors.Yellow, msg)};
 			}
 		};
 		
 		subCommands[30] = new FactionSubCommand(new String[] {"admin"}, "Transfer faction ownership to another player.", "[player]", 1, CommandUsageRank.FACTION_ADMIN) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player && args.length > 0;
+				FactionManager fManager = Utils.plugin.getFactionManager();
+				String pName = ((Player) caller).getName();
+				Faction f = fManager.getFaction(pName);
+				assert f != null && !(f instanceof SpecialFaction);
+				Faction other = fManager.getFaction(args[0]);
+				if(!f.equals(other)) {
+					return new String[] {Utils.rose("That player is not a member of your faction.")};
+				}
+				f.setAdmin(args[0]);
+				f.add(pName, Faction.PlayerRank.MODERATOR);
+				f.sendToMembers(String.format("%1$s%2$s %3$stransferred faction ownership to %1$s%4s%3$s.", Colors.LightGreen, pName, Colors.Yellow, args[0]));
+				return null;
 			}
 		};
 		

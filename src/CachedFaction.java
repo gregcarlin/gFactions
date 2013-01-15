@@ -148,13 +148,35 @@ public class CachedFaction extends Faction {
 	}
 
 	@Override
-	public void add(String player) {
+	public void add(String player, PlayerRank rank) {
 		members.add(player);
+		switch(rank) {
+		default:
+		case MEMBER:
+			members.add(player);
+			break;
+		case MODERATOR:
+			mods.add(player);
+			break;
+		case ADMIN:
+			setAdmin(player);
+			break;
+		}
 	}
 
 	@Override
-	public void remove(String player) {
-		members.remove(player);
+	public void remove(String player, PlayerRank oldRank) {
+		switch(oldRank) {
+		case MEMBER:
+			members.remove(player);
+			break;
+		case MODERATOR:
+			mods.remove(player);
+			break;
+		case ADMIN:
+			disband();
+			break;
+		}
 	}
 
 	@Override
@@ -180,5 +202,10 @@ public class CachedFaction extends Faction {
 	@Override
 	public void setHome(Location home) {
 		this.home = home;
+	}
+
+	@Override
+	public void setAdmin(String admin) {
+		this.admin = admin;
 	}
 }

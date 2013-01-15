@@ -81,6 +81,13 @@ public abstract class Faction {
 	public abstract String getAdmin();
 	
 	/**
+	 * Transfers ownership of the faction.
+	 * 
+	 * @param admin The new faction owner.
+	 */
+	public abstract void setAdmin(String admin);
+	
+	/**
 	 * Returns the location of the faction home.
 	 * 
 	 * @return Location
@@ -230,18 +237,38 @@ public abstract class Faction {
 	}
 	
 	/**
-	 * Adds a player to the faction.
+	 * Adds a player to the faction as a member.
 	 * 
 	 * @param player The name of the player to add.
 	 */
-	public abstract void add(String player);
+	public void add(String player) {
+		add(player, PlayerRank.MEMBER);
+	}
+	
+	/**
+	 * Adds a player to the faction.
+	 * 
+	 * @param player The name of the player to add.
+	 * @param rank The rank the new player will have.
+	 */
+	public abstract void add(String player, PlayerRank rank);
 	
 	/**
 	 * Removes a player from the faction.
 	 * 
 	 * @param player The name of the player to remove.
 	 */
-	public abstract void remove(String player);
+	public void remove(String player) {
+		remove(player, getRank(player));
+	}
+	
+	/**
+	 * Removes a player from the faction.
+	 * 
+	 * @param player The name of the player to remove.
+	 * @param oldRank The rank of the to be removed player.
+	 */
+	public abstract void remove(String player, PlayerRank oldRank);
 	
 	/**
 	 * Sets the faction description.
@@ -277,5 +304,41 @@ public abstract class Faction {
 	 */
 	public void disband() {
 		Utils.plugin.getFactionManager().disband(this);
+	}
+	
+	/**
+	 * Returns an array of the online players in the faction.
+	 * 
+	 * @return Player[]
+	 */
+	public Player[] getOnlineMembers() {
+		ArrayList<Player> online = new ArrayList<Player>();
+		Server server = etc.getServer();
+		for(String member : getMembers()) {
+			Player p = server.getPlayer(member);
+			if(p != null) {
+				online.add(p);
+			}
+		}
+		return online.toArray(new Player[0]);
+	}
+	
+	/**
+	 * Toggle mod status of a player.
+	 * 
+	 * @param player The player to toggle.
+	 * @return boolean True if now mod, false if now player.
+	 */
+	public boolean toggleMod(String player) {
+		assert !getAdmin().equals(player);
+		if(Utils.arrayContains(getMods(), player)) {
+			remove(player, PlayerRank.MODERATOR);
+			add(player, PlayerRank.MEMBER);
+			return false;
+		} else {
+			remove(player, PlayerRank.MEMBER);
+			add(player, PlayerRank.MODERATOR);
+			return true;
+		}
 	}
 }

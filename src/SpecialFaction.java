@@ -52,12 +52,12 @@ public abstract class SpecialFaction extends Faction {
 	}
 	
 	@Override
-	public void add(String player) {
+	public void add(String player, PlayerRank rank) {
 		
 	}
 	
 	@Override
-	public void remove(String player) {
+	public void remove(String player, PlayerRank oldRank) {
 		
 	}
 	
@@ -83,6 +83,11 @@ public abstract class SpecialFaction extends Faction {
 	
 	@Override
 	public void disband() {
+		
+	}
+	
+	@Override
+	public void setAdmin(String admin) {
 		
 	}
 }

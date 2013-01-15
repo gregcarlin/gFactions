@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -26,11 +27,6 @@ public class gFactions extends Plugin {
     
     @Override
     public void enable() {
-        log.info(name + " version " + version + " enabled.");
-    }
-    
-    @Override
-    public void initialize() {
     	config = new Config();
     	try {
 			dataSource = config.getDataSource();
@@ -44,15 +40,20 @@ public class gFactions extends Plugin {
     	pManager = new gPlayerManager(this);
     	PlayerCommands.getInstance().add("f", new FactionCommand());
     	
-    	PluginLoader loader = etc.getLoader();
-    	PluginLoader.Hook[] hooks = {PluginLoader.Hook.LOGIN};
-    	for(PluginLoader.Hook h : hooks) {
-    		loader.addListener(h, listener, this, PluginListener.Priority.MEDIUM);
-    	}
-    	
     	// in case plugin is enabled when players are already online
     	for(Player p : etc.getServer().getPlayerList()) {
     		listener.onLogin(p);
+    	}
+    	
+        log.info(name + " version " + version + " enabled.");
+    }
+    
+    @Override
+    public void initialize() {
+    	PluginLoader loader = etc.getLoader();
+    	PluginLoader.Hook[] hooks = {PluginLoader.Hook.LOGIN, PluginLoader.Hook.CHAT};
+    	for(PluginLoader.Hook h : hooks) {
+    		loader.addListener(h, listener, this, PluginListener.Priority.MEDIUM);
     	}
     	
         log.info(name + " version " + version + " initialized.");
@@ -82,6 +83,30 @@ public class gFactions extends Plugin {
         @Override
         public void onLogin(Player player) {
         	pManager.initPlayer(player.getName());
+        }
+        
+        @Override
+        public HookParametersChat onChat(HookParametersChat hookParams) {
+        	String player = hookParams.getPlayer().getName();
+        	ArrayList<Player> receivers = new ArrayList<Player>();
+        	Faction f = Utils.plugin.getFactionManager().getFaction(player);
+        	gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(player);
+        	switch(gp.chatChannel) {
+        	case ALLY:
+        		assert f != null && !(f instanceof SpecialFaction);
+        		Faction[] allies = Utils.plugin.getRelationManager().getRelations(f, Relation.Type.ALLY);
+        		for(Faction ally : allies) {
+        			Utils.addItems(ally.getOnlineMembers(), receivers);
+        		}
+        	case FACTION:
+        		assert f != null && !(f instanceof SpecialFaction);
+        		Utils.addItems(f.getOnlineMembers(), receivers);
+        		hookParams.setPrefix(new StringBuilder(gp.chatChannel.getColor()).append(gp.getFormattedName()));
+        		hookParams.setReceivers(receivers);
+        		return hookParams;
+        	default:
+        		return hookParams;
+        	}
         }
     }
 }
