@@ -20,6 +20,7 @@ public class gFactions extends Plugin {
     
     @Override
     public void disable() {
+    	ThreadManager.stopAll();
     	Utils.saveAll();
     	dataSource.close();
         log.info(name + " version " + version + " disabled.");
@@ -45,7 +46,10 @@ public class gFactions extends Plugin {
     		listener.onLogin(p);
     	}
     	
-    	// TODO autosave based on config's save interval
+    	int interval = config.getSaveInterval();
+    	if(interval > 0) {
+    		etc.getServer().addToServerQueue(new AutoSaver(), config.getSaveInterval());
+    	}
     	
         log.info(name + " version " + version + " enabled.");
     }

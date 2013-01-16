@@ -23,7 +23,8 @@ public class Config {
 		defaults.put("start-power", new Integer(10));
 		defaults.put("faction-open-by-default", new Boolean(false));
 		defaults.put("default-faction-desc", "Default faction description :(");
-		defaults.put("save-interval", new Integer(60));
+		defaults.put("save-interval", new Integer(60)); // seconds
+		defaults.put("power-regen-interval", new Integer(300)); // seconds
 		
 		for(Entry<String, Object> e : defaults.entrySet()) {
 			String key = e.getKey();
@@ -94,12 +95,22 @@ public class Config {
 	}
 	
 	/**
-	 * Returns the save interval in seconds.
-	 * <0 should save on change.
+	 * Returns the save interval in milliseconds.
+	 * 0 will not autosave.
+	 * <0 will save on change.
 	 * 
 	 * @return int
 	 */
 	public int getSaveInterval() {
-		return props.getInt("save-interval");
+		return props.getInt("save-interval") * 1000;
+	}
+	
+	/**
+	 * Returns the power regeneration interval in milliseconds.
+	 * 
+	 * @return int
+	 */
+	public int getPowerRegenInterval() {
+		return props.getInt("power-regen-interval") * 1000;
 	}
 }

@@ -56,23 +56,32 @@ public class gPlayerManager {
 			}
 			
 			if(rt.getPower() < rt.maxPower) {
-				etc.getServer().addToServerQueue(new PowerAdder(rt));
+				etc.getServer().addToServerQueue(new PowerAdder(rt), Utils.plugin.getConfig().getPowerRegenInterval());
 			}
 		}
 	}
 	
-	private class PowerAdder implements Runnable {
+	class PowerAdder extends CancellableRunnable {
 		private final gPlayer gp;
 		
 		public PowerAdder(gPlayer gp) {
+			super();
 			this.gp = gp;
 		}
 		
 		@Override
-		public void run() {
+		public void execute() {
 			if(gp.isOnline() && !gp.increasePower()) { // power won't increase unless player is online
-				etc.getServer().addToServerQueue(new PowerAdder(gp));
+				etc.getServer().addToServerQueue(new PowerAdder(gp), Utils.plugin.getConfig().getPowerRegenInterval());
 			}
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof PowerAdder) {
+				return ((PowerAdder) obj).gp.equals(this.gp);
+			}
+			return false;
 		}
 	}
 	
