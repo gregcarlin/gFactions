@@ -74,6 +74,6 @@ public abstract class FactionSubCommand {
 	
 	@Override
 	public String toString() {
-		return String.format("/f %s %s - %s", aliases[0], argHelp, description);
+		return String.format("%s/f %s %s - %s", Colors.Yellow, aliases[0], argHelp, description);
 	}
 }

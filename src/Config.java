@@ -1,4 +1,5 @@
 import java.io.File;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -22,6 +23,7 @@ public class Config {
 		defaults.put("start-power", new Integer(10));
 		defaults.put("faction-open-by-default", new Boolean(false));
 		defaults.put("default-faction-desc", "Default faction description :(");
+		defaults.put("save-interval", new Integer(60));
 		
 		for(Entry<String, Object> e : defaults.entrySet()) {
 			String key = e.getKey();
@@ -49,7 +51,12 @@ public class Config {
 	public Datasource getDataSource() throws DatasourceException {
 		String data = props.getString("data-source").toLowerCase();
 		if(data.equals("oodb") || data.equals("db4o")) {
-			return new OODBSource();
+			try {
+				((MyClassLoader) Utils.plugin.getClass().getClassLoader()).addURL(new File("db4o.jar").toURI().toURL());
+				return new OODBSource();
+			} catch (MalformedURLException e) {
+				throw new DatasourceException(e);
+			}
 		} else if(data.equals("file") || data.equals("flat-file")) {
 			return new FileSource(fManager);
 		} else if(data.equals("sql") || data.equals("mysql")) {
@@ -84,5 +91,15 @@ public class Config {
 	 */
 	public String getDefaultFactionDesc() {
 		return props.getString("default-faction-desc");
+	}
+	
+	/**
+	 * Returns the save interval in seconds.
+	 * <0 should save on change.
+	 * 
+	 * @return int
+	 */
+	public int getSaveInterval() {
+		return props.getInt("save-interval");
 	}
 }

@@ -38,12 +38,13 @@ public class FactionCommand extends BaseCommand {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				try {
-					int page = args.length > 1 ? Integer.parseInt(args[0]) : 0;
+					int page = args.length > 0 ? Integer.parseInt(args[0]) - 1 : 0;
 					int max = Utils.getCommandRank(caller).getListMax();
-					String[] rt = new String[5];
-					for(int i=0; i<rt.length; i++) {
-						int index = page * rt.length + i;
-						rt[i] = index <= max ? subCommands[index].toString() : Utils.rose("No more!");
+					String[] rt = new String[6];
+					rt[0] = String.format("%s------------- Commands (Page %d/%d) -------------", Colors.Gold, page + 1, (max / (rt.length - 1)) + 1);;
+					for(int i=0; i<rt.length-1; i++) {
+						int index = page * (rt.length-1) + i;
+						rt[i + 1] = index <= max && index >= 0 ? subCommands[index].toString() : Utils.rose("No more!");
 					}
 					return rt;
 				} catch (NumberFormatException e) {
@@ -52,11 +53,11 @@ public class FactionCommand extends BaseCommand {
 			}
 		};
 			
-		subCommands[1] = new FactionSubCommand(new String[] {"list", "ls"}, "Lists active factions.", "(page)") {
+		subCommands[1] = new FactionSubCommand(new String[] {"list", "ls"}, "Lists active factions.", "(page)") { // TODO test with multiple factions
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				try {
-					int page = args.length > 1 ? Integer.parseInt(args[0]) : 0;
+					int page = args.length > 0 ? Integer.parseInt(args[0]) - 1 : 0;
 					return Utils.plugin.getFactionManager().getList(page);
 				} catch (NumberFormatException e) {
 					return new String[] {Utils.rose("%s is not a number!", args[0])};
@@ -64,7 +65,7 @@ public class FactionCommand extends BaseCommand {
 			}
 		};
 		
-		subCommands[2] = new FactionSubCommand(new String[] {"show", "who"}, "Gives information about a faction.", "(faction)") {
+		subCommands[2] = new FactionSubCommand(new String[] {"show", "who"}, "Gives information about a faction.", "(faction)") { // TODO test with different relationships
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				if(args.length > 0) { // other faction specified
@@ -90,13 +91,15 @@ public class FactionCommand extends BaseCommand {
 			}
 		};
 		
-		subCommands[4] = new FactionSubCommand(new String[] {"power", "pow"}, "Displays the power possessed by a player.", "(player)") {
+		subCommands[4] = new FactionSubCommand(new String[] {"power", "pow"}, "Displays the power possessed by a player.", "(player)") { // TODO test with other players, on and offline
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				String player = args.length > 0 ? args[0] : (caller instanceof Player ? ((Player) caller).getName() : null);
 				gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(player);
 				if(player == null) {
 					return new String[] {Utils.rose("Usage: /f power [player]")};
+				} else if(gp == null) {
+					return new String[] {Utils.rose("Player %s not found!", args[0])};
 				} else if(caller instanceof Player) {
 					return new String[] {String.format("%s%s%s: %d/%d", Utils.plugin.getRelationManager().getRelation(((Player) caller).getName(), player).getColor(), gp.getFormattedName(), Colors.Yellow, gp.getPower(), gp.maxPower)};
 				} else {
@@ -105,14 +108,14 @@ public class FactionCommand extends BaseCommand {
 			}
 		};
 		
-		subCommands[5] = new FactionSubCommand(new String[] {"join"}, "Join a faction.", "[faction]", 1) {
+		subCommands[5] = new FactionSubCommand(new String[] {"join"}, "Join a faction.", "[faction]", 1) { // TODO test
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				if(caller instanceof Player) {
 					String pName = ((Player) caller).getName();
 					FactionManager fManager = Utils.plugin.getFactionManager();
 					Faction old = fManager.getFaction(pName);
-					if(old != null) {
+					if(!(old instanceof SpecialFaction)) {
 						return new String[] {Utils.rose("You must leave your current faction first.")};
 					}
 					Faction nFac = fManager.getFactionByName(args[0]);
@@ -161,12 +164,12 @@ public class FactionCommand extends BaseCommand {
 			String[] execute(MessageReceiver caller, String[] args) {
 				assert caller instanceof Player;
 				gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(((Player) caller).getName());
-				gPlayer.ChatChannel chatChannel = args.length > 0 ? gPlayer.ChatChannel.fromString(args[0]) : gp.chatChannel.increment();
+				gPlayer.ChatChannel chatChannel = args.length > 0 ? gPlayer.ChatChannel.fromString(args[0]) : gp.getChatChannel().increment();
 				if(chatChannel == null) {
 					assert args.length > 0;
 					return new String[] {Utils.rose("Chat channel %s%s %snot found.", Colors.Red, args[0], Colors.Rose)};
 				}
-				gp.chatChannel = chatChannel;
+				gp.setChatChannel(chatChannel);
 				return new String[] {String.format("%1$sNow chatting in %2$s%3$s %1$smode.", Colors.Yellow, chatChannel.getColor(), chatChannel.toString())};
 			}
 		};

@@ -101,15 +101,16 @@ public class CachedFaction extends Faction {
 	
 	@Override
 	public String[] getWho(Faction relativeTo) {
-		String[] rt = new String[5];
+		String[] rt = new String[6];
 		String relationColor = Utils.plugin.getRelationManager().getRelation(this, relativeTo).getColor();
 		rt[0] = String.format("%1$s------------ %2$s%3$s %1$s------------", Colors.Gold, relationColor, relativeTo.getName());
-		rt[1] = String.format("%1$sOpen: %2$s    %1$sPeaceful: %3$s", Colors.Yellow, Utils.readBool(isOpen(), "Yes", "No"), Utils.readBool(isPeaceful(), "Yes", "No"));
-		rt[2] = "TODO"; //TODO: land/power/maxpower
+		rt[1] = getDescription();
+		rt[2] = String.format("%1$sOpen: %2$s    %1$sPeaceful: %3$s", Colors.Yellow, Utils.readBool(isOpen(), "Yes", "No"), Utils.readBool(isPeaceful(), "Yes", "No"));
+		rt[3] = "TODO"; // TODO land/power/maxpower
 		String[] mems = getMembersFormatted(relationColor);
 		assert mems.length == 2;
-		rt[3] = String.format("%sMembers online: %s", Colors.Yellow, mems[0]);
-		rt[4] = String.format("%sMembers offline: %s", Colors.Yellow, mems[1]);
+		rt[4] = String.format("%sMembers online: %s", Colors.Yellow, mems[0]);
+		rt[5] = String.format("%sMembers offline: %s", Colors.Yellow, mems[1]);
 		return rt;
 	}
 	
@@ -134,7 +135,9 @@ public class CachedFaction extends Faction {
 				online.append(relationColor).append(title).append(rank).append(member).append(Colors.Gold).append(", ");
 			}
 		}
-		return new String[] {online.substring(0, online.length() - 2), offline.substring(0, offline.length() - 2)};
+		int onLen = online.length();
+		int ofLen = offline.length();
+		return new String[] {onLen > 2 ? online.substring(0, onLen - 2) : "None", ofLen > 2 ? offline.substring(0, offline.length() - 2) : "None"};
 	}
 	
 	@Override

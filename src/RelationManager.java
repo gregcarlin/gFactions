@@ -1,6 +1,11 @@
 import java.util.ArrayList;
 
-
+/**
+ * Manages the relationships between factions.
+ * 
+ * @author gregthegeek
+ *
+ */
 public class RelationManager {
 	private final ArrayList<Relation> relations = new ArrayList<Relation>();
 	
@@ -41,7 +46,12 @@ public class RelationManager {
 	 * Saves all relations to storage.
 	 */
 	public void save() {
-		Utils.plugin.getDataSource().save(relations.toArray(new Relation[0]));
+		Object[] arr = relations.toArray();
+		Relation[] rt = new Relation[arr.length];
+		for(int i=0; i<rt.length; i++) {
+			rt[i] = (Relation) arr[i];
+		}
+		Utils.plugin.getDataSource().save(rt);
 	}
 	
 	/**

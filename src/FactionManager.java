@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class FactionManager {
 	private static final int PAGESIZE = 8;
 	private final Faction wilderness = new Wilderness();
-	private ArrayList<Faction> factions = new ArrayList<Faction>(); //Should have every faction on the server
+	private ArrayList<Faction> factions = new ArrayList<Faction>(); // Should have every faction on the server
 	public final gFactions par;
 	
 	public FactionManager(gFactions par) {
@@ -23,13 +23,11 @@ public class FactionManager {
 	
 	public String[] getList(int page) {
 		String[] rt = new String[PAGESIZE + 2];
-		rt[0] = String.format("%s---------- Factions | Page %d/%d ----------", Colors.Gold, page, factions.size() / PAGESIZE + 1);
-		for(int i=1; i<rt.length-1; i++) {
-			if(i * PAGESIZE >= factions.size()) {
-				rt[i] = "No more.";
-			} else {
-				rt[i] = factions.get(i * PAGESIZE).getName();
-			}
+		int max = factions.size();
+		rt[0] = String.format("%s---------- Factions | Page %d/%d ----------", Colors.Gold, page + 1, max / PAGESIZE + 1);
+		for(int i=0; i<rt.length-2; i++) {
+			int index = page * PAGESIZE + i;
+			rt[i + 1] = index < max && index >= 0 ? factions.get(index).getName() : "No more."; // TODO color and info
 		}
 		rt[rt.length - 1] = String.format("%s--------------------------------------", Colors.Gold);
 		return rt;
@@ -138,7 +136,13 @@ public class FactionManager {
 			return false;
 		}
 		Config config = par.getConfig();
-		factions.add(new CachedFaction(getNextId(), factionName, config.getDefaultFactionDesc(), config.isDefaultFactionOpen(), false, creator, null));
+		CachedFaction f = new CachedFaction(getNextId(), factionName, config.getDefaultFactionDesc(), config.isDefaultFactionOpen(), false, creator, null);
+		factions.add(f);
+		
+		if(config.getSaveInterval() < 0) {
+			Utils.plugin.getDataSource().save(f);
+		}
+		
 		return true;
 	}
 	
@@ -163,5 +167,7 @@ public class FactionManager {
 	 */
 	public void disband(Faction f) {
 		factions.remove(f);
+		
+		Utils.plugin.getDataSource().delete(f);
 	}
 }

@@ -49,11 +49,11 @@ public class gPlayer {
 	
 	private final String name;
 	private int power;
-	private transient final Object powerLock = new Object();
+	private transient Object powerLock;
 	public int maxPower = 10;
 	public String title;
 	public transient boolean adminBypass;
-	public transient ChatChannel chatChannel;
+	private transient ChatChannel chatChannel;
 	public transient boolean chatSpy;
 	
 	public gPlayer(String name, int power) {
@@ -61,7 +61,6 @@ public class gPlayer {
 		this.power = power;
 		this.title = "";
 		this.adminBypass = false;
-		this.chatChannel = ChatChannel.PUBLIC;
 		this.chatSpy = false;
 	}
 	
@@ -80,9 +79,16 @@ public class gPlayer {
 	 * @return int
 	 */
 	public int getPower() {
-		synchronized(powerLock) {
+		synchronized(getPowerLock()) {
 			return power;
 		}
+	}
+	
+	private Object getPowerLock() {
+		if(powerLock == null) {
+			powerLock = new Object();
+		}
+		return powerLock;
 	}
 	
 	/**
@@ -93,7 +99,7 @@ public class gPlayer {
 	public String getFormattedName() {
 		String prefix = "";
 		Faction f = Utils.plugin.getFactionManager().getFaction(name);
-		if(f != null) {
+		if(f != null && !(f instanceof SpecialFaction)) {
 			prefix = f.getRank(name).getPrefix();
 		}
 		return title == null ? prefix + name : String.format("%s %s%s", title, prefix, name);
@@ -105,7 +111,7 @@ public class gPlayer {
 	 * @return Whether or not power is now maxed out.
 	 */
 	public boolean increasePower() {
-		synchronized(powerLock) {
+		synchronized(getPowerLock()) {
 			power++;
 			if(power > maxPower) { // don't think I need this, but better safe than sorry
 				power = maxPower;
@@ -130,5 +136,26 @@ public class gPlayer {
 	 */
 	public Player toPlayer() {
 		return etc.getServer().getPlayer(name);
+	}
+	
+	/**
+	 * Returns this gPlayer's current chat channel.
+	 * 
+	 * @return ChatChannel
+	 */
+	public ChatChannel getChatChannel() {
+		if(chatChannel == null) {
+			chatChannel = ChatChannel.PUBLIC;
+		}
+		return chatChannel;
+	}
+	
+	/**
+	 * Sets this gPlayer's current chat channel.
+	 * 
+	 * @param channel The new chat channel.
+	 */
+	public void setChatChannel(ChatChannel channel) {
+		chatChannel = channel;
 	}
 }

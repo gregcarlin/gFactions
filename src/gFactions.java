@@ -27,6 +27,7 @@ public class gFactions extends Plugin {
     
     @Override
     public void enable() {
+    	Utils.plugin = this;
     	config = new Config();
     	try {
 			dataSource = config.getDataSource();
@@ -34,16 +35,17 @@ public class gFactions extends Plugin {
 			log.severe("Error retrieving initial data from datasource!");
 		}
     	fManager = new FactionManager(this);
-    	Utils.plugin = this;
-    	config.fManager = fManager; //living life on the edge
+    	config.fManager = fManager; // living life on the edge
     	rManager = new RelationManager();
-    	pManager = new gPlayerManager(this);
+    	pManager = new gPlayerManager();
     	PlayerCommands.getInstance().add("f", new FactionCommand());
     	
     	// in case plugin is enabled when players are already online
     	for(Player p : etc.getServer().getPlayerList()) {
     		listener.onLogin(p);
     	}
+    	
+    	// TODO autosave based on config's save interval
     	
         log.info(name + " version " + version + " enabled.");
     }
@@ -91,7 +93,8 @@ public class gFactions extends Plugin {
         	ArrayList<Player> receivers = new ArrayList<Player>();
         	Faction f = Utils.plugin.getFactionManager().getFaction(player);
         	gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(player);
-        	switch(gp.chatChannel) {
+        	gPlayer.ChatChannel cc = gp.getChatChannel();
+        	switch(cc) {
         	case ALLY:
         		assert f != null && !(f instanceof SpecialFaction);
         		Faction[] allies = Utils.plugin.getRelationManager().getRelations(f, Relation.Type.ALLY);
@@ -111,7 +114,7 @@ public class gFactions extends Plugin {
         			}
         		}
         		
-        		hookParams.setPrefix(new StringBuilder(gp.chatChannel.getColor()).append(gp.getFormattedName()));
+        		hookParams.setPrefix(new StringBuilder(cc.getColor()).append(gp.getFormattedName()));
         		hookParams.setReceivers(receivers);
         		return hookParams;
         	default:

@@ -10,4 +10,9 @@ public abstract class ZoneFaction extends SpecialFaction {
 	public boolean isMember(String member) {
 		return false;
 	}
+	
+	@Override
+	public Player[] getOnlineMembers() {
+		return new Player[0];
+	}
 }

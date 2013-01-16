@@ -8,11 +8,6 @@ import java.util.ArrayList;
  */
 public class gPlayerManager {
 	private ArrayList<gPlayer> players = new ArrayList<gPlayer>();
-	private final gFactions gFac;
-	
-	public gPlayerManager(gFactions gFac) {
-		this.gFac = gFac;
-	}
 	
 	/**
 	 * Returns the gPlayer for a player.
@@ -33,7 +28,12 @@ public class gPlayerManager {
 	 * Saves all gPlayers to the datasource.
 	 */
 	public void save() {
-		gFac.getDataSource().save(players.toArray(new gPlayer[0]));
+		Object[] or = players.toArray();
+		gPlayer[] n = new gPlayer[or.length];
+		for(int i=0; i<n.length; i++) {
+			n[i] = (gPlayer) or[i];
+		}
+		Utils.plugin.getDataSource().save(n);
 	}
 	
 	/**
@@ -43,11 +43,17 @@ public class gPlayerManager {
 	 */
 	public void initPlayer(String name) {
 		if(getPlayer(name) == null) {
-			gPlayer rt = gFac.getDataSource().getPlayer(name);
+			Datasource ds = Utils.plugin.getDataSource();
+			gPlayer rt = ds.getPlayer(name);
+			Config config = Utils.plugin.getConfig();
 			if(rt == null) {
-				rt = new gPlayer(name, gFac.getConfig().getStartPower());
+				rt = new gPlayer(name, config.getStartPower());
 			}
 			players.add(rt);
+			
+			if(config.getSaveInterval() < 0) {
+				ds.save(new gPlayer[] {rt});
+			}
 			
 			if(rt.getPower() < rt.maxPower) {
 				etc.getServer().addToServerQueue(new PowerAdder(rt));

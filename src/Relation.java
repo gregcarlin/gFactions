@@ -1,5 +1,5 @@
 /**
- * Reprsents a relationship between two factions.
+ * Represents a relationship between two factions.
  * 
  * @author gregthegeek
  *

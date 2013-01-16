@@ -90,4 +90,44 @@ public abstract class SpecialFaction extends Faction {
 	public void setAdmin(String admin) {
 		
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return obj.getClass().equals(getClass());
+	}
+	
+	@Override
+	public String[] getAllMembers() {
+		return new String[0];
+	}
+	
+	@Override
+	public PlayerRank getRank(String player) {
+		return null;
+	}
+	
+	@Override
+	public boolean invite(String player) {
+		return true;
+	}
+	
+	@Override
+	public boolean deinvite(String player) {
+		return false;
+	}
+	
+	@Override
+	public boolean isInvited(String player) {
+		return false;
+	}
+	
+	@Override
+	public void sendToMembers(String msg) {
+		
+	}
+	
+	@Override
+	public boolean toggleMod(String player) {
+		return false;
+	}
 }
