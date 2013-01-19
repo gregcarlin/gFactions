@@ -55,6 +55,7 @@ public class gPlayer {
 	public transient boolean adminBypass;
 	private transient ChatChannel chatChannel;
 	public transient boolean chatSpy;
+	public transient boolean autoClaim;
 	
 	public gPlayer(String name, int power) {
 		this.name = name;
@@ -62,6 +63,7 @@ public class gPlayer {
 		this.title = "";
 		this.adminBypass = false;
 		this.chatSpy = false;
+		this.autoClaim = false;
 	}
 	
 	/**

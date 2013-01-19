@@ -45,6 +45,11 @@ public abstract class Faction {
 	 */
 	public abstract String getName();
 	
+	public String getNameRelative(Faction to) {
+		Relation.Type r = Utils.plugin.getRelationManager().getRelation(this, to);
+		return r.getColor() + getName();
+	}
+	
 	/**
 	 * Set the name (tag) of the faction.
 	 * 
@@ -340,5 +345,42 @@ public abstract class Faction {
 			add(player, PlayerRank.MODERATOR);
 			return true;
 		}
+	}
+	
+	/**
+	 * Returns the total power of the faction.
+	 * 
+	 * @return int
+	 */
+	public int getPower() {
+		gPlayerManager pManager = Utils.plugin.getPlayerManager();
+		int power = 0;
+		for(String member : getMembers()) {
+			power += pManager.getPlayer(member).getPower();
+		}
+		return power;
+	}
+	
+	/**
+	 * Returns the total max power of the faction.
+	 * 
+	 * @return int
+	 */
+	public int getMaxPower() {
+		gPlayerManager pManager = Utils.plugin.getPlayerManager();
+		int maxPower = 0;
+		for(String member : getMembers()) {
+			maxPower += pManager.getPlayer(member).maxPower;
+		}
+		return maxPower;
+	}
+	
+	/**
+	 * Returns the land owned by the faction.
+	 * 
+	 * @return Land[]
+	 */
+	public Land[] getLand() {
+		return Utils.plugin.getLandManager().getOwnedBy(getId());
 	}
 }

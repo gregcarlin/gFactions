@@ -10,11 +10,9 @@ public class FactionManager {
 	private static final int PAGESIZE = 8;
 	private final Faction wilderness = new Wilderness();
 	private ArrayList<Faction> factions = new ArrayList<Faction>(); // Should have every faction on the server
-	public final gFactions par;
 	
-	public FactionManager(gFactions par) {
-		this.par = par;
-		Faction[] facs = par.getDataSource().getAllFactions();
+	public FactionManager() {
+		Faction[] facs = Utils.plugin.getDataSource().getAllFactions();
 		factions.ensureCapacity(facs.length);
 		for(Faction f : facs) {
 			factions.add(f);
@@ -57,7 +55,7 @@ public class FactionManager {
 		}
 		
 		//update our list to hold the cached version of the faction.
-		CachedFaction cache = par.getDataSource().getFaction(id);
+		CachedFaction cache = Utils.plugin.getDataSource().getFaction(id);
 		factions.set(index, cache);
 		
 		return cache;
@@ -116,7 +114,7 @@ public class FactionManager {
 	 * Saves all CachedFactions to the datasource.
 	 */
 	public void save() {
-		Datasource ds = par.getDataSource();
+		Datasource ds = Utils.plugin.getDataSource();
 		for(Faction f : factions) {
 			if(f instanceof CachedFaction) {
 				ds.save((CachedFaction) f);
@@ -135,7 +133,7 @@ public class FactionManager {
 		if(getFactionByName(factionName) != null) {
 			return false;
 		}
-		Config config = par.getConfig();
+		Config config = Utils.plugin.getConfig();
 		CachedFaction f = new CachedFaction(getNextId(), factionName, config.getDefaultFactionDesc(), config.isDefaultFactionOpen(), false, creator, null);
 		factions.add(f);
 		

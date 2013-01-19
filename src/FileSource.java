@@ -16,18 +16,15 @@ import java.util.ArrayList;
 public class FileSource implements Datasource {
 	private final String[] factionFile;
 	private final String[] playerFile;
-	private final FactionManager fManager;
 	
-	public FileSource(FactionManager fManager) throws DatasourceException {
-		this.fManager = fManager;
-		
+	public FileSource() throws DatasourceException {
 		factionFile = Utils.readFile(Config.FOLDER + "factions.txt");
 		playerFile = Utils.readFile(Config.FOLDER + "players.txt");
 	}
 
 	@Override
 	public CachedFaction getFaction(int id) { //this should actually never be called, as factions are already all cached
-		return (CachedFaction) fManager.getFaction(id);
+		return (CachedFaction) Utils.plugin.getFactionManager().getFaction(id);
 	}
 
 	@Override

@@ -15,8 +15,10 @@ public class gFactions extends Plugin {
     private FactionManager fManager;
     private RelationManager rManager;
     private gPlayerManager pManager;
+    private LandManager lManager;
     private Config config;
     private Datasource dataSource;
+    private Economy economy;
     
     @Override
     public void disable() {
@@ -35,10 +37,12 @@ public class gFactions extends Plugin {
 		} catch (DatasourceException e) {
 			log.severe("Error retrieving initial data from datasource!");
 		}
-    	fManager = new FactionManager(this);
-    	config.fManager = fManager; // living life on the edge
+    	fManager = new FactionManager();
     	rManager = new RelationManager();
     	pManager = new gPlayerManager();
+    	lManager = new LandManager();
+    	economy = config.getEconomy();
+    	
     	PlayerCommands.getInstance().add("f", new FactionCommand());
     	
     	// in case plugin is enabled when players are already online
@@ -81,8 +85,16 @@ public class gFactions extends Plugin {
     	return pManager;
     }
     
+    public LandManager getLandManager() {
+    	return lManager;
+    }
+    
     public Config getConfig() {
     	return config;
+    }
+    
+    public Economy getEconomy() {
+    	return economy;
     }
     
     private class gFactionsListener extends PluginListener {

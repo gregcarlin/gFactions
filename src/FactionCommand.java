@@ -308,14 +308,18 @@ public class FactionCommand extends BaseCommand {
 		subCommands[19] = new FactionSubCommand(new String[] {"claim"}, "Claim land for your faction.", "", CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				return claimHelper((Player) caller);
 			}
 		};
 		
 		subCommands[20] = new FactionSubCommand(new String[] {"autoclaim"}, "Toggle the automatic claiming of land for your faction.", "", CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(((Player) caller).getName());
+				gp.autoClaim = !gp.autoClaim;
+				return new String[] {String.format("Autoclaim set to %s", Utils.readBool(gp.autoClaim, "ON", "OFF"))};
 			}
 		};
 		
@@ -507,14 +511,30 @@ public class FactionCommand extends BaseCommand {
 		};
 	}
 	
-	/**
-	 * Highly specialized internal use only.
-	 * 
-	 * @param one First player.
-	 * @param two Second player.
-	 * @param error
-	 * @return String null if successful.
-	 */
+	private static String[] claimHelper(Player claimer) {
+		String pName = claimer.getName();
+		Faction f = Utils.plugin.getFactionManager().getFaction(pName);
+		assert f != null && !(f instanceof SpecialFaction);
+		Land l = Utils.plugin.getLandManager().getLandAt(claimer.getLocation());
+		Faction other = l.claimedBy();
+		if(other instanceof SpecialFaction) {
+			return new String[] {Utils.rose("You cannot claim %s.", other.getName())};
+		} else if(f.equals(other)) {
+			return new String[] {Utils.rose("This land is already owned by your faction.")};
+		} else if(f.getLand().length >= f.getPower()) {
+			return new String[] {Utils.rose("You do not have enough power to claim any more land.")};
+		} else if(f == null || f.getLand().length > f.getPower()) {
+			l.claim(f);
+			if(other != null) {
+				other.sendToMembers(String.format("%s %sclaimed your land.", f.getNameRelative(other), Colors.Yellow));
+			}
+			f.sendToMembers(String.format("%s%s %sclaimed land for your faction from %s", Colors.LightGreen, pName, Colors.Yellow, other.getNameRelative(f)));
+			return null;
+		} else {
+			return new String[] {Utils.rose("%s owns this land and is strong enough to keep it.", other.getName())};
+		}
+	}
+	
 	private static String powerOverHelper(String one, String two, String error) {
 		FactionManager fManager = Utils.plugin.getFactionManager();
 		Faction factionOne = fManager.getFaction(one);

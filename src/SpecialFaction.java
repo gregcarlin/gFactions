@@ -130,4 +130,9 @@ public abstract class SpecialFaction extends Faction {
 	public boolean toggleMod(String player) {
 		return false;
 	}
+	
+	@Override
+	public String getNameRelative(Faction to) {
+		return getName();
+	}
 }
