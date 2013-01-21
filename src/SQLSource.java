@@ -54,4 +54,10 @@ public class SQLSource implements Datasource {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void save(Land land) {
+		// TODO Auto-generated method stub
+		
+	}
 }

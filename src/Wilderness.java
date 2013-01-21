@@ -1,6 +1,11 @@
 import java.util.ArrayList;
 
-
+/**
+ * Represents the wilderness.
+ * 
+ * @author gregthegeek
+ *
+ */
 public class Wilderness extends SpecialFaction {
 
 	@Override
@@ -28,5 +33,10 @@ public class Wilderness extends SpecialFaction {
 			}
 		}
 		return rt.toArray(new Player[0]);
+	}
+	
+	@Override
+	public int getId() {
+		return -1;
 	}
 }

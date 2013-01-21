@@ -7,11 +7,6 @@
 public abstract class SpecialFaction extends Faction {
 	
 	@Override
-	public int getId() {
-		return -1;
-	}
-	
-	@Override
 	public boolean isOpen() {
 		return false;
 	}

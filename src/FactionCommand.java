@@ -194,7 +194,20 @@ public class FactionCommand extends BaseCommand {
 		subCommands[10] = new FactionSubCommand(new String[] {"ownerlist"}, "List the owners of a land plot.", "", CommandUsageRank.FACTION_MEMBER) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				Player p = (Player) caller;
+				Faction f = Utils.plugin.getFactionManager().getFaction(p.getName());
+				assert f != null && !(f instanceof SpecialFaction);
+				Land l = Utils.plugin.getLandManager().getLandAt(p.getLocation());
+				if(f.getId() == l.getClaimerId()) {
+					StringBuilder owners = new StringBuilder(Colors.Gray).append("Owners: ");
+					for(String owner : l.getOwners()) {
+						owners.append(owner).append(", ");
+					}
+					return new String[] {owners.substring(0, -2)};
+				} else {
+					return new String[] {Utils.rose("Your faction does not own this land.")};
+				}
 			}
 		};
 		
@@ -326,21 +339,60 @@ public class FactionCommand extends BaseCommand {
 		subCommands[21] = new FactionSubCommand(new String[] {"unclaim", "declaim"}, "Unclaim land for your faction.", "", CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				Player p = (Player) caller;
+				String pName = p.getName();
+				Faction f = Utils.plugin.getFactionManager().getFaction(pName);
+				assert f != null && !(f instanceof SpecialFaction);
+				Land l = Utils.plugin.getLandManager().getLandAt(p.getLocation());
+				if(f.getId() == l.getClaimerId()) {
+					l.claim(null);
+					f.sendToMembers(String.format("%s%s %sunclaimed land owned by your faction.", Colors.LightGreen, pName, Colors.Yellow));
+					return null;
+				} else {
+					return new String[] {Utils.rose("You do not own this land.")};
+				}
 			}
 		};
 		
 		subCommands[22] = new FactionSubCommand(new String[] {"unclaimall", "declaimall"}, "Unclaim all faction-owned land.", "", CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				String pName = ((Player) caller).getName();
+				Faction f = Utils.plugin.getFactionManager().getFaction(pName);
+				assert f != null && !(f instanceof SpecialFaction);
+				Land[] lands = Utils.plugin.getLandManager().getOwnedBy(f);
+				for(Land l : lands) {
+					l.claim(null);
+				}
+				f.sendToMembers(String.format("%s%s %sunclaimed all your land.", Colors.LightGreen, pName, Colors.Yellow));
+				return null;
 			}
 		};
 		
-		subCommands[23] = new FactionSubCommand(new String[] {"owner"}, "Toggles build rights for players on land.", "(player)", CommandUsageRank.FACTION_MOD) {
+		subCommands[23] = new FactionSubCommand(new String[] {"owner"}, "Toggles build rights for players on land.", "[player]", 1, CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				Player p = (Player) caller;
+				Faction f = Utils.plugin.getFactionManager().getFaction(p.getName());
+				assert f != null && !(f instanceof SpecialFaction);
+				Land l = Utils.plugin.getLandManager().getLandAt(p.getLocation());
+				if(l.getClaimerId() == f.getId()) {
+					Faction other = Utils.plugin.getFactionManager().getFaction(args[0]);
+					if(f.equals(other)) {
+						if(other.getRank(args[0]) == Faction.PlayerRank.MEMBER) {
+							return new String[] {String.format("%s%s %scan %s build here.", Colors.LightGreen, args[0], Colors.Yellow, l.toggleOwner(args[0]) ? "now" : "no longer")};
+						} else {
+							return new String[] {Utils.rose("You cannot change those person's build rights.")};
+						}
+					} else {
+						return new String[] {Utils.rose("That player is not a member of your faction.")};
+					}
+				} else {
+					return new String[] {Utils.rose("Your faction does not own this land.")};
+				}
 			}
 		};
 		
@@ -384,21 +436,104 @@ public class FactionCommand extends BaseCommand {
 		subCommands[26] = new FactionSubCommand(new String[] {"ally"}, "Ally another faction.", "[faction]", 1, CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				FactionManager fm = Utils.plugin.getFactionManager();
+				Faction f = fm.getFaction(((Player) caller).getName());
+				assert f != null && !(f instanceof SpecialFaction);
+				assert args.length > 0;
+				Faction other = fm.getFactionByName(args[0]);
+				if(other == null || other instanceof SpecialFaction) {
+					return new String[] {Utils.rose("The faction %s was not found.", args[0])};
+				} else {
+					RelationManager rm = Utils.plugin.getRelationManager();
+					Relation.Type relation = rm.getRelation(f, other);
+					if(relation == Relation.Type.SAME) {
+						return new String[] {Utils.rose("You cannot ally yourself!")};
+					} else if(relation == Relation.Type.ALLY) {
+						return new String[] {Utils.rose("You are already allies with that faction.")};
+					} else if(rm.request(f, other, false)) {
+						String color = Relation.Type.ALLY.getColor();
+						other.sendToMembers(String.format("%sYour faction is now allies with %s%s", Colors.Yellow, color, f.getName()));
+						f.sendToMembers(String.format("%sYour faction is now allies with %s%s", Colors.Yellow, color, other.getName()));
+						return null;
+					} else {
+						String color = relation.getColor();
+						other.sendToMembers(String.format("%s%s %swould like to be allies.", color, f.getName(), Colors.Yellow));
+						return new String[] {String.format("%sAlly request sent to %s%s", Colors.Yellow, color, other.getName())};
+					}
+				}
 			}
 		};
 		
 		subCommands[27] = new FactionSubCommand(new String[] {"neutral"}, "Dissolve relations with another faction.", "[faction]", 1, CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				FactionManager fm = Utils.plugin.getFactionManager();
+				Faction f = fm.getFaction(((Player) caller).getName());
+				assert f != null && !(f instanceof SpecialFaction);
+				assert args.length > 0;
+				Faction other = fm.getFactionByName(args[0]);
+				if(other == null || other instanceof SpecialFaction) {
+					return new String[] {Utils.rose("The faction %s was not found.", args[0])};
+				} else {
+					RelationManager rm = Utils.plugin.getRelationManager();
+					Relation.Type relation = rm.getRelation(f, other);
+					switch(relation) {
+					case SAME:
+						return new String[] {Utils.rose("You cannot ally yourself!")};
+					case NEUTRAL:
+						return new String[] {Utils.rose("You are already neutral with that faction.")};
+					case ENEMY:
+						if(rm.request(f, other, true)) {
+							String color = Relation.Type.NEUTRAL.getColor();
+							other.sendToMembers(String.format("%sYour faction is now neutral with %s%s", Colors.Yellow, color, f.getName()));
+							f.sendToMembers(String.format("%sYour faction is now neutral with %s%s", Colors.Yellow, color, other.getName()));
+							return null;
+						} else {
+							String color = relation.getColor();
+							other.sendToMembers(String.format("%s%s %swould like to be neutral.", color, f.getName(), Colors.Yellow));
+							return new String[] {String.format("%sNeutral request sent to %s%s", Colors.Yellow, color, other.getName())};
+						}
+					case ALLY:
+						rm.setRelation(f, other, Relation.Type.NEUTRAL);
+						String color = Relation.Type.NEUTRAL.getColor();
+						other.sendToMembers(String.format("%sYour faction is now neutral with %s%s", Colors.Yellow, color, f.getName()));
+						f.sendToMembers(String.format("%sYour faction is now neutral with %s%s", Colors.Yellow, color, other.getName()));
+						return null;
+					default:
+						assert false;
+						return null;
+					}
+				}
 			}
 		};
 		
 		subCommands[28] = new FactionSubCommand(new String[] {"enemy"}, "Enemy another faction.", "[faction]", 1, CommandUsageRank.FACTION_MOD) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				assert caller instanceof Player;
+				FactionManager fm = Utils.plugin.getFactionManager();
+				Faction f = fm.getFaction(((Player) caller).getName());
+				assert f != null && !(f instanceof SpecialFaction);
+				assert args.length > 0;
+				Faction other = fm.getFaction(args[0]);
+				if(other == null || other instanceof SpecialFaction) {
+					return new String[] {Utils.rose("The faction %s was not found.", args[0])};
+				} else if(f.equals(other)) {
+					return new String[] {Utils.rose("You cannot enemy your own faction!")};
+				} else {
+					RelationManager rm = Utils.plugin.getRelationManager();
+					if(rm.getRelation(f, other) == Relation.Type.ENEMY) {
+						return new String[] {Utils.rose("You are already enemies with that faction.")};
+					} else {
+						rm.setRelation(f, other, Relation.Type.ENEMY);
+						String color = Relation.Type.ENEMY.getColor();
+						other.sendToMembers(String.format("%sYour faction is now enemies with %s%s", Colors.Yellow, color, f.getName()));
+						f.sendToMembers(String.format("%sYour faction is now enemies with %s%s", Colors.Yellow, color, other.getName()));
+						return null;
+					}
+				}
 			}
 		};
 		
@@ -510,6 +645,31 @@ public class FactionCommand extends BaseCommand {
 			}
 		};
 	}
+	
+	/*private static String relationChangeHelper(Faction from, Faction to, Relation.Type type) {
+		RelationManager rm = Utils.plugin.getRelationManager();
+		Relation.Type currentType = rm.getRelation(from, to);
+		if(currentType == Relation.Type.SAME) {
+			return Utils.rose("You cannot change the relationship with your own faction!");
+		} else if(type == currentType) {
+			return Utils.rose("Your faction is already %s with that faction.", type.toString());
+		} else if(type == Relation.Type.ALLY) {
+			if(rm.allyRequest(from, to)) {
+				String color = Relation.Type.ALLY.getColor();
+				from.sendToMembers(String.format("%sYou are now allies with %s%s", Colors.Yellow, color, to.getName()));
+				to.sendToMembers(String.format("%sYou are now allies with %s%s", Colors.Yellow, color, from.getName()));
+				return null;
+			} else {
+				String color = currentType.getColor();
+				to.sendToMembers(String.format("%s%s %swould like to be allies.", color, from.getName(), Colors.Yellow));
+				return String.format("%sAlly request sent to %s%s", Colors.Yellow, color, to.getName());
+			}
+		} else if(currentType == Relation.Type.ENEMY) {
+			
+		} else {
+			
+		}
+	}*/
 	
 	private static String[] claimHelper(Player claimer) {
 		String pName = claimer.getName();

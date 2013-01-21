@@ -172,6 +172,7 @@ public abstract class Utils {
 		plugin.getFactionManager().save();
     	plugin.getPlayerManager().save();
     	plugin.getRelationManager().save();
+    	plugin.getLandManager().save();
 	}
 	
 	/**

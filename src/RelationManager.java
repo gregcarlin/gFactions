@@ -8,6 +8,7 @@ import java.util.ArrayList;
  */
 public class RelationManager {
 	private final ArrayList<Relation> relations = new ArrayList<Relation>();
+	private final ArrayList<RelationRequest> requests = new ArrayList<RelationRequest>();
 	
 	/**
 	 * Returns the relation between two factions.
@@ -23,7 +24,7 @@ public class RelationManager {
 			return Relation.Type.SAME;
 		}
 		for(Relation r : relations) {
-			if(r.getOne().equals(one) && r.getTwo().equals(two)) {
+			if(r.isInvolved(one) && r.isInvolved(two)) {
 				return r.type;
 			}
 		}
@@ -40,6 +41,26 @@ public class RelationManager {
 	public Relation.Type getRelation(String one, String two) {
 		FactionManager fm = Utils.plugin.getFactionManager();
 		return getRelation(fm.getFaction(one), fm.getFaction(two));
+	}
+	
+	public void setRelation(Faction one, Faction two, Relation.Type type) {
+		int index = locateRelation(one, two);
+		if(index < 0) {
+			relations.add(new Relation(type, one, two));
+		} else {
+			relations.get(index).type = type; 
+		}
+	}
+	
+	private int locateRelation(Faction one, Faction two) {
+		int size = relations.size();
+		for(int i=0; i<size; i++) {
+			Relation r = relations.get(i);
+			if(r.isInvolved(one) && r.isInvolved(two)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 	/**
@@ -69,5 +90,27 @@ public class RelationManager {
 			}
 		}
 		return rt.toArray(new Faction[0]);
+	}
+	
+	/**
+	 * Manages a relation request between two factions.
+	 * 
+	 * @param from The faction sending the request.
+	 * @param to The faction receiving the request.
+	 * @param isNeutral True if neutral request, false if ally
+	 * @return boolean Whether or not the two factions are now neutral/allied.
+	 */
+	public boolean request(Faction from, Faction to, boolean isNeutral) {
+		int size = requests.size();
+		for(int i=0; i<size; i++) {
+			RelationRequest ar = requests.get(i);
+			if(ar.isNeutral() == isNeutral && ar.getFrom().equals(to)) {
+				setRelation(from, to, isNeutral ? Relation.Type.NEUTRAL : Relation.Type.ALLY);
+				requests.remove(i);
+				return true;
+			}
+		}
+		requests.add(new RelationRequest(from, to, isNeutral));
+		return false;
 	}
 }

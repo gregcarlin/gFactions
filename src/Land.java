@@ -10,7 +10,7 @@ public class Land {
 	private final int x;
 	private final int z;
 	private int faction = -1;
-	public final ArrayList<String> owners = new ArrayList<String>();
+	private final ArrayList<String> owners = new ArrayList<String>();
 	
 	public Land(int x, int z) {
 		this.x = x;
@@ -64,6 +64,7 @@ public class Land {
 	public void claim(Faction faction) {
 		if(faction == null) {
 			this.faction = -1;
+			owners.clear();
 		} else {
 			this.faction = faction.getId();
 		}
@@ -76,5 +77,40 @@ public class Land {
 	 */
 	public int getClaimerId() {
 		return faction;
+	}
+	
+	/**
+	 * Returns true if this land is owned by something other than the wilderness.
+	 * 
+	 * @return boolean
+	 */
+	public boolean isClaimed() {
+		return faction != -1;
+	}
+	
+	/**
+	 * Returns those who have build rights here.
+	 * 
+	 * @return String[]
+	 */
+	public String[] getOwners() {
+		return owners.toArray(new String[0]);
+	}
+	
+	/**
+	 * Toggle whether or not a player can build here.
+	 * 
+	 * @param player The name of the player to toggle.
+	 * @return boolean True if they can now build, false if they can't.
+	 */
+	public boolean toggleOwner(String player) {
+		player = player.toLowerCase();
+		if(owners.contains(player)) {
+			owners.remove(player);
+			return false;
+		} else {
+			owners.add(player);
+			return true;
+		}
 	}
 }

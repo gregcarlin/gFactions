@@ -6,19 +6,26 @@
  */
 public class Relation {
 	public enum Type {
-		NEUTRAL(Colors.White),
-		ALLY(Colors.Purple),
-		ENEMY(Colors.Red),
-		SAME(Colors.LightGreen);
+		NEUTRAL(Colors.White, "neutral"),
+		ALLY(Colors.Purple, "allies"),
+		ENEMY(Colors.Red, "enemies"),
+		SAME(Colors.LightGreen, null); // readable isn't used
 		
 		private final String color;
+		private final String readable;
 		
-		private Type(String color) {
+		private Type(String color, String readable) {
 			this.color = color;
+			this.readable = readable;
 		}
 		
 		public String getColor() {
 			return color;
+		}
+		
+		@Override
+		public String toString() {
+			return readable;
 		}
 	}
 	

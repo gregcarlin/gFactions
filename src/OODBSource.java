@@ -12,6 +12,7 @@ public class OODBSource implements Datasource {
 	private final ObjectContainer factionDB = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), Config.FOLDER + "factions.db");
 	private final ObjectContainer playerDB = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), Config.FOLDER + "players.db");
 	private final ObjectContainer relationDB = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), Config.FOLDER + "relations.db");
+	private final ObjectContainer landDB = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), Config.FOLDER + "land.db");
 	
 	public OODBSource() {
 		
@@ -45,6 +46,7 @@ public class OODBSource implements Datasource {
 		factionDB.close();
 		playerDB.close();
 		relationDB.close();
+		landDB.close();
 	}
 
 	@Override
@@ -69,5 +71,10 @@ public class OODBSource implements Datasource {
 	@Override
 	public void delete(Faction f) {
 		factionDB.delete(f);
+	}
+
+	@Override
+	public void save(Land land) {
+		landDB.store(land);
 	}
 }

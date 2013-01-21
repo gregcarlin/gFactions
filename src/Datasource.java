@@ -55,9 +55,16 @@ public interface Datasource {
 	/**
 	 * Saves the given relations to storage.
 	 * 
-	 * @param relations
+	 * @param relations The relations to save.
 	 */
 	public void save(Relation[] relations);
+	
+	/**
+	 * Saves the given land chunk to storage.
+	 * 
+	 * @param land The land to save.
+	 */
+	public void save(Land land);
 	
 	/**
 	 * Deletes a faction from storage.

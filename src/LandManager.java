@@ -53,6 +53,16 @@ public class LandManager {
 	/**
 	 * Returns all the land owned by a given faction.
 	 * 
+	 * @param f The faction that claimed the land.
+	 * @return Land[]
+	 */
+	public Land[] getOwnedBy(Faction f) {
+		return getOwnedBy(f.getId());
+	}
+	
+	/**
+	 * Returns all the land owned by a given faction.
+	 * 
 	 * @param fId The id of the owner faction.
 	 * @return Land[]
 	 */
@@ -64,5 +74,17 @@ public class LandManager {
 			}
 		}
 		return subSet.toArray(new Land[0]);
+	}
+	
+	/**
+	 * Saves all claimed land to the datasource.
+	 */
+	public void save() {
+		Datasource ds = Utils.plugin.getDataSource();
+		for(Land l : lands) {
+			if(l.isClaimed()) {
+				ds.save(l);
+			}
+		}
 	}
 }
