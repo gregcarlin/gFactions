@@ -113,4 +113,27 @@ public class RelationManager {
 		requests.add(new RelationRequest(from, to, isNeutral));
 		return false;
 	}
+	
+	/**
+	 * Removes all relations and requests related to the given faction.
+	 * 
+	 * @param f The faction to remove stuff of.
+	 */
+	public void removeAll(Faction f) {
+		Datasource ds = Utils.plugin.getDataSource();
+		for(int i=relations.size()-1; i>=0; i--) {
+			Relation r = relations.get(i);
+			if(r.isInvolved(f)) {
+				relations.remove(r);
+				ds.delete(r);
+			}
+		}
+		
+		for(int i=requests.size()-1; i>=0; i--) {
+			RelationRequest r = requests.get(i);
+			if(r.getFrom().equals(f) || r.getTo().equals(f)) {
+				requests.remove(r);
+			}
+		}
+	}
 }

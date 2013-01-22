@@ -296,7 +296,7 @@ public abstract class Faction {
 	 */
 	public void sendToMembers(String message) {
 		Server server = etc.getServer();
-		for(String member : getMembers()) {
+		for(String member : getAllMembers()) {
 			Player p = server.getPlayer(member);
 			if(p != null) {
 				p.sendMessage(message);
@@ -319,7 +319,7 @@ public abstract class Faction {
 	public Player[] getOnlineMembers() {
 		ArrayList<Player> online = new ArrayList<Player>();
 		Server server = etc.getServer();
-		for(String member : getMembers()) {
+		for(String member : getAllMembers()) {
 			Player p = server.getPlayer(member);
 			if(p != null) {
 				online.add(p);
@@ -355,7 +355,7 @@ public abstract class Faction {
 	public int getPower() {
 		gPlayerManager pManager = Utils.plugin.getPlayerManager();
 		int power = 0;
-		for(String member : getMembers()) {
+		for(String member : getAllMembers()) {
 			power += pManager.getPlayer(member).getPower();
 		}
 		return power;
@@ -369,7 +369,7 @@ public abstract class Faction {
 	public int getMaxPower() {
 		gPlayerManager pManager = Utils.plugin.getPlayerManager();
 		int maxPower = 0;
-		for(String member : getMembers()) {
+		for(String member : getAllMembers()) {
 			maxPower += pManager.getPlayer(member).maxPower;
 		}
 		return maxPower;
@@ -382,5 +382,25 @@ public abstract class Faction {
 	 */
 	public Land[] getLand() {
 		return Utils.plugin.getLandManager().getOwnedBy(getId());
+	}
+	
+	/**
+	 * Returns the character that represents this faction on a map.
+	 * 
+	 * @param gen The map icon generator.
+	 * @return char
+	 */
+	public char getMapIcon(MapIconGen gen) {
+		return gen.nextChar(this);
+	}
+	
+	/**
+	 * Returns the color that represents the relationship between this faction and the given faction.
+	 * 
+	 * @param to The faction the color is relative to.
+	 * @return String
+	 */
+	public String getColorRelative(Faction to) {
+		return Utils.plugin.getRelationManager().getRelation(this, to).getColor();
 	}
 }

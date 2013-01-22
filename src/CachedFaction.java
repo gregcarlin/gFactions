@@ -106,7 +106,7 @@ public class CachedFaction extends Faction {
 		rt[0] = String.format("%1$s------------ %2$s%3$s %1$s------------", Colors.Gold, relationColor, relativeTo.getName());
 		rt[1] = getDescription();
 		rt[2] = String.format("%1$sOpen: %2$s    %1$sPeaceful: %3$s", Colors.Yellow, Utils.readBool(isOpen(), "Yes", "No"), Utils.readBool(isPeaceful(), "Yes", "No"));
-		rt[3] = "TODO"; // TODO land/power/maxpower
+		rt[3] = String.format("%sLand/Power/Maxpower: %d/%d/%d", Colors.Yellow, getLand().length, getPower(), getMaxPower()); // TODO land/power/maxpower
 		String[] mems = getMembersFormatted(relationColor);
 		assert mems.length == 2;
 		rt[4] = String.format("%sMembers online: %s", Colors.Yellow, mems[0]);

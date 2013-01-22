@@ -6,7 +6,7 @@
  */
 public class gPlayer {
 	public enum ChatChannel {
-		PUBLIC(null),
+		PUBLIC(Colors.White),
 		FACTION(Relation.Type.SAME.getColor()),
 		ALLY(Relation.Type.ALLY.getColor());
 		
@@ -120,6 +120,24 @@ public class gPlayer {
 			}
 			return power == maxPower;
 		}
+	}
+	
+	/**
+	 * Decreases power by the amount specified in the config.
+	 * 
+	 * @return Whether or not power is now zero.
+	 */
+	public boolean decreasePower() {
+		if(power >= maxPower) {
+			etc.getServer().addToServerQueue(new PowerAdder(this), Utils.plugin.getConfig().getPowerRegenInterval());
+		}
+		synchronized(getPowerLock()) {
+			power -= Utils.plugin.getConfig().getPowerLossOnDeath();
+			if(power < 0) {
+				power = 0;
+			}
+		}
+		return power == 0;
 	}
 	
 	/**

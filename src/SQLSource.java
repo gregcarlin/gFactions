@@ -60,4 +60,28 @@ public class SQLSource implements Datasource {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public Land[] getAllLand() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Relation[] getAllRelations() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void delete(Land l) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void delete(Relation r) {
+		// TODO Auto-generated method stub
+		
+	}
 }

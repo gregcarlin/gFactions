@@ -25,6 +25,7 @@ public class Config {
 		defaults.put("save-interval", new Integer(60)); // seconds
 		defaults.put("power-regen-interval", new Integer(300)); // seconds
 		defaults.put("economy", "none"); // available options: none,integrated,built-in,dconomy,external
+		defaults.put("power-loss-on-death", new Integer(4));
 		
 		for(Entry<String, Object> e : defaults.entrySet()) {
 			String key = e.getKey();
@@ -128,5 +129,14 @@ public class Config {
 		} else {
 			return new InactiveEconomy();
 		}
+	}
+	
+	/**
+	 * Returns the amount of power lost when a player dies outside of a war or safe zone.
+	 * 
+	 * @return int
+	 */
+	public int getPowerLossOnDeath() {
+		return props.getInt("power-loss-on-death");
 	}
 }

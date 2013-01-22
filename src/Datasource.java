@@ -21,6 +21,20 @@ public interface Datasource {
 	public Faction[] getAllFactions();
 	
 	/**
+	 * Reads information for all land.
+	 * 
+	 * @return Land[]
+	 */
+	public Land[] getAllLand();
+	
+	/**
+	 * Reads information for all the relations in the server.
+	 * 
+	 * @return Relation[]
+	 */
+	public Relation[] getAllRelations();
+	
+	/**
 	 * Scans the saved data for errors and reverts them to their default values.
 	 */
 	public void fix();
@@ -72,4 +86,18 @@ public interface Datasource {
 	 * @param f The faction to delete.
 	 */
 	public void delete(Faction f);
+	
+	/**
+	 * Deletes a land parcel from storage.
+	 * 
+	 * @param l The land to delete.
+	 */
+	public void delete(Land l);
+	
+	/**
+	 * Deletes a relation from storage.
+	 * 
+	 * @param r The relation to delete.
+	 */
+	public void delete(Relation r);
 }

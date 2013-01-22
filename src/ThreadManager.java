@@ -14,4 +14,16 @@ public class ThreadManager {
 			r.cancel();
 		}
 	}
+	
+	public static void disconnect(Player p) {
+		int size = threads.size();
+		String name = p.getName();
+		for(int i=0; i<size; i++) {
+			CancellableRunnable r = threads.get(i);
+			if(r instanceof PowerAdder && ((PowerAdder) r).getPlayer().equals(name)) {
+				r.cancel();
+				break;
+			}
+		}
+	}
 }

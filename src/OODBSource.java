@@ -77,4 +77,26 @@ public class OODBSource implements Datasource {
 	public void save(Land land) {
 		landDB.store(land);
 	}
+
+	@Override
+	public Land[] getAllLand() {
+		ObjectSet<Land> result = landDB.query(Land.class);
+		return result.toArray(new Land[0]);
+	}
+
+	@Override
+	public Relation[] getAllRelations() {
+		ObjectSet<Relation> result = relationDB.queryByExample(new Relation(null, null, null));
+		return result.toArray(new Relation[0]);
+	}
+
+	@Override
+	public void delete(Land l) {
+		landDB.delete(l);
+	}
+
+	@Override
+	public void delete(Relation r) {
+		relationDB.delete(r);
+	}
 }

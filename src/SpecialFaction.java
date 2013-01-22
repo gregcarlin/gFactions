@@ -130,4 +130,9 @@ public abstract class SpecialFaction extends Faction {
 	public String getNameRelative(Faction to) {
 		return getName();
 	}
+	
+	@Override
+	public Land[] getLand() {
+		return new Land[0];
+	}
 }

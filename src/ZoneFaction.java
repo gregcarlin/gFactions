@@ -15,4 +15,9 @@ public abstract class ZoneFaction extends SpecialFaction {
 	public Player[] getOnlineMembers() {
 		return new Player[0];
 	}
+	
+	@Override
+	public char getMapIcon(MapIconGen gen) {
+		return '+';
+	}
 }

@@ -20,7 +20,7 @@ public class Wilderness extends SpecialFaction {
 	
 	@Override
 	public String getDescription() {
-		return "";
+		return "Pure anarchy.";
 	}
 	
 	@Override
@@ -37,6 +37,21 @@ public class Wilderness extends SpecialFaction {
 	
 	@Override
 	public int getId() {
+		return -1;
+	}
+	
+	@Override
+	public String getColorRelative(Faction to) {
+		return Colors.Gray;
+	}
+	
+	@Override
+	public char getMapIcon(MapIconGen gen) {
+		return '-';
+	}
+	
+	@Override
+	public int getPower() {
 		return -1;
 	}
 }

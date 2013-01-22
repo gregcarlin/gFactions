@@ -9,6 +9,14 @@ import java.util.ArrayList;
 public class LandManager {
 	private ArrayList<Land> lands = new ArrayList<Land>();
 	
+	public LandManager() {
+		Land[] land = Utils.plugin.getDataSource().getAllLand();
+		lands.ensureCapacity(land.length);
+		for(Land l : land) {
+			lands.add(l);
+		}
+	}
+	
 	/**
 	 * Returns the land at a given block location. Will be created if doesn't already exist.
 	 * 

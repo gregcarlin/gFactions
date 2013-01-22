@@ -68,6 +68,7 @@ public class FactionManager {
 	 * @return Faction
 	 */
 	public Faction getFaction(int id) {
+		if(id == -1) {return wilderness;}
 		for(Faction f : factions) {
 			if(f.getId() == id) {
 				return f;
@@ -165,6 +166,17 @@ public class FactionManager {
 	 */
 	public void disband(Faction f) {
 		factions.remove(f);
+		
+		for(Land l : Utils.plugin.getLandManager().getOwnedBy(f)) {
+			l.claim(null);
+		}
+		
+		gPlayerManager gpm = Utils.plugin.getPlayerManager();
+		for(String m : f.getMembers()) {
+			gpm.getPlayer(m).title = "";
+		}
+		
+		Utils.plugin.getRelationManager().removeAll(f);
 		
 		Utils.plugin.getDataSource().delete(f);
 	}

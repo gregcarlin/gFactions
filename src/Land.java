@@ -50,9 +50,6 @@ public class Land {
 	 * @return Faction
 	 */
 	public Faction claimedBy() {
-		if(faction < 0) {
-			return null;
-		}
 		return Utils.plugin.getFactionManager().getFaction(faction);
 	}
 	
@@ -65,6 +62,7 @@ public class Land {
 		if(faction == null) {
 			this.faction = -1;
 			owners.clear();
+			Utils.plugin.getDataSource().delete(this);
 		} else {
 			this.faction = faction.getId();
 		}

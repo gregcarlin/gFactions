@@ -9,7 +9,7 @@ import java.util.logging.Logger;
  */
 public class gFactions extends Plugin {
     public static final String name = "gFactions";
-    public static final String version = "1.0";
+    public static final String version = "2.0";
     private final Logger log = Logger.getLogger("Minecraft");
     private final gFactionsListener listener = new gFactionsListener();
     private FactionManager fManager;
@@ -61,7 +61,7 @@ public class gFactions extends Plugin {
     @Override
     public void initialize() {
     	PluginLoader loader = etc.getLoader();
-    	PluginLoader.Hook[] hooks = {PluginLoader.Hook.LOGIN, PluginLoader.Hook.CHAT};
+    	PluginLoader.Hook[] hooks = {PluginLoader.Hook.LOGIN, PluginLoader.Hook.CHAT, PluginLoader.Hook.DEATH, PluginLoader.Hook.PLAYER_MOVE};
     	for(PluginLoader.Hook h : hooks) {
     		loader.addListener(h, listener, this, PluginListener.Priority.MEDIUM);
     	}
@@ -120,6 +120,7 @@ public class gFactions extends Plugin {
         	case FACTION:
         		assert f != null && !(f instanceof SpecialFaction);
         		Utils.addItems(f.getOnlineMembers(), receivers);
+        		//etc.getServer().messageAll(String.format("online members are %s", java.util.Arrays.toString(f.getOnlineMembers())));
         		
         		gPlayer[] spies = Utils.plugin.getPlayerManager().spying();
         		for(gPlayer gP : spies) {
@@ -130,11 +131,42 @@ public class gFactions extends Plugin {
         			}
         		}
         		
-        		hookParams.setPrefix(new StringBuilder(cc.getColor()).append(gp.getFormattedName()));
+        		hookParams.setPrefix(new StringBuilder(cc.getColor()).append(gp.getFormattedName()).append(Colors.White));
         		hookParams.setReceivers(receivers);
+        		//etc.getServer().messageAll(String.format("message receivers are %s", receivers.toString()));
         		return hookParams;
         	default:
         		return hookParams;
+        	}
+        }
+        
+        @Override
+        public void onDeath(LivingEntity entity) {
+        	if(entity instanceof Player) {
+        		Player p = (Player) entity;
+        		gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(p.getName());
+        		gp.decreasePower();
+        		p.sendMessage(String.format("%sYour power is now %s%s", Colors.Yellow, Colors.White, gp.getPower()));
+        	}
+        }
+        
+        @Override
+        public void onPlayerMove(Player player, Location from, Location to) {
+        	LandManager lm = Utils.plugin.getLandManager();
+        	int start = lm.getLandAt(from).getClaimerId();
+        	int finish = lm.getLandAt(to).getClaimerId();
+        	if(start != finish) {
+        		String pName = player.getName();
+        		if(Utils.plugin.getPlayerManager().getPlayer(pName).autoClaim) {
+        			String msg = FactionCommand.claimHelper(player);
+        			if(msg != null) {
+        				player.sendMessage(msg);
+        			}
+        		} else {
+        			FactionManager fm = Utils.plugin.getFactionManager();
+        			Faction landFac = fm.getFaction(finish);
+        			player.sendMessage(String.format("%s~ %s - %s", Colors.Yellow, landFac.getNameRelative(fm.getFaction(pName)), landFac.getDescription()));
+        		}
         	}
         }
     }

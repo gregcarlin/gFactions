@@ -87,7 +87,59 @@ public class FactionCommand extends BaseCommand {
 		subCommands[3] = new FactionSubCommand(new String[] {"map"}, "Displays a map of nearby factions.", "") {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return null; // TODO
+				if(!(caller instanceof Player)) {
+					return new String[] {"Only players can call /f map"};
+				}
+				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
+				StringBuilder[] rt = new StringBuilder[8];
+				LandManager lm = Utils.plugin.getLandManager();
+				Location l = ((Player) caller).getLocation();
+				int startX = (int) l.x / 16;
+				int startZ = (int) l.z / 16;
+				MapIconGen gen = new MapIconGen();
+				Direction dir = Direction.fromRot(l.rotX + 90); // why +90 is needed? who knows
+				for(int y=0; y<8; y++) {
+					String lastColor = null;
+					rt[y] = new StringBuilder();
+					for(int x=0; x<40; x++) {
+						if(x == 20 && y == 4) {
+							rt[y].append(Colors.LightBlue + "+");
+							lastColor = Colors.LightBlue;
+						} else if(x == 0 && y == 0) {
+							rt[y].append(dir == Direction.NORTH_WEST ? Colors.Rose : Colors.Gold).append('\\');
+						} else if(x == 1 && y == 0) {
+							rt[y].append(dir == Direction.NORTH ? Colors.Rose : Colors.Gold).append('N');
+						} else if(x == 2 && y == 0) {
+							rt[y].append(dir == Direction.NORTH_EAST ? Colors.Rose : Colors.Gold).append('/');
+						} else if(x == 0 && y == 1) {
+							rt[y].append(dir == Direction.WEST ? Colors.Rose : Colors.Gold).append('W');
+						} else if(x == 1 && y == 1) {
+							rt[y].append(dir == Direction.ERROR ? Colors.Rose : Colors.Gold).append('+');
+						} else if(x == 2 && y == 1) {
+							rt[y].append(dir == Direction.EAST ? Colors.Rose : Colors.Gold).append('E');
+						} else if(x == 0 && y == 2) {
+							rt[y].append(dir == Direction.SOUTH_WEST ? Colors.Rose : Colors.Gold).append('/');
+						} else if(x == 1 && y == 2) {
+							rt[y].append(dir == Direction.SOUTH ? Colors.Rose : Colors.Gold).append('S');
+						} else if(x == 2 && y == 2) {
+							rt[y].append(dir == Direction.SOUTH_EAST ? Colors.Rose : Colors.Gold).append('\\');
+						} else {
+							Faction owner = lm.getLandAt(x - 20 + startX, y - 4 + startZ).claimedBy();
+							String color = owner.getColorRelative(f);
+							if(!color.equals(lastColor)) {
+								lastColor = color;
+								rt[y].append(color);
+							}
+							rt[y].append(owner.getMapIcon(gen));
+						}
+					}
+				}
+				String[] str = new String[rt.length + 1];
+				str[0] = String.format("%1$s-----------.[%2$s (%3$d, %4$d)%1$s].-----------", Colors.Gold, lm.getLandAt(startX, startZ).claimedBy().getNameRelative(f), startX, startZ);
+				for(int i=0; i<rt.length; i++) {
+					str[i + 1] = rt[i].toString();
+				}
+				return str;
 			}
 		};
 		
@@ -137,7 +189,17 @@ public class FactionCommand extends BaseCommand {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				try {
-					Utils.plugin.getFactionManager().createFaction(((Player) caller).getName(), args[0]);
+					FactionManager fm = Utils.plugin.getFactionManager();
+					String pName = ((Player) caller).getName();
+					Faction f = fm.getFaction(pName);
+					if(!(f instanceof SpecialFaction)) {
+						return new String[] {Utils.rose("You are already a member of a faction!")};
+					}
+					f = fm.getFactionByName(args[0]);
+					if(f != null) {
+						return new String[] {Utils.rose("A faction with the name %s already exists.", args[0])};
+					}
+					Utils.plugin.getFactionManager().createFaction(pName, args[0]);
 					return new String[] {String.format("%1$sFaction %2$s%3$s %1$screated.", Colors.Yellow, Colors.Gold, args[0])};
 				} catch (ArrayIndexOutOfBoundsException e) {
 					return new String[] {Utils.rose("Usage: /f create [name]")};
@@ -204,7 +266,7 @@ public class FactionCommand extends BaseCommand {
 					for(String owner : l.getOwners()) {
 						owners.append(owner).append(", ");
 					}
-					return new String[] {owners.substring(0, -2)};
+					return new String[] {owners.substring(0, owners.length() - 2)};
 				} else {
 					return new String[] {Utils.rose("Your faction does not own this land.")};
 				}
@@ -224,8 +286,13 @@ public class FactionCommand extends BaseCommand {
 				assert caller instanceof Player;
 				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
 				assert f != null && !(f instanceof SpecialFaction);
-				f.setDescription(args[0]);
-				return new String[] {String.format("%1$sDescription set to %2$s%3$s%1$s.", Colors.Yellow, Colors.Green, args[0])};
+				StringBuilder desc = new StringBuilder();
+				for(String s : args) {
+					desc.append(s).append(" ");
+				}
+				String dStr = desc.substring(0, desc.length() - 1);
+				f.setDescription(dStr);
+				return new String[] {String.format("%1$sDescription set to %2$s%3$s%1$s.", Colors.Yellow, Colors.Green, dStr)};
 			}
 		};
 		
@@ -322,7 +389,7 @@ public class FactionCommand extends BaseCommand {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				assert caller instanceof Player;
-				return claimHelper((Player) caller);
+				return new String[] {claimHelper((Player) caller)};
 			}
 		};
 		
@@ -591,6 +658,7 @@ public class FactionCommand extends BaseCommand {
 				String pName = ((Player) caller).getName();
 				Faction f = Utils.plugin.getFactionManager().getFaction(pName);
 				assert f != null && !(f instanceof SpecialFaction);
+				f.disband();
 				String name = f.getName();
 				return new String[] {String.format("%1$s%2$s %3$swas disbanded by %1$s%4$s%3$s.", Colors.Gray, name, Colors.Yellow, pName)};
 			}
@@ -646,44 +714,19 @@ public class FactionCommand extends BaseCommand {
 		};
 	}
 	
-	/*private static String relationChangeHelper(Faction from, Faction to, Relation.Type type) {
-		RelationManager rm = Utils.plugin.getRelationManager();
-		Relation.Type currentType = rm.getRelation(from, to);
-		if(currentType == Relation.Type.SAME) {
-			return Utils.rose("You cannot change the relationship with your own faction!");
-		} else if(type == currentType) {
-			return Utils.rose("Your faction is already %s with that faction.", type.toString());
-		} else if(type == Relation.Type.ALLY) {
-			if(rm.allyRequest(from, to)) {
-				String color = Relation.Type.ALLY.getColor();
-				from.sendToMembers(String.format("%sYou are now allies with %s%s", Colors.Yellow, color, to.getName()));
-				to.sendToMembers(String.format("%sYou are now allies with %s%s", Colors.Yellow, color, from.getName()));
-				return null;
-			} else {
-				String color = currentType.getColor();
-				to.sendToMembers(String.format("%s%s %swould like to be allies.", color, from.getName(), Colors.Yellow));
-				return String.format("%sAlly request sent to %s%s", Colors.Yellow, color, to.getName());
-			}
-		} else if(currentType == Relation.Type.ENEMY) {
-			
-		} else {
-			
-		}
-	}*/
-	
-	private static String[] claimHelper(Player claimer) {
+	public static String claimHelper(Player claimer) {
 		String pName = claimer.getName();
 		Faction f = Utils.plugin.getFactionManager().getFaction(pName);
 		assert f != null && !(f instanceof SpecialFaction);
 		Land l = Utils.plugin.getLandManager().getLandAt(claimer.getLocation());
 		Faction other = l.claimedBy();
-		if(other instanceof SpecialFaction) {
-			return new String[] {Utils.rose("You cannot claim %s.", other.getName())};
+		if(other instanceof ZoneFaction) {
+			return Utils.rose("You cannot claim %s.", other.getName());
 		} else if(f.equals(other)) {
-			return new String[] {Utils.rose("This land is already owned by your faction.")};
+			return Utils.rose("This land is already owned by your faction.");
 		} else if(f.getLand().length >= f.getPower()) {
-			return new String[] {Utils.rose("You do not have enough power to claim any more land.")};
-		} else if(f == null || f.getLand().length > f.getPower()) {
+			return Utils.rose("You do not have enough power to claim any more land.");
+		} else if(other == null || other.getLand().length > other.getPower()) {
 			l.claim(f);
 			if(other != null) {
 				other.sendToMembers(String.format("%s %sclaimed your land.", f.getNameRelative(other), Colors.Yellow));
@@ -691,7 +734,7 @@ public class FactionCommand extends BaseCommand {
 			f.sendToMembers(String.format("%s%s %sclaimed land for your faction from %s", Colors.LightGreen, pName, Colors.Yellow, other.getNameRelative(f)));
 			return null;
 		} else {
-			return new String[] {Utils.rose("%s owns this land and is strong enough to keep it.", other.getName())};
+			return Utils.rose("%s owns this land and is strong enough to keep it.", other.getName());
 		}
 	}
 	
@@ -737,12 +780,4 @@ public class FactionCommand extends BaseCommand {
 			Utils.sendMsgs(arg0, msgs);
 		}
 	}
-	
-	/*private static String[] lower(String[] arr) {
-		String[] rt = new String[arr.length];
-		for(int i=0; i<rt.length; i++) {
-			rt[i] = arr[i].toLowerCase();
-		}
-		return rt;
-	}*/
 }

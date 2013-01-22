@@ -50,6 +50,7 @@ public class FileSource implements Datasource {
 		return rt.toArray(new Faction[0]);
 	}
 	
+	@SuppressWarnings("unused")
 	private static String serialize(Location location) {
 		return String.format("%s,%d,%d,%d,%d,%d", location.world, location.x, location.y, location.z, location.rotX, location.rotY);
 	}
@@ -140,6 +141,30 @@ public class FileSource implements Datasource {
 
 	@Override
 	public void save(Land land) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Land[] getAllLand() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Relation[] getAllRelations() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void delete(Land l) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void delete(Relation r) {
 		// TODO Auto-generated method stub
 		
 	}
