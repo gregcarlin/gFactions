@@ -9,6 +9,8 @@ import java.util.ArrayList;
 public class FactionManager {
 	private static final int PAGESIZE = 8;
 	private final Faction wilderness = new Wilderness();
+	private final Faction safezone = new SafeZone();
+	private final Faction warzone = new WarZone();
 	private ArrayList<Faction> factions = new ArrayList<Faction>(); // Should have every faction on the server
 	
 	public FactionManager() {
@@ -19,13 +21,26 @@ public class FactionManager {
 		}
 	}
 	
-	public String[] getList(int page) {
+	/**
+	 * Returns a list of server factions.
+	 * 
+	 * @param page The page of the list to show.
+	 * @param relativeTo The faction to display names relative to.
+	 * @return String[]
+	 */
+	public String[] getList(int page, Faction relativeTo) {
 		String[] rt = new String[PAGESIZE + 2];
 		int max = factions.size();
 		rt[0] = String.format("%s---------- Factions | Page %d/%d ----------", Colors.Gold, page + 1, max / PAGESIZE + 1);
 		for(int i=0; i<rt.length-2; i++) {
 			int index = page * PAGESIZE + i;
-			rt[i + 1] = index < max && index >= 0 ? factions.get(index).getName() : "No more."; // TODO color and info
+			if(index < max && index >= 0) {
+				Faction f = factions.get(index);
+				rt[i + 1] = String.format("%s (%d/%d/%d)", f.getNameRelative(relativeTo), f.getLand().length, f.getPower(), f.getMaxPower());
+			} else {
+				rt[i + 1] = "No more.";
+			}
+			//rt[i + 1] = index < max && index >= 0 ? factions.get(index).getName() : "No more.";
 		}
 		rt[rt.length - 1] = String.format("%s--------------------------------------", Colors.Gold);
 		return rt;
@@ -38,7 +53,7 @@ public class FactionManager {
 	 * @return CachedFaction
 	 */
 	public CachedFaction cache(LazyFaction f) {
-		//check to see if we already have a cached version.
+		// check to see if we already have a cached version.
 		Faction fac = null;
 		int id = f.getId();
 		int index = -1;
@@ -54,7 +69,7 @@ public class FactionManager {
 			return (CachedFaction) fac;
 		}
 		
-		//update our list to hold the cached version of the faction.
+		// update our list to hold the cached version of the faction.
 		CachedFaction cache = Utils.plugin.getDataSource().getFaction(id);
 		factions.set(index, cache);
 		
@@ -69,6 +84,8 @@ public class FactionManager {
 	 */
 	public Faction getFaction(int id) {
 		if(id == -1) {return wilderness;}
+		if(id == -2) {return safezone;}
+		if(id == -3) {return warzone;}
 		for(Faction f : factions) {
 			if(f.getId() == id) {
 				return f;
@@ -173,7 +190,7 @@ public class FactionManager {
 		
 		gPlayerManager gpm = Utils.plugin.getPlayerManager();
 		for(String m : f.getMembers()) {
-			gpm.getPlayer(m).title = "";
+			gpm.getPlayer(m).setTitle("");
 		}
 		
 		Utils.plugin.getRelationManager().removeAll(f);

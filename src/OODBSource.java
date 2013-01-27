@@ -37,7 +37,9 @@ public class OODBSource implements Datasource {
 
 	@Override
 	public gPlayer getPlayer(String name) {
-		ObjectSet<gPlayer> result = playerDB.queryByExample(new gPlayer(name, 0));
+		gPlayer gp = new gPlayer(name, 0);
+		gp.setTitle(null);
+		ObjectSet<gPlayer> result = playerDB.queryByExample(gp);
 		return result.size() > 0 ? result.get(0) : null;
 	}
 

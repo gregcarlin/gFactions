@@ -16,7 +16,6 @@ public class CachedFaction extends Faction {
 	private Location home;
 	private final ArrayList<String> mods = new ArrayList<String>();
 	private final ArrayList<String> members = new ArrayList<String>();
-	private final ArrayList<String> log = new ArrayList<String>();
 	
 	public CachedFaction(int id, String name, String desc, boolean isOpen, boolean isPeaceful, String admin, Location home) {
 		this.id = id;
@@ -49,18 +48,6 @@ public class CachedFaction extends Faction {
 		members.ensureCapacity(members.size() + list.length);
 		for(String s : list) {
 			members.add(s);
-		}
-	}
-	
-	/**
-	 * Adds messages to the faction log.
-	 * 
-	 * @param msgs The list of messages to add
-	 */
-	public void log(String... msgs) {
-		log.ensureCapacity(log.size() + msgs.length);
-		for(String m : msgs) {
-			log.add(m);
 		}
 	}
 	
@@ -104,9 +91,9 @@ public class CachedFaction extends Faction {
 		String[] rt = new String[6];
 		String relationColor = Utils.plugin.getRelationManager().getRelation(this, relativeTo).getColor();
 		rt[0] = String.format("%1$s------------ %2$s%3$s %1$s------------", Colors.Gold, relationColor, relativeTo.getName());
-		rt[1] = getDescription();
+		rt[1] = String.format("%s%s", relationColor, getDescription());
 		rt[2] = String.format("%1$sOpen: %2$s    %1$sPeaceful: %3$s", Colors.Yellow, Utils.readBool(isOpen(), "Yes", "No"), Utils.readBool(isPeaceful(), "Yes", "No"));
-		rt[3] = String.format("%sLand/Power/Maxpower: %d/%d/%d", Colors.Yellow, getLand().length, getPower(), getMaxPower()); // TODO land/power/maxpower
+		rt[3] = String.format("%sLand/Power/Maxpower: %d/%d/%d", Colors.Yellow, getLand().length, getPower(), getMaxPower());
 		String[] mems = getMembersFormatted(relationColor);
 		assert mems.length == 2;
 		rt[4] = String.format("%sMembers online: %s", Colors.Yellow, mems[0]);
@@ -125,7 +112,7 @@ public class CachedFaction extends Faction {
 		StringBuilder offline = new StringBuilder();
 		for(String member : getAllMembers()) {
 			String rank = getRank(member).getPrefix();
-			String title = Utils.plugin.getPlayerManager().getPlayer(member).title;
+			String title = Utils.plugin.getPlayerManager().getPlayer(member).getTitle();
 			if(title != null && !title.isEmpty()) {
 				title += " ";
 			}

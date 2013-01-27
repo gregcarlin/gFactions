@@ -1,4 +1,5 @@
-import java.awt.Color;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 /**
  * Handles the execution of commands.
@@ -53,19 +54,19 @@ public class FactionCommand extends BaseCommand {
 			}
 		};
 			
-		subCommands[1] = new FactionSubCommand(new String[] {"list", "ls"}, "Lists active factions.", "(page)") { // TODO test with multiple factions
+		subCommands[1] = new FactionSubCommand(new String[] {"list", "ls"}, "Lists active factions.", "(page)") {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				try {
 					int page = args.length > 0 ? Integer.parseInt(args[0]) - 1 : 0;
-					return Utils.plugin.getFactionManager().getList(page);
+					return Utils.plugin.getFactionManager().getList(page, caller instanceof Player ? Utils.plugin.getFactionManager().getFaction(((Player) caller).getName()) : null);
 				} catch (NumberFormatException e) {
 					return new String[] {Utils.rose("%s is not a number!", args[0])};
 				}
 			}
 		};
 		
-		subCommands[2] = new FactionSubCommand(new String[] {"show", "who"}, "Gives information about a faction.", "(faction)") { // TODO test with different relationships
+		subCommands[2] = new FactionSubCommand(new String[] {"show", "who"}, "Gives information about a faction.", "(faction)") {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				if(args.length > 0) { // other faction specified
@@ -90,7 +91,8 @@ public class FactionCommand extends BaseCommand {
 				if(!(caller instanceof Player)) {
 					return new String[] {"Only players can call /f map"};
 				}
-				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
+				FactionManager fm = Utils.plugin.getFactionManager();
+				Faction f = fm.getFaction(((Player) caller).getName());
 				StringBuilder[] rt = new StringBuilder[8];
 				LandManager lm = Utils.plugin.getLandManager();
 				Location l = ((Player) caller).getLocation();
@@ -134,16 +136,25 @@ public class FactionCommand extends BaseCommand {
 						}
 					}
 				}
-				String[] str = new String[rt.length + 1];
+				HashMap<Integer, Character> fMap = gen.getFactionMap();
+				boolean useMap = fMap.size() > 0;
+				String[] str = new String[rt.length + (useMap ? 2 : 1)];
 				str[0] = String.format("%1$s-----------.[%2$s (%3$d, %4$d)%1$s].-----------", Colors.Gold, lm.getLandAt(startX, startZ).claimedBy().getNameRelative(f), startX, startZ);
 				for(int i=0; i<rt.length; i++) {
 					str[i + 1] = rt[i].toString();
+				}
+				if(useMap) {
+					StringBuilder sb = new StringBuilder(Colors.Gray);
+					for(Entry<Integer, Character> e : fMap.entrySet()) {
+						sb.append(e.getValue()).append(": ").append(fm.getFaction(e.getKey()).getName()).append(", ");
+					}
+					str[str.length - 1] = sb.substring(0, sb.length() - 2);
 				}
 				return str;
 			}
 		};
 		
-		subCommands[4] = new FactionSubCommand(new String[] {"power", "pow"}, "Displays the power possessed by a player.", "(player)") { // TODO test with other players, on and offline
+		subCommands[4] = new FactionSubCommand(new String[] {"power", "pow"}, "Displays the power possessed by a player.", "(player)") {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				String player = args.length > 0 ? args[0] : (caller instanceof Player ? ((Player) caller).getName() : null);
@@ -160,7 +171,7 @@ public class FactionCommand extends BaseCommand {
 			}
 		};
 		
-		subCommands[5] = new FactionSubCommand(new String[] {"join"}, "Join a faction.", "[faction]", 1) { // TODO test
+		subCommands[5] = new FactionSubCommand(new String[] {"join"}, "Join a faction.", "[faction]", 1) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				if(caller instanceof Player) {
@@ -262,8 +273,12 @@ public class FactionCommand extends BaseCommand {
 				assert f != null && !(f instanceof SpecialFaction);
 				Land l = Utils.plugin.getLandManager().getLandAt(p.getLocation());
 				if(f.getId() == l.getClaimerId()) {
+					String[] ownerlist = l.getOwners();
+					if(ownerlist.length <= 0) {
+						return new String[] {String.format("%sThis land is open to all faction members.", Colors.Gray)};
+					}
 					StringBuilder owners = new StringBuilder(Colors.Gray).append("Owners: ");
-					for(String owner : l.getOwners()) {
+					for(String owner : ownerlist) {
 						owners.append(owner).append(", ");
 					}
 					return new String[] {owners.substring(0, owners.length() - 2)};
@@ -286,11 +301,7 @@ public class FactionCommand extends BaseCommand {
 				assert caller instanceof Player;
 				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
 				assert f != null && !(f instanceof SpecialFaction);
-				StringBuilder desc = new StringBuilder();
-				for(String s : args) {
-					desc.append(s).append(" ");
-				}
-				String dStr = desc.substring(0, desc.length() - 1);
+				String dStr = etc.combineSplit(0, args, " ");
 				f.setDescription(dStr);
 				return new String[] {String.format("%1$sDescription set to %2$s%3$s%1$s.", Colors.Yellow, Colors.Green, dStr)};
 			}
@@ -389,7 +400,20 @@ public class FactionCommand extends BaseCommand {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				assert caller instanceof Player;
-				return new String[] {claimHelper((Player) caller)};
+				if(args.length > 0 && Utils.permCheck(caller, "/fadmin")) {
+					char c = Character.toLowerCase(args[0].charAt(0));
+					switch(c) {
+					default:
+						return new String[] {Utils.rose("Unknown special zone %s.", args[0])};
+					case 's':
+					case 'w':
+						Faction f = Utils.plugin.getFactionManager().getFaction(c == 's' ? -2 : -3);
+						Utils.plugin.getLandManager().getLandAt(((Player) caller).getLocation()).claim(f);
+						return new String[] {String.format("%sLand claimed for %s", Colors.Yellow, f.getName())};
+					}
+				}
+				String s = claimHelper((Player) caller);
+				return s == null ? null : new String[] {s};
 			}
 		};
 		
@@ -447,15 +471,11 @@ public class FactionCommand extends BaseCommand {
 				assert f != null && !(f instanceof SpecialFaction);
 				Land l = Utils.plugin.getLandManager().getLandAt(p.getLocation());
 				if(l.getClaimerId() == f.getId()) {
-					Faction other = Utils.plugin.getFactionManager().getFaction(args[0]);
-					if(f.equals(other)) {
-						if(other.getRank(args[0]) == Faction.PlayerRank.MEMBER) {
-							return new String[] {String.format("%s%s %scan %s build here.", Colors.LightGreen, args[0], Colors.Yellow, l.toggleOwner(args[0]) ? "now" : "no longer")};
-						} else {
-							return new String[] {Utils.rose("You cannot change those person's build rights.")};
-						}
+					String s = powerOverHelper(p.getName(), args[0], "You cannot change those person's build rights.");
+					if(s == null) {
+						return new String[] {String.format("%s%s %scan %s build here.", Colors.LightGreen, args[0], Colors.Yellow, l.toggleOwner(args[0]) ? "now" : "no longer")};
 					} else {
-						return new String[] {Utils.rose("That player is not a member of your faction.")};
+						return new String[] {s};
 					}
 				} else {
 					return new String[] {Utils.rose("Your faction does not own this land.")};
@@ -491,12 +511,13 @@ public class FactionCommand extends BaseCommand {
 				if(rt != null) {
 					return new String[] {rt};
 				}
-				Utils.plugin.getPlayerManager().getPlayer(args[0]).title = args[1];
+				String title = etc.combineSplit(1, args, " ");
+				Utils.plugin.getPlayerManager().getPlayer(args[0]).setTitle(title);
 				Player p = etc.getServer().getPlayer(args[0]);
 				if(p != null) {
-					p.sendMessage(String.format("%sYour title has been set to %s%s", Colors.Yellow, Colors.LightGreen, args[1]));
+					p.sendMessage(String.format("%sYour title has been set to %s%s", Colors.Yellow, Colors.LightGreen, title));
 				}
-				return new String[] {String.format("%1$s%2$s%3$s's title set to %1$s%4$s%3$s.", Colors.LightGreen, args[0], Colors.Yellow, args[1])};
+				return new String[] {String.format("%1$s%2$s%3$s's title set to %1$s%4$s%3$s.", Colors.LightGreen, args[0], Colors.Yellow, title)};
 			}
 		};
 		
@@ -548,7 +569,7 @@ public class FactionCommand extends BaseCommand {
 					Relation.Type relation = rm.getRelation(f, other);
 					switch(relation) {
 					case SAME:
-						return new String[] {Utils.rose("You cannot ally yourself!")};
+						return new String[] {Utils.rose("You cannot neutral yourself!")};
 					case NEUTRAL:
 						return new String[] {Utils.rose("You are already neutral with that faction.")};
 					case ENEMY:
@@ -584,11 +605,11 @@ public class FactionCommand extends BaseCommand {
 				Faction f = fm.getFaction(((Player) caller).getName());
 				assert f != null && !(f instanceof SpecialFaction);
 				assert args.length > 0;
-				Faction other = fm.getFaction(args[0]);
+				Faction other = fm.getFactionByName(args[0]);
 				if(other == null || other instanceof SpecialFaction) {
 					return new String[] {Utils.rose("The faction %s was not found.", args[0])};
 				} else if(f.equals(other)) {
-					return new String[] {Utils.rose("You cannot enemy your own faction!")};
+					return new String[] {Utils.rose("You cannot enemy yourself!")};
 				} else {
 					RelationManager rm = Utils.plugin.getRelationManager();
 					if(rm.getRelation(f, other) == Relation.Type.ENEMY) {
@@ -609,7 +630,11 @@ public class FactionCommand extends BaseCommand {
 			String[] execute(MessageReceiver caller, String[] args) {
 				assert caller instanceof Player && args.length > 0;
 				FactionManager fManager = Utils.plugin.getFactionManager();
-				Faction f = fManager.getFaction(((Player) caller).getName());
+				String pN = ((Player) caller).getName();
+				if(pN.equalsIgnoreCase(args[0])) {
+					return new String[] {Utils.rose("You cannot demote yourself!")};
+				}
+				Faction f = fManager.getFaction(pN);
 				assert f != null && !(f instanceof SpecialFaction);
 				Faction other = fManager.getFaction(args[0]);
 				if(!f.equals(other)) {
@@ -631,6 +656,9 @@ public class FactionCommand extends BaseCommand {
 				assert caller instanceof Player && args.length > 0;
 				FactionManager fManager = Utils.plugin.getFactionManager();
 				String pName = ((Player) caller).getName();
+				if(pName.equalsIgnoreCase(args[0])) {
+					return new String[] {Utils.rose("You are already the owner of your faction!")};
+				}
 				Faction f = fManager.getFaction(pName);
 				assert f != null && !(f instanceof SpecialFaction);
 				Faction other = fManager.getFaction(args[0]);
@@ -702,7 +730,7 @@ public class FactionCommand extends BaseCommand {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				Utils.saveAll();
-				return new String[] {String.format("%sAll data saved.", Color.GREEN)};
+				return new String[] {String.format("%sAll data saved.", Colors.Green)};
 			}
 		};
 		
@@ -752,6 +780,9 @@ public class FactionCommand extends BaseCommand {
 			return Utils.rose("That player is not in your faction.");
 		}
 		Faction.PlayerRank rankOne = factionOne.getRank(one);
+		if(rankOne == Faction.PlayerRank.ADMIN) {
+			return null;
+		}
 		Faction.PlayerRank rankTwo = factionTwo.getRank(two);
 		if(rankOne.ordinal() >= rankTwo.ordinal()) {
 			return Utils.rose(error);

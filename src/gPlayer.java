@@ -49,9 +49,9 @@ public class gPlayer {
 	
 	private final String name;
 	private int power;
-	private transient Object powerLock;
 	public int maxPower = 10;
-	public String title;
+	private String title;
+	private transient Object powerLock;
 	public transient boolean adminBypass;
 	private transient ChatChannel chatChannel;
 	public transient boolean chatSpy;
@@ -177,5 +177,23 @@ public class gPlayer {
 	 */
 	public void setChatChannel(ChatChannel channel) {
 		chatChannel = channel;
+	}
+	
+	/**
+	 * Get this player's title. Should never be null, should be empty string if no title.
+	 * 
+	 * @return String
+	 */
+	public String getTitle() {
+		return title;
+	}
+	
+	/**
+	 * Sets this player's title. Should never be null, should use empty string if no title.
+	 * 
+	 * @param title The player's new title.
+	 */
+	public void setTitle(String title) {
+		this.title = title;
 	}
 }

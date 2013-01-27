@@ -4,7 +4,7 @@ import java.util.ArrayList;
  * Manages the retrieval and storage of flat file data.
  * 
  * factions.txt is stored in the following format:
- * id:name:desc:open/peaceful/both:admin:home:mods:members:log
+ * id:name:desc:open/peaceful/both:admin:home:mods:members
  * For open/peaceful/both, value is 0 if neither, 1 if just open, 2 if just peaceful, and 3 if both.
  * 
  * players.txt is stored in the following format:
@@ -32,7 +32,7 @@ public class FileSource implements Datasource {
 		ArrayList<Faction> rt = new ArrayList<Faction>();
 		for(String s : factionFile) {
 			String[] split = s.split(":");
-			if(split.length < 9) {
+			if(split.length < 8) {
 				continue;
 			}
 			int oVal = Integer.parseInt(split[3]);
@@ -44,7 +44,6 @@ public class FileSource implements Datasource {
 			CachedFaction f = new CachedFaction(Integer.parseInt(split[0]), split[1], split[2], isOpen, isPeaceful, split[4], expand(split[5]));
 			f.addMods(split[6].split(","));
 			f.addMembers(split[7].split(","));
-			f.log(split[8].split(","));
 			rt.add(f);
 		}
 		return rt.toArray(new Faction[0]);
@@ -107,7 +106,7 @@ public class FileSource implements Datasource {
 				continue;
 			}
 			gPlayer gp = new gPlayer(split[0], i(split[1]));
-			gp.title = split[2];
+			gp.setTitle(split[2]);
 			rt.add(gp);
 		}
 		return rt.toArray(new gPlayer[0]);

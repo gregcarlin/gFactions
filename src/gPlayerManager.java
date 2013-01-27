@@ -56,7 +56,7 @@ public class gPlayerManager {
 			}
 			
 			if(rt.getPower() < rt.maxPower) {
-				etc.getServer().addToServerQueue(new PowerAdder(rt), Utils.plugin.getConfig().getPowerRegenInterval());
+				etc.getServer().addToServerQueue(new PowerAdder(rt), config.getPowerRegenInterval());
 			}
 		}
 	}

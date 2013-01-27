@@ -29,7 +29,7 @@ public abstract class Faction {
 		}
 	}
 	
-	private transient final ArrayList<String> invited = new ArrayList<String>();
+	private transient ArrayList<String> invited = new ArrayList<String>();
 	
 	/**
 	 * Returns the UUID for the faction.
@@ -214,10 +214,10 @@ public abstract class Faction {
 	 * @return boolean True if the player was already invited.
 	 */
 	public boolean invite(String player) {
-		if(invited.contains(player)) {
+		if(getInvited().contains(player)) {
 			return true;
 		}
-		invited.add(player);
+		getInvited().add(player);
 		return false;
 	}
 	
@@ -228,7 +228,7 @@ public abstract class Faction {
 	 * @return boolean Whether or not the player was on the list.
 	 */
 	public boolean deinvite(String player) {
-		return invited.remove(player);
+		return getInvited().remove(player);
 	}
 	
 	/**
@@ -238,7 +238,14 @@ public abstract class Faction {
 	 * @return boolean
 	 */
 	public boolean isInvited(String player) {
-		return invited.contains(player);
+		return getInvited().contains(player);
+	}
+	
+	private ArrayList<String> getInvited() {
+		if(invited == null) {
+			invited = new ArrayList<String>();
+		}
+		return invited;
 	}
 	
 	/**

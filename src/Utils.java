@@ -44,9 +44,7 @@ public abstract class Utils {
 		if(msgs == null) {
 			return;
 		}
-		//warning("sending %s", java.util.Arrays.toString(msgs));
 		for(String s : msgs) {
-			//warning("sending %s", s);
 			mr.notify(s);
 		}
 	}

@@ -120,7 +120,6 @@ public class gFactions extends Plugin {
         	case FACTION:
         		assert f != null && !(f instanceof SpecialFaction);
         		Utils.addItems(f.getOnlineMembers(), receivers);
-        		//etc.getServer().messageAll(String.format("online members are %s", java.util.Arrays.toString(f.getOnlineMembers())));
         		
         		gPlayer[] spies = Utils.plugin.getPlayerManager().spying();
         		for(gPlayer gP : spies) {
@@ -133,7 +132,6 @@ public class gFactions extends Plugin {
         		
         		hookParams.setPrefix(new StringBuilder(cc.getColor()).append(gp.getFormattedName()).append(Colors.White));
         		hookParams.setReceivers(receivers);
-        		//etc.getServer().messageAll(String.format("message receivers are %s", receivers.toString()));
         		return hookParams;
         	default:
         		return hookParams;
