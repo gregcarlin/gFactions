@@ -125,14 +125,16 @@ public class gPlayer {
 	/**
 	 * Decreases power by the amount specified in the config.
 	 * 
+	 * @param warzone Whether or not power loss is warzone or regular.
 	 * @return Whether or not power is now zero.
 	 */
-	public boolean decreasePower() {
-		if(power >= maxPower) {
-			etc.getServer().addToServerQueue(new PowerAdder(this), Utils.plugin.getConfig().getPowerRegenInterval());
+	public boolean decreasePower(boolean warzone) {
+		Config config = Utils.plugin.getConfig();
+		if(power >= maxPower) { // if true, no power adder was running for this player
+			etc.getServer().addToServerQueue(new PowerAdder(this), config.getPowerRegenInterval());
 		}
 		synchronized(getPowerLock()) {
-			power -= Utils.plugin.getConfig().getPowerLossOnDeath();
+			power -= warzone ? config.getPowerLossOnDeathWarzone() : config.getPowerLossOnDeath();
 			if(power < 0) {
 				power = 0;
 			}

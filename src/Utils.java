@@ -186,4 +186,14 @@ public abstract class Utils {
 			to.add(obj);
 		}
 	}
+	
+	/**
+	 * Returns whether or not this player is in admin bypass mode.
+	 * 
+	 * @param p The player to check.
+	 * @return boolean
+	 */
+	public static boolean isBypass(Player p) {
+		return plugin.getPlayerManager().getPlayer(p.getName()).adminBypass;
+	}
 }

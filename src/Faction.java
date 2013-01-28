@@ -410,4 +410,19 @@ public abstract class Faction {
 	public String getColorRelative(Faction to) {
 		return Utils.plugin.getRelationManager().getRelation(this, to).getColor();
 	}
+	
+	/**
+	 * Returns whether or not the given player is in this faction.
+	 * 
+	 * @param player The player to check.
+	 * @return boolean
+	 */
+	public boolean has(String player) {
+		for(String s : getAllMembers()) {
+			if(s.equalsIgnoreCase(player)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

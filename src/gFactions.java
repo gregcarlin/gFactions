@@ -61,7 +61,7 @@ public class gFactions extends Plugin {
     @Override
     public void initialize() {
     	PluginLoader loader = etc.getLoader();
-    	PluginLoader.Hook[] hooks = {PluginLoader.Hook.LOGIN, PluginLoader.Hook.CHAT, PluginLoader.Hook.DEATH, PluginLoader.Hook.PLAYER_MOVE};
+    	PluginLoader.Hook[] hooks = {PluginLoader.Hook.LOGIN, PluginLoader.Hook.CHAT, PluginLoader.Hook.DEATH, PluginLoader.Hook.PLAYER_MOVE, PluginLoader.Hook.BLOCK_PLACE, PluginLoader.Hook.DAMAGE, PluginLoader.Hook.BLOCK_BROKEN, PluginLoader.Hook.PLAYER_RESPAWN, PluginLoader.Hook.BLOCK_RIGHTCLICKED};
     	for(PluginLoader.Hook h : hooks) {
     		loader.addListener(h, listener, this, PluginListener.Priority.MEDIUM);
     	}
@@ -104,7 +104,7 @@ public class gFactions extends Plugin {
         }
         
         @Override
-        public HookParametersChat onChat(HookParametersChat hookParams) {
+        public HookParametersChat onChat(HookParametersChat hookParams) { // manages ally, faction, and public chat
         	String player = hookParams.getPlayer().getName();
         	ArrayList<Player> receivers = new ArrayList<Player>();
         	Faction f = Utils.plugin.getFactionManager().getFaction(player);
@@ -139,17 +139,17 @@ public class gFactions extends Plugin {
         }
         
         @Override
-        public void onDeath(LivingEntity entity) {
+        public void onDeath(LivingEntity entity) { // decreases players' power on death
         	if(entity instanceof Player) {
         		Player p = (Player) entity;
         		gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(p.getName());
-        		gp.decreasePower();
+        		gp.decreasePower(Utils.plugin.getLandManager().getLandAt(p.getLocation()).claimedBy() instanceof WarZone);
         		p.sendMessage(String.format("%sYour power is now %s%s", Colors.Yellow, Colors.White, gp.getPower()));
         	}
         }
         
         @Override
-        public void onPlayerMove(Player player, Location from, Location to) {
+        public void onPlayerMove(Player player, Location from, Location to) { // will alert players when they move from one territory to another
         	LandManager lm = Utils.plugin.getLandManager();
         	int start = lm.getLandAt(from).getClaimerId();
         	int finish = lm.getLandAt(to).getClaimerId();
@@ -166,6 +166,87 @@ public class gFactions extends Plugin {
         			player.sendMessage(String.format("%s~ %s - %s", Colors.Yellow, landFac.getNameRelative(fm.getFaction(pName)), landFac.getDescription()));
         		}
         	}
+        }
+        
+        @Override
+        public boolean onBlockPlace(Player player, Block blockPlaced, Block blockClicked, Item itemInHand) { // will restrict building to wilderness and owned land
+        	return landEditHelper(player, blockPlaced);
+        }
+        
+        @Override
+        public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker, BaseEntity defender, int amount) { // prevents damage in spawn and among faction, reduces damage in owned territory
+        	if(!defender.isPlayer()) { // defender is not player, we don't care about them
+        		return false;
+        	}
+        	LandManager lm = Utils.plugin.getLandManager();
+        	Faction owner = lm.getLandAt(defender.getLocation()).claimedBy();
+        	if(owner instanceof SafeZone) { // defender is in safe zone
+        		return true;
+        	}
+        	if(attacker == null || !attacker.isPlayer()) { // attacker is non-player
+        		return false;
+        	}
+        	if(lm.getLandAt(attacker.getLocation()).claimedBy() instanceof SafeZone) { // attacker is in safe zone
+        		((Player) attacker).sendMessage(String.format("%sYou cannot hurt someone while you are in a safe zone.", Colors.Yellow));
+        		return true;
+        	}
+        	// we now know: attacker nor defender is not in safe zone, attacker and defender are both players
+        	Faction defense = Utils.plugin.getFactionManager().getFaction(((Player) defender).getName());
+        	if(defense.has(((Player) attacker).getName())) { // attacker and defender are in the same faction
+        		((Player) attacker).sendMessage(String.format("%sYou cannot hurt members of your own faction.", Colors.Yellow));
+        		return true;
+        	}
+        	if(defense != null && !(defense instanceof SpecialFaction) && defense.equals(owner)) { // defender belongs to a faction and is in his own faction territory
+        		double reduction = Utils.plugin.getConfig().getHomeLandDamageReduction();
+        		if(reduction <= 0) {
+        			return false;
+        		}
+        		((Player) defender).applyDamage(type, (int) (amount * reduction));
+        		((Player) defender).sendMessage(String.format("%sDamage reduced by %d%%.", Colors.Yellow, reduction * 100));
+        		return true;
+        	}
+        	return false;
+        }
+        
+        @Override
+        public boolean onBlockBreak(Player player, Block block) { // will restrict the breaking of blocks to wilderness and owned land
+        	return landEditHelper(player, block);
+        }
+        
+        private boolean landEditHelper(Player player, Block block) { // used by onBlockBreak, onBlockPlace, and onBlockRightClick
+        	if(Utils.isBypass(player)) {
+        		return false;
+        	}
+        	Faction f = Utils.plugin.getLandManager().getLandAt(block.getLocation()).claimedBy();
+        	if(f instanceof ZoneFaction) {
+        		player.sendMessage(String.format("%sYou cannot build in %s.", f.getColorRelative(null), f.getName()));
+        		return true;
+        	}
+        	if(f == null || f instanceof Wilderness) {
+        		return false;
+        	}
+        	Faction me = Utils.plugin.getFactionManager().getFaction(player.getName());
+        	if(me == null || me instanceof Wilderness || !me.equals(f)) {
+        		player.sendMessage(Utils.rose("You cannot build in the territory of %s.", f.getName()));
+        		return true;
+        	}
+        	return false;
+        }
+        
+        @Override
+        public void onPlayerRespawn(Player player, Location loc) { // players respawn at their faction's homes
+        	Faction f = Utils.plugin.getFactionManager().getFaction(player.getName());
+        	if(f != null && !(f instanceof SpecialFaction) && Utils.plugin.getConfig().factionHomeOnDeath()) {
+        		Location home = f.getHome();
+        		if(home != null) {
+        			loc = home;
+        		}
+        	}
+        }
+        
+        @Override
+        public boolean onBlockRightClick(Player player, Block blockClicked, Item itemInHand) { // restricts the interaction with blocks to wilderness and owned land
+        	return landEditHelper(player, blockClicked);
         }
     }
 }

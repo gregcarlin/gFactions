@@ -26,6 +26,9 @@ public class Config {
 		defaults.put("power-regen-interval", new Integer(300)); // seconds
 		defaults.put("economy", "none"); // available options: none,integrated,built-in,dconomy,external
 		defaults.put("power-loss-on-death", new Integer(4));
+		defaults.put("power-loss-on-death-warzone", new Integer(0));
+		defaults.put("home-land-dmg-reduce", new Integer(30)); // percentage, 30 = 30% reduction
+		defaults.put("f-home-on-death", new Boolean(true));
 		
 		for(Entry<String, Object> e : defaults.entrySet()) {
 			String key = e.getKey();
@@ -138,5 +141,32 @@ public class Config {
 	 */
 	public int getPowerLossOnDeath() {
 		return props.getInt("power-loss-on-death");
+	}
+	
+	/**
+	 * Returns the amount of power lost when a player dies in a warzone.
+	 * 
+	 * @return int
+	 */
+	public int getPowerLossOnDeathWarzone() {
+		return props.getInt("power-loss-on-death-warzone");
+	}
+	
+	/**
+	 * Returns the home land damage multiplier.
+	 * 
+	 * @return double
+	 */
+	public double getHomeLandDamageReduction() {
+		return ((double) props.getInt("home-land-dmg-reduce")) / 100d;
+	}
+	
+	/**
+	 * Returns whether or not players should respawn at their faction homes.
+	 * 
+	 * @return
+	 */
+	public boolean factionHomeOnDeath() {
+		return props.getBoolean("f-home-on-death");
 	}
 }
