@@ -261,11 +261,14 @@ public class FactionCommand extends BaseCommand {
 			String[] execute(MessageReceiver caller, String[] args) {
 				assert caller instanceof Player;
 				Player p = (Player) caller;
-				Faction f = Utils.plugin.getFactionManager().getFaction(p.getName());
+				String pName = p.getName();
+				Faction f = Utils.plugin.getFactionManager().getFaction(pName);
 				assert f != null && !(f instanceof SpecialFaction);
 				Location home = f.getHome();
 				if(home == null) {
-					return new String[] {Utils.rose("Your faction does not have a home set.")};
+					return new String[] {Utils.rose("Your faction does not have a home set.")}; // TODO: check nearest enemy distance
+				} else if(!Utils.plugin.getEconomy().modifyBalance(pName, Utils.plugin.getConfig().getTpHomeCost())) {
+					return new String[] {Utils.rose("You cannot afford to teleport to your faction's home.")};
 				} else {
 					p.teleportTo(home);
 					return new String[] {String.format("%sTeleported.", Colors.Green)};
@@ -310,6 +313,9 @@ public class FactionCommand extends BaseCommand {
 				assert caller instanceof Player;
 				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
 				assert f != null && !(f instanceof SpecialFaction);
+				if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getDescCost())) {
+					return new String[] {Utils.rose("Your faction cannot afford to change its description.")};
+				}
 				String dStr = etc.combineSplit(0, args, " ");
 				f.setDescription(dStr);
 				return new String[] {String.format("%1$sDescription set to %2$s%3$s%1$s.", Colors.Yellow, Colors.Green, dStr)};
@@ -325,6 +331,9 @@ public class FactionCommand extends BaseCommand {
 				if(other == null) {
 					Faction f = fManager.getFaction(((Player) caller).getName());
 					assert f != null && !(f instanceof SpecialFaction);
+					if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getRenameCost())) {
+						return new String[] {Utils.rose("Your faction cannot afford to change its name.")};
+					}
 					f.setName(args[0]);
 					return new String[] {String.format("%1$sYour faction's name set to %2$s%3$s%1$s.", Colors.Yellow, Colors.Green, args[0])};
 				} else {
@@ -339,6 +348,9 @@ public class FactionCommand extends BaseCommand {
 				assert caller instanceof Player;
 				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
 				assert f != null && !(f instanceof SpecialFaction);
+				if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getOpenCost())) {
+					return new String[] {Utils.rose("Your faction cannot afford to become open.")};
+				}
 				f.setOpen(true);
 				return new String[] {String.format("%sYour faction is now %s%s", Colors.Yellow, Colors.Green, "Open")};
 			}
@@ -350,6 +362,9 @@ public class FactionCommand extends BaseCommand {
 				assert caller instanceof Player;
 				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
 				assert f != null && !(f instanceof SpecialFaction);
+				if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getCloseCost())) {
+					return new String[] {Utils.rose("Your faction cannot afford to become closed.")};
+				}
 				f.setOpen(false);
 				return new String[] {String.format("%sYour faction is now %s%s", Colors.Yellow, Colors.Red, "Closed")};
 			}
@@ -363,6 +378,8 @@ public class FactionCommand extends BaseCommand {
 				assert f != null && !(f instanceof SpecialFaction);
 				if(f.invite(args[0])) {
 					return new String[] {Utils.rose("That player has already been invited to your faction.")};
+				} else if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getInviteCost())) {
+					return new String[] {Utils.rose("Your faction cannot afford to invite a player.")};
 				} else {
 					Player p = etc.getServer().getPlayer(args[0]);
 					if(p != null) {
@@ -527,6 +544,9 @@ public class FactionCommand extends BaseCommand {
 				if(rt != null) {
 					return new String[] {rt};
 				}
+				if(!Utils.plugin.getEconomy().modifyBalance(Utils.plugin.getFactionManager().getFaction(((Player) caller).getName()), Utils.plugin.getConfig().getTitleCost())) {
+					return new String[] {Utils.rose("Your faction cannot afford to change the titles of its members.")};
+				}
 				String title = etc.combineSplit(1, args, " ");
 				Utils.plugin.getPlayerManager().getPlayer(args[0]).setTitle(title);
 				Player p = etc.getServer().getPlayer(args[0]);
@@ -555,6 +575,8 @@ public class FactionCommand extends BaseCommand {
 						return new String[] {Utils.rose("You cannot ally yourself!")};
 					} else if(relation == Relation.Type.ALLY) {
 						return new String[] {Utils.rose("You are already allies with that faction.")};
+					} else if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getAllyCost())) {
+						return new String[] {Utils.rose("Your faction cannot afford to ally another faction.")};
 					} else if(rm.request(f, other, false)) {
 						String color = Relation.Type.ALLY.getColor();
 						other.sendToMembers(String.format("%sYour faction is now allies with %s%s", Colors.Yellow, color, f.getName()));
@@ -589,7 +611,9 @@ public class FactionCommand extends BaseCommand {
 					case NEUTRAL:
 						return new String[] {Utils.rose("You are already neutral with that faction.")};
 					case ENEMY:
-						if(rm.request(f, other, true)) {
+						if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getNeutralCost())) {
+							return new String[] {Utils.rose("Your faction cannot afford to neutral another faction.")};
+						} else if(rm.request(f, other, true)) {
 							String color = Relation.Type.NEUTRAL.getColor();
 							other.sendToMembers(String.format("%sYour faction is now neutral with %s%s", Colors.Yellow, color, f.getName()));
 							f.sendToMembers(String.format("%sYour faction is now neutral with %s%s", Colors.Yellow, color, other.getName()));
@@ -600,6 +624,9 @@ public class FactionCommand extends BaseCommand {
 							return new String[] {String.format("%sNeutral request sent to %s%s", Colors.Yellow, color, other.getName())};
 						}
 					case ALLY:
+						if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getNeutralCost())) {
+							return new String[] {Utils.rose("Your faction cannot afford to neutral another faction.")};
+						}
 						rm.setRelation(f, other, Relation.Type.NEUTRAL);
 						String color = Relation.Type.NEUTRAL.getColor();
 						other.sendToMembers(String.format("%sYour faction is now neutral with %s%s", Colors.Yellow, color, f.getName()));
@@ -626,6 +653,8 @@ public class FactionCommand extends BaseCommand {
 					return new String[] {Utils.rose("The faction %s was not found.", args[0])};
 				} else if(f.equals(other)) {
 					return new String[] {Utils.rose("You cannot enemy yourself!")};
+				} else if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getEnemyCost())) {
+					return new String[] {Utils.rose("Your faction cannot afford to enemy another faction.")};
 				} else {
 					RelationManager rm = Utils.plugin.getRelationManager();
 					if(rm.getRelation(f, other) == Relation.Type.ENEMY) {

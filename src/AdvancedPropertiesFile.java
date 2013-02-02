@@ -119,13 +119,13 @@ public class AdvancedPropertiesFile {
 	
 	/**
 	 * Returns the value associated with the given key.
-	 * Null if the key does not exist.
+	 * If the key does not exist, a property with its value set to null is returned.
 	 * 
 	 * @param key The key of the value to return.
 	 * @return Property
 	 */
 	public Property getProperty(String key) {
-		return map.get(key);
+		return containsKey(key) ? map.get(key) : new Property(null);
 	}
 	
 	/**
@@ -227,7 +227,7 @@ public class AdvancedPropertiesFile {
 	 * @return String
 	 */
 	public String getString(String key) {
-		return this.getProperty(key).valueAsString();
+		return getProperty(key).valueAsString();
 	}
 	
 	/**
@@ -891,43 +891,43 @@ public class AdvancedPropertiesFile {
 		}
 		
 		public int valueAsInt() {
-			return Integer.parseInt(value);
+			return value == null ? 0 : Integer.parseInt(value);
 		}
 		
 		public double valueAsDouble() {
-			return Double.parseDouble(value);
+			return value == null ? 0 : Double.parseDouble(value);
 		}
 		
 		public long valueAsLong() {
-			return Long.parseLong(value);
+			return value == null ? 0 : Long.parseLong(value);
 		}
 		
 		public boolean valueAsBool() {
-			return Boolean.parseBoolean(value);
+			return value == null ? false : Boolean.parseBoolean(value);
 		}
 		
 		public String[] valueAsArray() {
-			return value.split(",");
+			return value == null ? new String[0] : value.split(",");
 		}
 		
 		public <T extends Enum<T>> T valueAsEnum(Class<T> enumClass) {
-			return Enum.valueOf(enumClass, value);
+			return value == null ? null : Enum.valueOf(enumClass, value);
 		}
 		
 		public byte valueAsByte() {
-			return Byte.parseByte(value);
+			return value == null ? 0 : Byte.parseByte(value);
 		}
 		
 		public short valueAsShort() {
-			return Short.parseShort(value);
+			return value == null ? 0 : Short.parseShort(value);
 		}
 		
 		public float valueAsFloat() {
-			return Float.parseFloat(value);
+			return value == null ? 0 : Float.parseFloat(value);
 		}
 		
 		public char valueAsChar() {
-			return value.charAt(0);
+			return value == null ? 0 : value.charAt(0);
 		}
 	}
 }

@@ -55,6 +55,7 @@ public class Config {
 		props.getInt("start-money", 10, "The amount of money new players are given when they join the server. Only used with built-in economy.");
 		props.getInt("start-money-faction", 0, "The amount of money new factions are given when they are first created.");
 		props.getBoolean("tags-in-chat", true, "Whether or not public chat shows faction tags.");
+		props.getInt("no-tp-enemy-dist", 32, "Enemies must be this distance away or more in order to teleport.");
 		
 		try {
 			props.save();
@@ -237,6 +238,15 @@ public class Config {
 	 */
 	public boolean tagsInChat() {
 		return props.getBoolean("tags-in-chat");
+	}
+	
+	/**
+	 * The distance enemies must be in order to teleport.
+	 * 
+	 * @return int
+	 */
+	public int getMinEnemyDist() {
+		return props.getInt("no-tp-enemy-dist");
 	}
 	
 	// start prices
