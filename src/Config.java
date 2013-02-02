@@ -1,7 +1,8 @@
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Map.Entry;
+//import java.util.HashMap;
+//import java.util.Map.Entry;
 
 /**
  * Manages the plugin's configuration.
@@ -11,39 +12,52 @@ import java.util.Map.Entry;
  */
 public class Config {
 	public static final String FOLDER = etc.getInstance().getConfigFolder() + "gFactions/";
-	private final PropertiesFile props = new PropertiesFile(FOLDER + "config.txt");
+	private final AdvancedPropertiesFile props = getProps(FOLDER + "config.txt");
+	
+	private enum DataSourceEnum {
+		OODB,
+		DB4O,
+		FILE,
+		FLAT_FILE,
+		SQL,
+		MYSQL;
+	}
+	
+	private enum EconomyEnum {
+		NONE,
+		INTEGRATED,
+		BUILT_IN,
+		DCONOMY,
+		EXTERNAL;
+	}
 	
 	public Config() {
 		new File(FOLDER).mkdirs();
 		
-		HashMap<String, Object> defaults = new HashMap<String, Object>();
+		if(props == null) {
+			return;
+		}
 		
-		defaults.put("data-source", "db4o"); // available options: oodb,db4o,file,flat-file,sql,mysql
-		defaults.put("start-power", new Integer(10));
-		defaults.put("faction-open-by-default", new Boolean(false));
-		defaults.put("default-faction-desc", "Default faction description :(");
-		defaults.put("save-interval", new Integer(60)); // seconds
-		defaults.put("power-regen-interval", new Integer(300)); // seconds
-		defaults.put("economy", "none"); // available options: none,integrated,built-in,dconomy,external
-		defaults.put("power-loss-on-death", new Integer(4));
-		defaults.put("power-loss-on-death-warzone", new Integer(0));
-		defaults.put("home-land-dmg-reduce", new Integer(30)); // percentage, 30 = 30% reduction
-		defaults.put("f-home-on-death", new Boolean(true));
+		if(props.getHeader() == null) {
+			props.setHeader("Main configuration file for gFactions.");
+		}
 		
-		for(Entry<String, Object> e : defaults.entrySet()) {
-			String key = e.getKey();
-			if(!props.containsKey(key)) {
-				Object val = e.getValue();
-				if(val instanceof Boolean) {
-					props.setBoolean(key, (Boolean) val);
-				} else if(val instanceof Integer) {
-					props.setInt(key, (Integer) val);
-				} else if(val instanceof String) {
-					props.setString(key, (String) val);
-				} else {
-					Utils.warning("Unknown data type found in defaults. PM gregthegeek, he's retarted.");
-				}
-			}
+		props.getEnum("data-source", DataSourceEnum.OODB, "Available options are OODB, DB4O, FILE, FLAT-FILE, SQL, and MYSQL.");
+		props.getInt("start-power", 10, "The power new players are given when they join the server.");
+		props.getBoolean("faction-open-by-default", false, "Whether or not new factions allow anyone to join them.");
+		props.getString("default-faction-desc", "Default faction description", "The description new factions are set to.");
+		props.getInt("save-interval", -1, "The seconds in between server saves. Values <0 will auto save whenever changes occur.");
+		props.getInt("power-regen-interval", 300, "The amount of seconds it takes for a player to regain one power.");
+		props.getEnum("economy", EconomyEnum.NONE, "Available options are NONE, INTEGRATED, BUILT_IN, DCONOMY, and EXTERNAL.");
+		props.getInt("power-loss-on-death", 4, "The amount of power lost by a player when he dies.");
+		props.getInt("power-loss-on-death-warzone", 0, "The amount of power lost by a player when he dies in a war zone.");
+		props.getInt("home-land-dmg-reduce", 30, "The percentage damage is reduced by when attacked by another player while in owned territory.");
+		props.getBoolean("f-home-on-death", true, "Whether or not players respawn at their factions' homes.");
+		
+		try {
+			props.save();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
 	}
 	
@@ -54,20 +68,23 @@ public class Config {
 	 * @throws DatasourceException
 	 */
 	public Datasource getDataSource() throws DatasourceException {
-		String data = props.getString("data-source").toLowerCase();
-		if(data.equals("db4o") || data.equals("oodb")) {
+		switch(props.getEnum("data-source", DataSourceEnum.class)) {
+		case OODB:
+		case DB4O:
 			try {
 				((MyClassLoader) Utils.plugin.getClass().getClassLoader()).addURL(new File("db4o.jar").toURI().toURL());
 				return new OODBSource();
 			} catch (MalformedURLException e) {
 				throw new DatasourceException(e);
 			}
-		} else if(data.equals("file") || data.equals("flat-file")) {
+		case FILE:
+		case FLAT_FILE:
 			return new FileSource();
-		} else if(data.equals("sql") || data.equals("mysql")) {
+		case SQL:
+		case MYSQL:
 			return new SQLSource();
-		} else {
-			throw new DatasourceException("%s is an invalid datasource!", data);
+		default:
+			throw new DatasourceException("Error retrieving datasource!");
 		}
 	}
 	
@@ -124,12 +141,14 @@ public class Config {
 	 * @return Economy
 	 */
 	public Economy getEconomy() {
-		String s = props.getString("economy").toLowerCase();
-		if(s.equals("integrated") || s.equals("built-in")) {
+		switch(props.getEnum("economy", EconomyEnum.class)) {
+		case INTEGRATED:
+		case BUILT_IN:
 			return new IntegratedEconomy();
-		} else if(s.equals("dconomy") || s.equals("external")) {
+		case DCONOMY:
+		case EXTERNAL:
 			return new ExternalEconomy();
-		} else {
+		default:
 			return new InactiveEconomy();
 		}
 	}
@@ -168,5 +187,13 @@ public class Config {
 	 */
 	public boolean factionHomeOnDeath() {
 		return props.getBoolean("f-home-on-death");
+	}
+	
+	private static AdvancedPropertiesFile getProps(String path) {
+		try {
+			return new AdvancedPropertiesFile(path);
+		} catch (IOException e) {
+			return null;
+		}
 	}
 }
