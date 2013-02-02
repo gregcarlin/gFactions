@@ -53,6 +53,8 @@ public class Config {
 		props.getInt("power-loss-on-death-warzone", 0, "The amount of power lost by a player when he dies in a war zone.");
 		props.getInt("home-land-dmg-reduce", 30, "The percentage damage is reduced by when attacked by another player while in owned territory.");
 		props.getBoolean("f-home-on-death", true, "Whether or not players respawn at their factions' homes.");
+		props.getInt("start-money", 10, "The amount of money new players are given when they join the server. Only used with built-in economy.");
+		props.getInt("start-money-faction", 0, "The amount of money new factions are given when they are first created.");
 		
 		try {
 			props.save();
@@ -183,10 +185,19 @@ public class Config {
 	/**
 	 * Returns whether or not players should respawn at their faction homes.
 	 * 
-	 * @return
+	 * @return boolean
 	 */
 	public boolean factionHomeOnDeath() {
 		return props.getBoolean("f-home-on-death");
+	}
+	
+	/**
+	 * Returns the money new players start with.
+	 * 
+	 * @return int
+	 */
+	public int getStartMoney() {
+		return props.getInt("start-money");
 	}
 	
 	private static AdvancedPropertiesFile getProps(String path) {

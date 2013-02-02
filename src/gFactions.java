@@ -100,7 +100,9 @@ public class gFactions extends Plugin {
     private class gFactionsListener extends PluginListener {
         @Override
         public void onLogin(Player player) {
-        	pManager.initPlayer(player.getName());
+        	String name = player.getName();
+        	pManager.initPlayer(name);
+        	economy.initPlayer(name);
         }
         
         @Override

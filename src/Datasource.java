@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 /**
  * Interface for data sources (eg. flatfile, mysql).
  * 
@@ -100,4 +102,34 @@ public interface Datasource {
 	 * @param r The relation to delete.
 	 */
 	public void delete(Relation r);
+	
+	/**
+	 * Gets the balance of a player.
+	 * 
+	 * @param player The player.
+	 * @return int The balance.
+	 */
+	public int getBalance(String player);
+	
+	/**
+	 * Gets the balance of a faction.
+	 * 
+	 * @param fID The faction id.
+	 * @return int The balance.
+	 */
+	public int getBalance(int fID);
+	
+	/**
+	 * Saves the players' balances to storage.
+	 * 
+	 * @param players The players to save.
+	 */
+	public void savePlayerBalances(HashMap<String, Integer> players);
+	
+	/**
+	 * Saves the factions' balances to storage.
+	 * 
+	 * @param factions The factions to save.
+	 */
+	public void saveFactionBalances(HashMap<Integer, Integer> factions);
 }

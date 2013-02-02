@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 /**
  * Manages the retrieval and storage of data in a MySQL database.
  * 
@@ -81,6 +83,30 @@ public class SQLSource implements Datasource {
 
 	@Override
 	public void delete(Relation r) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getBalance(String player) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getBalance(int fID) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void savePlayerBalances(HashMap<String, Integer> players) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void saveFactionBalances(HashMap<Integer, Integer> factions) {
 		// TODO Auto-generated method stub
 		
 	}

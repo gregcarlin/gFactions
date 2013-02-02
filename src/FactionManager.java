@@ -40,7 +40,6 @@ public class FactionManager {
 			} else {
 				rt[i + 1] = "No more.";
 			}
-			//rt[i + 1] = index < max && index >= 0 ? factions.get(index).getName() : "No more.";
 		}
 		rt[rt.length - 1] = String.format("%s--------------------------------------", Colors.Gold);
 		return rt;

@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
@@ -14,8 +16,15 @@ public class OODBSource implements Datasource {
 	private final ObjectContainer relationDB = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), Config.FOLDER + "relations.db");
 	private final ObjectContainer landDB = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), Config.FOLDER + "land.db");
 	
+	private final HashMap<String, Integer> pBalances;
+	private final HashMap<Integer, Integer> fBalances;
+	
 	public OODBSource() {
+		ObjectSet<HashMap<String, Integer>> rt = playerDB.queryByExample(new HashMap<String, Integer>());
+		pBalances = rt.size() <= 0 ? new HashMap<String, Integer>() : rt.get(0);
 		
+		ObjectSet<HashMap<Integer, Integer>> rt2 = factionDB.queryByExample(new HashMap<Integer, Integer>());
+		fBalances = rt2.size() <= 0 ? new HashMap<Integer, Integer>() : rt2.get(0);
 	}
 
 	@Override
@@ -100,5 +109,25 @@ public class OODBSource implements Datasource {
 	@Override
 	public void delete(Relation r) {
 		relationDB.delete(r);
+	}
+
+	@Override
+	public int getBalance(String player) {
+		return pBalances.containsKey(player) ? pBalances.get(player) : Utils.plugin.getConfig().getStartMoney();
+	}
+
+	@Override
+	public int getBalance(int fID) {
+		return fBalances.containsKey(fID) ? fBalances.get(fID) : Utils.plugin.getConfig().getStartMoney();
+	}
+
+	@Override
+	public void savePlayerBalances(HashMap<String, Integer> players) {
+		playerDB.store(players);
+	}
+
+	@Override
+	public void saveFactionBalances(HashMap<Integer, Integer> factions) {
+		factionDB.store(factions);
 	}
 }
