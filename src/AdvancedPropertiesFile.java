@@ -72,14 +72,12 @@ public class AdvancedPropertiesFile {
 	 * @throws IOException
 	 */
 	public void save() throws IOException {
-		//System.out.printf("writing to %s%n", filePath);
 		File base = new File(filePath);
 		BufferedWriter writer = new BufferedWriter(new FileWriter(base));
 		if(header != null) {
 			writer.append(String.format("##%s\n", header));
 		}
 		for(Entry<String, Property> e : map.entrySet()) {
-			//System.out.println("prop iter");
 			Property p = e.getValue();
 			String comment = p.getComment();
 			if(comment != null) {
@@ -305,7 +303,7 @@ public class AdvancedPropertiesFile {
 	 * @param key The key of the property.
 	 * @return Integer
 	 */
-	public Integer getInt(String key) {
+	public int getInt(String key) {
 		return getProperty(key).valueAsInt();
 	}
 	
@@ -316,7 +314,7 @@ public class AdvancedPropertiesFile {
 	 * @param defaultVal The default value of the property.
 	 * @return Integer
 	 */
-	public Integer getInt(String key, Integer defaultVal) {
+	public int getInt(String key, Integer defaultVal) {
 		return getProperty(key, defaultVal.toString()).valueAsInt();
 	}
 	
@@ -328,7 +326,7 @@ public class AdvancedPropertiesFile {
 	 * @param defaultComment The default comment of the property.
 	 * @return Integer
 	 */
-	public Integer getInt(String key, Integer defaultVal, String defaultComment) {
+	public int getInt(String key, Integer defaultVal, String defaultComment) {
 		return getProperty(key, defaultVal.toString(), defaultComment).valueAsInt();
 	}
 	
@@ -359,7 +357,7 @@ public class AdvancedPropertiesFile {
 	 * @param key The key of the property to get.
 	 * @return Double
 	 */
-	public Double getDouble(String key) {
+	public double getDouble(String key) {
 		return getProperty(key).valueAsDouble();
 	}
 	
@@ -370,7 +368,7 @@ public class AdvancedPropertiesFile {
 	 * @param defaultVal The default value of the property to get.
 	 * @return Double
 	 */
-	public Double getDouble(String key, Double defaultVal) {
+	public double getDouble(String key, Double defaultVal) {
 		return getProperty(key, defaultVal.toString()).valueAsDouble();
 	}
 	
@@ -382,7 +380,7 @@ public class AdvancedPropertiesFile {
 	 * @param defaultComment The default comment of the property.
 	 * @return Double
 	 */
-	public Double getDouble(String key, Double defaultVal, String defaultComment) {
+	public double getDouble(String key, Double defaultVal, String defaultComment) {
 		return getProperty(key, defaultVal.toString(), defaultComment).valueAsDouble();
 	}
 	
@@ -413,7 +411,7 @@ public class AdvancedPropertiesFile {
 	 * @param key The key of the property to get.
 	 * @return Long
 	 */
-	public Long getLong(String key) {
+	public long getLong(String key) {
 		return getProperty(key).valueAsLong();
 	}
 	
@@ -424,7 +422,7 @@ public class AdvancedPropertiesFile {
 	 * @param defaultVal The default value of the property to get.
 	 * @return Long
 	 */
-	public Long getLong(String key, Long defaultVal) {
+	public long getLong(String key, Long defaultVal) {
 		return getProperty(key, defaultVal.toString()).valueAsLong();
 	}
 	
@@ -436,7 +434,7 @@ public class AdvancedPropertiesFile {
 	 * @param defaultComment The default comment of the property.
 	 * @return Long
 	 */
-	public Long getLong(String key, Long defaultVal, String defaultComment) {
+	public long getLong(String key, Long defaultVal, String defaultComment) {
 		return getProperty(key, defaultVal.toString(), defaultComment).valueAsLong();
 	}
 	
@@ -467,7 +465,7 @@ public class AdvancedPropertiesFile {
 	 * @param key The key of the property to get.
 	 * @return Boolean
 	 */
-	public Boolean getBoolean(String key) {
+	public boolean getBoolean(String key) {
 		return getProperty(key).valueAsBool();
 	}
 	
@@ -478,7 +476,7 @@ public class AdvancedPropertiesFile {
 	 * @param defaultVal The default value of the property to get.
 	 * @return Boolean
 	 */
-	public Boolean getBoolean(String key, Boolean defaultVal) {
+	public boolean getBoolean(String key, Boolean defaultVal) {
 		return getProperty(key, defaultVal.toString()).valueAsBool();
 	}
 	
@@ -490,7 +488,7 @@ public class AdvancedPropertiesFile {
 	 * @param comment The default comment of the property.
 	 * @return Boolean
 	 */
-	public Boolean getBoolean(String key, Boolean defaultVal, String comment) {
+	public boolean getBoolean(String key, Boolean defaultVal, String comment) {
 		return getProperty(key, defaultVal.toString(), comment).valueAsBool();
 	}
 	
@@ -585,13 +583,6 @@ public class AdvancedPropertiesFile {
 	 * @return Enum
 	 */
 	public <T extends Enum<T>> T getEnum(String key, Class<T> enumClass) {
-		/*try {
-			Object[] vals = (Object[]) source.getClass().getDeclaredMethod("values").invoke(null);
-			return (Enum<?>) vals[getProperty(key).valueAsInt()];
-		} catch (Exception e) {
-			return null;
-		}*/
-		//return Enum.valueOf(enumClass, getProperty(key).valueAsString());
 		return getProperty(key).valueAsEnum(enumClass);
 	}
 	
@@ -603,7 +594,6 @@ public class AdvancedPropertiesFile {
 	 * @return Enum
 	 */
 	public <T extends Enum<T>> T getEnum(String key, T defaultVal) {
-		//return Enum.valueOf(defaultVal.getDeclaringClass(), getProperty(key, defaultVal.toString()).valueAsString());
 		return getProperty(key, defaultVal.toString()).valueAsEnum(defaultVal.getDeclaringClass());
 	}
 	
@@ -619,8 +609,224 @@ public class AdvancedPropertiesFile {
 		return getProperty(key, defaultVal.toString(), defaultComment).valueAsEnum(defaultVal.getDeclaringClass());
 	}
 	
+	/**
+	 * Sets a byte property.
+	 * 
+	 * @param key The key of the property.
+	 * @param value The value of the property.
+	 */
+	public void setByte(String key, Byte value) {
+		setNumber(key, value);
+	}
+	
+	/**
+	 * Sets a byte property.
+	 * 
+	 * @param key The key of the property.
+	 * @param value The value of the property.
+	 * @param comment The comment of the property.
+	 */
+	public void setByte(String key, Byte value, String comment) {
+		setNumber(key, value, comment);
+	}
+	
+	/**
+	 * Gets a byte property.
+	 * 
+	 * @param key The key of the property.
+	 * @return byte
+	 */
+	public byte getByte(String key) {
+		return getProperty(key).valueAsByte();
+	}
+	
+	/**
+	 * Gets a byte property.
+	 * 
+	 * @param key The key of the property.
+	 * @param defaultVal The default value of the property.
+	 * @return byte
+	 */
+	public byte getByte(String key, Byte defaultVal) {
+		return getProperty(key, defaultVal.toString()).valueAsByte();
+	}
+	
+	/**
+	 * Gets a byte property.
+	 * 
+	 * @param key The key of the property.
+	 * @param defaultVal The default value of the property.
+	 * @param defaultComment The default comment of the property.
+	 * @return byte
+	 */
+	public byte getByte(String key, Byte defaultVal, String defaultComment) {
+		return getProperty(key, defaultVal.toString(), defaultComment).valueAsByte();
+	}
+	
+	/**
+	 * Sets a short property.
+	 * 
+	 * @param key The key of the property.
+	 * @param value The value of the property.
+	 */
+	public void setShort(String key, Short value) {
+		setNumber(key, value);
+	}
+	
+	/**
+	 * Sets a short property.
+	 * 
+	 * @param key The key of the property.
+	 * @param value The value of the property.
+	 * @param comment The comment of the property.
+	 */
+	public void setShort(String key, Short value, String comment) {
+		setNumber(key, value, comment);
+	}
+	
+	/**
+	 * Gets a short property.
+	 * 
+	 * @param key The key of the property.
+	 * @return short
+	 */
+	public short getShort(String key) {
+		return getProperty(key).valueAsShort();
+	}
+	
+	/**
+	 * Gets a short property.
+	 * 
+	 * @param key The key of the property.
+	 * @param defaultVal The default value of the property.
+	 * @return short
+	 */
+	public short getShort(String key, Short defaultVal) {
+		return getProperty(key, defaultVal.toString()).valueAsShort();
+	}
+	
+	/**
+	 * Gets a short property.
+	 * 
+	 * @param key The key of the property.
+	 * @param defaultVal The default value of the property.
+	 * @param defaultComment The default comment of the property.
+	 * @return short
+	 */
+	public short getShort(String key, Short defaultVal, String defaultComment) {
+		return getProperty(key, defaultVal.toString(), defaultComment).valueAsShort();
+	}
+	
+	/**
+	 * Sets a float property.
+	 * 
+	 * @param key The key of the property.
+	 * @param value The value of the property.
+	 */
+	public void setFloat(String key, Float value) {
+		setNumber(key, value);
+	}
+	
+	/**
+	 * Sets a float property.
+	 * 
+	 * @param key The key of the property.
+	 * @param value The value of the property.
+	 * @param comment The comment of the property.
+	 */
+	public void setFloat(String key, Float value, String comment) {
+		setNumber(key, value, comment);
+	}
+	
+	/**
+	 * Gets a float property.
+	 * 
+	 * @param key The key of the property.
+	 * @return float
+	 */
+	public float getFloat(String key) {
+		return getProperty(key).valueAsFloat();
+	}
+	
+	/**
+	 * Gets a float property.
+	 * 
+	 * @param key The key of the property.
+	 * @param defaultVal The default value of the property.
+	 * @return float
+	 */
+	public float getFloat(String key, Float defaultVal) {
+		return getProperty(key, defaultVal.toString()).valueAsFloat();
+	}
+	
+	/**
+	 * Gets a float property.
+	 * 
+	 * @param key The key of the property.
+	 * @param defaultVal The default value of the property.
+	 * @param defaultComment The default comment of the property.
+	 * @return
+	 */
+	public float getFloat(String key, Float defaultVal, String defaultComment) {
+		return getProperty(key, defaultVal.toString(), defaultComment).valueAsFloat();
+	}
+	
+	/**
+	 * Sets a character property.
+	 * 
+	 * @param key The key of the property.
+	 * @param value The value of the property.
+	 */
+	public void setCharacter(String key, Character value) {
+		setProperty(key, value.toString());
+	}
+	
+	/**
+	 * Sets a character property.
+	 * 
+	 * @param key The key of the property.
+	 * @param value The value of the property.
+	 * @param comment The comment of the property.
+	 */
+	public void setCharacter(String key, Character value, String comment) {
+		setProperty(key, value.toString(), comment);
+	}
+	
+	/**
+	 * Gets a character property.
+	 * 
+	 * @param key The key of the property.
+	 * @return char
+	 */
+	public char getCharacter(String key) {
+		return getProperty(key).valueAsChar();
+	}
+	
+	/**
+	 * Gets a character property.
+	 * 
+	 * @param key The key of the property.
+	 * @param defaultVal The default value of the property.
+	 * @return char
+	 */
+	public char getCharacter(String key, Character defaultVal) {
+		return getProperty(key, defaultVal.toString()).valueAsChar();
+	}
+	
+	/**
+	 * Gets a character property.
+	 * 
+	 * @param key The key of the property.
+	 * @param defaultVal The default value of the property.
+	 * @param comment The default comment of the property.
+	 * @return char
+	 */
+	public char getCharacter(String key, Character defaultVal, String comment) {
+		return getProperty(key, defaultVal.toString(), comment).valueAsChar();
+	}
+	
 	@Override
-	protected void finalize() { // does this actually work?
+	protected void finalize() { // not always called
 		try {
 			save();
 		} catch (IOException e) {
@@ -644,6 +850,19 @@ public class AdvancedPropertiesFile {
 	 */
 	public void setHeader(String header) {
 		this.header = header;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("AdvancedPropertiesFile[path=%s]", filePath);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof AdvancedPropertiesFile) {
+			return filePath.equalsIgnoreCase(((AdvancedPropertiesFile) obj).filePath);
+		}
+		return false;
 	}
 	
 	class Property {
@@ -671,19 +890,19 @@ public class AdvancedPropertiesFile {
 			return value;
 		}
 		
-		public Integer valueAsInt() {
+		public int valueAsInt() {
 			return Integer.parseInt(value);
 		}
 		
-		public Double valueAsDouble() {
+		public double valueAsDouble() {
 			return Double.parseDouble(value);
 		}
 		
-		public Long valueAsLong() {
+		public long valueAsLong() {
 			return Long.parseLong(value);
 		}
 		
-		public Boolean valueAsBool() {
+		public boolean valueAsBool() {
 			return Boolean.parseBoolean(value);
 		}
 		
@@ -693,6 +912,22 @@ public class AdvancedPropertiesFile {
 		
 		public <T extends Enum<T>> T valueAsEnum(Class<T> enumClass) {
 			return Enum.valueOf(enumClass, value);
+		}
+		
+		public byte valueAsByte() {
+			return Byte.parseByte(value);
+		}
+		
+		public short valueAsShort() {
+			return Short.parseShort(value);
+		}
+		
+		public float valueAsFloat() {
+			return Float.parseFloat(value);
+		}
+		
+		public char valueAsChar() {
+			return value.charAt(0);
 		}
 	}
 }

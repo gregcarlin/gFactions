@@ -132,10 +132,14 @@ public class gFactions extends Plugin {
         			}
         		}
         		
-        		hookParams.setPrefix(new StringBuilder(cc.getColor()).append(gp.getFormattedName()).append(Colors.White));
+        		hookParams.setPrefix(new StringBuilder(cc.getColor()).append(gp.getFormattedName()).append(Colors.White)); // title name
         		hookParams.setReceivers(receivers);
         		return hookParams;
         	default:
+        		// public chat
+        		if(f != null && !(f instanceof SpecialFaction)) {
+        			hookParams.setPrefix(new StringBuilder("[").append(f.getName()).append("] ").append(gp.getName())); // [faction] name
+        		}
         		return hookParams;
         	}
         }

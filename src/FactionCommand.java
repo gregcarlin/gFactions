@@ -185,6 +185,9 @@ public class FactionCommand extends BaseCommand {
 					if(nFac == null) {
 						return new String[] {Utils.rose("Faction %s%s %snot found.", Colors.Red, args[0], Colors.Rose)};
 					} else if(nFac.isOpen() || nFac.isInvited(pName) || Utils.plugin.getPlayerManager().getPlayer(pName).adminBypass) {
+						if(!Utils.plugin.getEconomy().modifyBalance(pName, Utils.plugin.getConfig().getJoinCost())) {
+							return new String[] {Utils.rose("You cannot afford to join a faction.")};
+						}
 						nFac.add(pName);
 						return new String[] {String.format("%1$sYou are now a member of %2$s%3$s %1$s.", Colors.Yellow, Colors.Green, nFac.getName())};
 					} else {
@@ -210,6 +213,9 @@ public class FactionCommand extends BaseCommand {
 					if(f != null) {
 						return new String[] {Utils.rose("A faction with the name %s already exists.", args[0])};
 					}
+					if(!Utils.plugin.getEconomy().modifyBalance(pName, Utils.plugin.getConfig().getFactionCreateCost())) {
+						return new String[] {Utils.rose("You cannot afford to create a faction.")};
+					}
 					Utils.plugin.getFactionManager().createFaction(pName, args[0]);
 					return new String[] {String.format("%1$sFaction %2$s%3$s %1$screated.", Colors.Yellow, Colors.Gold, args[0])};
 				} catch (ArrayIndexOutOfBoundsException e) {
@@ -227,6 +233,9 @@ public class FactionCommand extends BaseCommand {
 				String pName = ((Player) caller).getName();
 				Faction f = Utils.plugin.getFactionManager().getFaction(pName);
 				assert f != null && !(f instanceof SpecialFaction);
+				if(!Utils.plugin.getEconomy().modifyBalance(pName, Utils.plugin.getConfig().getLeaveCost())) {
+					return new String[] {Utils.rose("You cannot afford to leave this faction.")};
+				}
 				f.remove(pName);
 				return new String[] {String.format("%sYou are no longer in any faction.", Colors.Yellow)};
 			}
@@ -390,6 +399,9 @@ public class FactionCommand extends BaseCommand {
 				String pName = p.getName();
 				Faction f = Utils.plugin.getFactionManager().getFaction(pName);
 				assert f != null && !(f instanceof SpecialFaction);
+				if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getSetHomeCost())) {
+					return new String[] {Utils.rose("Your faction cannot afford to set its home.")};
+				}
 				f.setHome(p.getLocation());
 				f.sendToMembers(String.format("%s%s %sjust set the faction home.", Colors.LightGreen, pName, Colors.Yellow));
 				return null;
@@ -437,6 +449,7 @@ public class FactionCommand extends BaseCommand {
 				assert f != null && !(f instanceof SpecialFaction);
 				Land l = Utils.plugin.getLandManager().getLandAt(p.getLocation());
 				if(f.getId() == l.getClaimerId()) {
+					Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getLandRefund());
 					l.claim(null);
 					f.sendToMembers(String.format("%s%s %sunclaimed land owned by your faction.", Colors.LightGreen, pName, Colors.Yellow));
 					return null;
@@ -492,6 +505,9 @@ public class FactionCommand extends BaseCommand {
 					return new String[] {rt};
 				}
 				Faction f = Utils.plugin.getFactionManager().getFaction(args[0]);
+				if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getKickCost())) {
+					return new String[] {Utils.rose("Your faction cannot afford to kick a player.")};
+				}
 				f.deinvite(args[0]);
 				f.remove(args[0]);
 				f.sendToMembers(String.format("%s%s %swas kicked from the faction.", Colors.Gray, args[0], Colors.Yellow));
@@ -755,8 +771,12 @@ public class FactionCommand extends BaseCommand {
 		} else if(f.getLand().length >= f.getPower()) {
 			return Utils.rose("You do not have enough power to claim any more land.");
 		} else if(other == null || other.getLand().length > other.getPower()) {
+			boolean wasWild = other == null || other instanceof Wilderness;
+			if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getClaimCost(wasWild, f.getLand().length))) {
+				return Utils.rose("Your faction cannot afford to claim this land.");
+			}
 			l.claim(f);
-			if(other != null) {
+			if(!wasWild) {
 				other.sendToMembers(String.format("%s %sclaimed your land.", f.getNameRelative(other), Colors.Yellow));
 			}
 			f.sendToMembers(String.format("%s%s %sclaimed land for your faction from %s", Colors.LightGreen, pName, Colors.Yellow, other.getNameRelative(f)));

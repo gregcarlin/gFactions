@@ -41,7 +41,7 @@ public interface Economy {
 	 * 
 	 * @param fac The faction being charged/payed.
 	 * @param amount The amount of money being charged (negative value) or payed (positive value).
-	 * @return boolean Whether or not the player could afford the transaction.
+	 * @return boolean Whether or not the faction could afford the transaction.
 	 */
 	public boolean modifyBalance(Faction fac, int amount);
 	
