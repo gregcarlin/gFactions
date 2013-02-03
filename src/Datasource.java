@@ -30,11 +30,19 @@ public interface Datasource {
 	public Land[] getAllLand();
 	
 	/**
-	 * Reads information for all the relations in the server.
+	 * Reads information about a given relation.
 	 * 
+	 * @return Relation
+	 */
+	public Relation getRelation(Faction one, Faction two);
+	
+	/**
+	 * Reads information involving all relations that involve a given faction.
+	 * 
+	 * @param f The faction involved.
 	 * @return Relation[]
 	 */
-	public Relation[] getAllRelations();
+	public Relation[] getRelationsWith(Faction f);
 	
 	/**
 	 * Scans the saved data for errors and reverts them to their default values.

@@ -151,7 +151,7 @@ public abstract class Utils {
 		}
 		String pName = player.getName();
 		Faction faction = plugin.getFactionManager().getFaction(pName);
-		if(faction == null) {
+		if(faction == null || faction instanceof SpecialFaction) {
 			return FactionCommand.CommandUsageRank.NO_FACTION;
 		}
 		return faction.getRank(pName).getCommandRank();

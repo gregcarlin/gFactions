@@ -30,13 +30,13 @@ public class Relation {
 	}
 	
 	public Type type;
-	private final Faction one;
-	private final Faction two;
+	private final int one;
+	private final int two;
 	
 	public Relation(Type type, Faction one, Faction two) {
 		this.type = type;
-		this.one = one;
-		this.two = two;
+		this.one = one.getId();
+		this.two = two.getId();
 	}
 	
 	/**
@@ -45,7 +45,7 @@ public class Relation {
 	 * @return Faction
 	 */
 	public Faction getOne() {
-		return one;
+		return Utils.plugin.getFactionManager().getFaction(one);
 	}
 	
 	/**
@@ -54,7 +54,7 @@ public class Relation {
 	 * @return Faction
 	 */
 	public Faction getTwo() {
-		return two;
+		return Utils.plugin.getFactionManager().getFaction(two);
 	}
 	
 	/**
@@ -64,7 +64,8 @@ public class Relation {
 	 * @return boolean
 	 */
 	public boolean isInvolved(Faction f) {
-		return one.equals(f) || two.equals(f);
+		int id = f.getId();
+		return one == id || two == id;
 	}
 	
 	/**
@@ -75,12 +76,18 @@ public class Relation {
 	 * @return Faction the other faction.
 	 */
 	public Faction getOther(Faction f) {
-		if(one.equals(f)) {
-			return two;
-		} else if(two.equals(f)) {
-			return one;
+		int id = f.getId();
+		if(one == id) {
+			return getTwo();
+		} else if(two == id) {
+			return getOne();
 		} else {
 			return null;
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("Relation[type=%s, one=%d, two=%d]", type, one, two);
 	}
 }

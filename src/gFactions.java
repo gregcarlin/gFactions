@@ -110,6 +110,9 @@ public class gFactions extends Plugin {
         	String player = hookParams.getPlayer().getName();
         	ArrayList<Player> receivers = new ArrayList<Player>();
         	Faction f = Utils.plugin.getFactionManager().getFaction(player);
+        	if(f == null || f instanceof SpecialFaction) {
+        		return hookParams;
+        	}
         	gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(player);
         	gPlayer.ChatChannel cc = gp.getChatChannel();
         	switch(cc) {
@@ -146,8 +149,8 @@ public class gFactions extends Plugin {
         
         @Override
         public void onDeath(LivingEntity entity) { // decreases players' power on death
-        	if(entity instanceof Player) {
-        		Player p = (Player) entity;
+        	if(entity.isPlayer()) {
+        		Player p = entity.getPlayer();
         		gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(p.getName());
         		gp.decreasePower(Utils.plugin.getLandManager().getLandAt(p.getLocation()).claimedBy() instanceof WarZone);
         		p.sendMessage(String.format("%sYour power is now %s%s", Colors.Yellow, Colors.White, gp.getPower()));
@@ -193,13 +196,15 @@ public class gFactions extends Plugin {
         		return false;
         	}
         	if(lm.getLandAt(attacker.getLocation()).claimedBy() instanceof SafeZone) { // attacker is in safe zone
-        		((Player) attacker).sendMessage(String.format("%sYou cannot hurt someone while you are in a safe zone.", Colors.Yellow));
+        		attacker.getPlayer().sendMessage(String.format("%sYou cannot hurt someone while you are in a safe zone.", Colors.Yellow));
         		return true;
         	}
         	// we now know: attacker nor defender is not in safe zone, attacker and defender are both players
-        	Faction defense = Utils.plugin.getFactionManager().getFaction(((Player) defender).getName());
-        	if(defense.has(((Player) attacker).getName())) { // attacker and defender are in the same faction
-        		((Player) attacker).sendMessage(String.format("%sYou cannot hurt members of your own faction.", Colors.Yellow));
+        	Player pDefend = defender.getPlayer();
+        	Faction defense = Utils.plugin.getFactionManager().getFaction(pDefend.getName());
+        	Player pAttack = attacker.getPlayer();
+        	if(defense.has(pAttack.getName())) { // attacker and defender are in the same faction
+        		pAttack.sendMessage(String.format("%sYou cannot hurt members of your own faction.", Colors.Yellow));
         		return true;
         	}
         	if(defense != null && !(defense instanceof SpecialFaction) && defense.equals(owner)) { // defender belongs to a faction and is in his own faction territory
@@ -207,8 +212,12 @@ public class gFactions extends Plugin {
         		if(reduction <= 0) {
         			return false;
         		}
-        		((Player) defender).applyDamage(type, (int) (amount * reduction));
-        		((Player) defender).sendMessage(String.format("%sDamage reduced by %d%%.", Colors.Yellow, reduction * 100));
+        		pDefend.applyDamage(type, (int) (amount * reduction));
+        		OPacket38EntityStatus pkt = new OPacket38EntityStatus(pDefend.getId(), (byte) 0x02);
+				for(Player p : etc.getServer().getPlayerList()) {
+					p.getUser().a.b(pkt);
+				}
+        		pDefend.sendMessage(String.format("%sDamage reduced by %d%%.", Colors.Yellow, (int) (reduction * 100)));
         		return true;
         	}
         	return false;

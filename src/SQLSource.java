@@ -70,7 +70,7 @@ public class SQLSource implements Datasource {
 	}
 
 	@Override
-	public Relation[] getAllRelations() {
+	public Relation getRelation(Faction one, Faction two) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -109,5 +109,11 @@ public class SQLSource implements Datasource {
 	public void saveFactionBalances(HashMap<Integer, Integer> factions) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public Relation[] getRelationsWith(Faction f) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

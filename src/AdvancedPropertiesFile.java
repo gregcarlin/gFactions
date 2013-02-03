@@ -40,7 +40,7 @@ public class AdvancedPropertiesFile {
 			for(int i=0; i<size; i++) {
 				String l = lines.get(i);
 				if(i == 0 && l.startsWith("##")) { // allows a header at the top of the file
-					header = l.substring(1);
+					header = l.substring(2);
 					continue;
 				} else if(l.startsWith("#")) { // ignore comments at first
 					justComment = true;
@@ -137,7 +137,7 @@ public class AdvancedPropertiesFile {
 	 */
 	public Property getProperty(String key, Property defaultVal) {
 		Property val = getProperty(key);
-		if(val != null) {
+		if(val.hasValue()) {
 			return val;
 		}
 		
@@ -936,6 +936,15 @@ public class AdvancedPropertiesFile {
 		
 		public char valueAsChar() {
 			return value == null ? 0 : value.charAt(0);
+		}
+		
+		public boolean hasValue() {
+			return value != null;
+		}
+		
+		@Override
+		public String toString() {
+			return String.format("Property[value=%s, comment=%s]", value, comment);
 		}
 	}
 }

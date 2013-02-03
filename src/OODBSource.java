@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.db4o.Db4oEmbedded;
@@ -46,10 +47,13 @@ public class OODBSource implements Datasource {
 
 	@Override
 	public gPlayer getPlayer(String name) {
-		gPlayer gp = new gPlayer(name, 0);
-		gp.setTitle(null);
-		ObjectSet<gPlayer> result = playerDB.queryByExample(gp);
-		return result.size() > 0 ? result.get(0) : null;
+		ObjectSet<gPlayer> result = playerDB.query(gPlayer.class);
+		for(gPlayer gp : result) {
+			if(gp.getName().equals(name)) {
+				return gp;
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -96,9 +100,9 @@ public class OODBSource implements Datasource {
 	}
 
 	@Override
-	public Relation[] getAllRelations() {
-		ObjectSet<Relation> result = relationDB.queryByExample(new Relation(null, null, null));
-		return result.toArray(new Relation[0]);
+	public Relation getRelation(Faction one, Faction two) {
+		ObjectSet<Relation> result = relationDB.queryByExample(new Relation(null, one, two));
+		return result.size() > 0 ? result.get(0) : null;
 	}
 
 	@Override
@@ -129,5 +133,17 @@ public class OODBSource implements Datasource {
 	@Override
 	public void saveFactionBalances(HashMap<Integer, Integer> factions) {
 		factionDB.store(factions);
+	}
+
+	@Override
+	public Relation[] getRelationsWith(Faction f) {
+		ObjectSet<Relation> result = relationDB.query(Relation.class);
+		ArrayList<Relation> rt = new ArrayList<Relation>();
+		for(Relation r : result) {
+			if(r.isInvolved(f)) {
+				rt.add(r);
+			}
+		}
+		return rt.toArray(new Relation[0]);
 	}
 }

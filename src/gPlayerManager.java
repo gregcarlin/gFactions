@@ -9,6 +9,10 @@ import java.util.ArrayList;
 public class gPlayerManager {
 	private ArrayList<gPlayer> players = new ArrayList<gPlayer>();
 	
+	public gPlayerManager() {
+		
+	}
+	
 	/**
 	 * Returns the gPlayer for a player.
 	 * 
@@ -16,12 +20,47 @@ public class gPlayerManager {
 	 * @return gPlayer
 	 */
 	public gPlayer getPlayer(String name) {
+		if(name == null) {
+			return null;
+		}
+		
 		for(gPlayer p : players) {
 			if(p.getName().equalsIgnoreCase(name)) {
 				return p;
 			}
 		}
-		return null;
+		
+		gPlayer gp = Utils.plugin.getDataSource().getPlayer(name);
+		if(gp == null) {
+			return null;
+		}
+		players.add(gp);
+		if(gp.getPower() < gp.maxPower) {
+			etc.getServer().addToServerQueue(new PowerAdder(gp), Utils.plugin.getConfig().getPowerRegenInterval());
+		}
+		
+		return gp;
+	}
+	
+	/**
+	 * Should be called when a player logs in.
+	 * 
+	 * @param name
+	 */
+	public void initPlayer(String name) {
+		if(getPlayer(name) == null) {
+			Config config = Utils.plugin.getConfig();
+			gPlayer gp = new gPlayer(name, config.getStartPower());
+			players.add(gp);
+			
+			if(config.getSaveInterval() < 0) {
+				Utils.plugin.getDataSource().save(new gPlayer[] {gp});
+			}
+			
+			if(gp.getPower() < gp.maxPower) {
+				etc.getServer().addToServerQueue(new PowerAdder(gp), config.getPowerRegenInterval());
+			}
+		}
 	}
 	
 	/**
@@ -34,31 +73,6 @@ public class gPlayerManager {
 			n[i] = (gPlayer) or[i];
 		}
 		Utils.plugin.getDataSource().save(n);
-	}
-	
-	/**
-	 * Should be called when a player logs in.
-	 * 
-	 * @param name The name of the player.
-	 */
-	public void initPlayer(String name) {
-		if(getPlayer(name) == null) {
-			Datasource ds = Utils.plugin.getDataSource();
-			gPlayer rt = ds.getPlayer(name);
-			Config config = Utils.plugin.getConfig();
-			if(rt == null) {
-				rt = new gPlayer(name, config.getStartPower());
-			}
-			players.add(rt);
-			
-			if(config.getSaveInterval() < 0) {
-				ds.save(new gPlayer[] {rt});
-			}
-			
-			if(rt.getPower() < rt.maxPower) {
-				etc.getServer().addToServerQueue(new PowerAdder(rt), config.getPowerRegenInterval());
-			}
-		}
 	}
 	
 	/**

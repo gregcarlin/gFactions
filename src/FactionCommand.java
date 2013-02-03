@@ -305,6 +305,9 @@ public class FactionCommand extends BaseCommand {
 		subCommands[11] = new FactionSubCommand(new String[] {"money"}, "View commands related to faction banking.", "", CommandUsageRank.FACTION_MEMBER) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
+				if(Utils.plugin.getEconomy() instanceof InactiveEconomy) {
+					return new String[] {Utils.rose("Economy is disabled.")};
+				}
 				if(args.length > 0) {
 					if(args[0].equalsIgnoreCase("?") || args[0].equalsIgnoreCase("h") || args[0].equalsIgnoreCase("help")) {
 						String[] rt = new String[5];

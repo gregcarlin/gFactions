@@ -118,8 +118,9 @@ public class gPlayer {
 			if(power > maxPower) { // don't think I need this, but better safe than sorry
 				power = maxPower;
 			}
-			return power == maxPower;
 		}
+		save();
+		return power == maxPower;
 	}
 	
 	/**
@@ -139,6 +140,7 @@ public class gPlayer {
 				power = 0;
 			}
 		}
+		save();
 		return power == 0;
 	}
 	
@@ -197,5 +199,17 @@ public class gPlayer {
 	 */
 	public void setTitle(String title) {
 		this.title = title;
+		save();
+	}
+	
+	private void save() {
+		if(Utils.plugin.getConfig().getSaveInterval() < 0) {
+			Utils.plugin.getDataSource().save(new gPlayer[] {this});
+		}
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("gPlayer[name=%s, power=%d, title=%s]", name, power, title);
 	}
 }

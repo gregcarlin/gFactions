@@ -28,6 +28,19 @@ public class RelationManager {
 				return r.type;
 			}
 		}
+		
+		Relation r = Utils.plugin.getDataSource().getRelation(one, two);
+		if(r != null) {
+			relations.add(r);
+			return r.type;
+		} else {
+			r = Utils.plugin.getDataSource().getRelation(two, one);
+			if(r != null) {
+				relations.add(r);
+				return r.type;
+			}
+		}
+		
 		return Relation.Type.NEUTRAL;
 	}
 	
@@ -46,7 +59,12 @@ public class RelationManager {
 	public void setRelation(Faction one, Faction two, Relation.Type type) {
 		int index = locateRelation(one, two);
 		if(index < 0) {
-			relations.add(new Relation(type, one, two));
+			Relation r = new Relation(type, one, two);
+			relations.add(r);
+			if(Utils.plugin.getConfig().getSaveInterval() < 0) {
+				Utils.warning("saving relation %s", r);
+				Utils.plugin.getDataSource().save(new Relation[] {r});
+			}
 		} else {
 			relations.get(index).type = type; 
 		}

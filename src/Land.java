@@ -65,6 +65,7 @@ public class Land {
 			Utils.plugin.getDataSource().delete(this);
 		} else {
 			this.faction = faction.getId();
+			save();
 		}
 	}
 	
@@ -105,10 +106,18 @@ public class Land {
 		player = player.toLowerCase();
 		if(owners.contains(player)) {
 			owners.remove(player);
+			save();
 			return false;
 		} else {
 			owners.add(player);
+			save();
 			return true;
+		}
+	}
+	
+	private void save() {
+		if(Utils.plugin.getConfig().getSaveInterval() < 0) {
+			Utils.plugin.getDataSource().save(this);
 		}
 	}
 }

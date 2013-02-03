@@ -37,6 +37,7 @@ public class CachedFaction extends Faction {
 		for(String s : list) {
 			mods.add(s);
 		}
+		save();
 	}
 	
 	/**
@@ -49,6 +50,7 @@ public class CachedFaction extends Faction {
 		for(String s : list) {
 			members.add(s);
 		}
+		save();
 	}
 	
 	@Override
@@ -90,7 +92,7 @@ public class CachedFaction extends Faction {
 	public String[] getWho(Faction relativeTo) {
 		String[] rt = new String[6];
 		String relationColor = Utils.plugin.getRelationManager().getRelation(this, relativeTo).getColor();
-		rt[0] = String.format("%1$s------------ %2$s%3$s %1$s------------", Colors.Gold, relationColor, relativeTo.getName());
+		rt[0] = String.format("%1$s------------ %2$s%3$s %1$s------------", Colors.Gold, relationColor, getName());
 		rt[1] = String.format("%s%s", relationColor, getDescription());
 		rt[2] = String.format("%1$sOpen: %2$s    %1$sPeaceful: %3$s", Colors.Yellow, Utils.readBool(isOpen(), "Yes", "No"), Utils.readBool(isPeaceful(), "Yes", "No"));
 		rt[3] = String.format("%sLand/Power/Maxpower: %d/%d/%d", Colors.Yellow, getLand().length, getPower(), getMaxPower());
@@ -152,6 +154,7 @@ public class CachedFaction extends Faction {
 			setAdmin(player);
 			break;
 		}
+		save();
 	}
 
 	@Override
@@ -159,9 +162,11 @@ public class CachedFaction extends Faction {
 		switch(oldRank) {
 		case MEMBER:
 			members.remove(player);
+			save();
 			break;
 		case MODERATOR:
 			mods.remove(player);
+			save();
 			break;
 		case ADMIN:
 			disband();
@@ -172,6 +177,7 @@ public class CachedFaction extends Faction {
 	@Override
 	public void setDescription(String desc) {
 		this.desc = desc;
+		save();
 	}
 
 	@Override
@@ -182,20 +188,30 @@ public class CachedFaction extends Faction {
 	@Override
 	public void setName(String name) {
 		this.name = name;
+		save();
 	}
 
 	@Override
 	public void setOpen(boolean open) {
 		this.isOpen = open;
+		save();
 	}
 
 	@Override
 	public void setHome(Location home) {
 		this.home = home;
+		save();
 	}
 
 	@Override
 	public void setAdmin(String admin) {
 		this.admin = admin;
+		save();
+	}
+	
+	private void save() {
+		if(Utils.plugin.getConfig().getSaveInterval() < 0) {
+			Utils.plugin.getDataSource().save(this);
+		}
 	}
 }

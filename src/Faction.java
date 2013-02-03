@@ -448,4 +448,9 @@ public abstract class Faction {
 		}
 		return closest;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("Faction[id=%d, name=%s]", getId(), getName());
+	}
 }
