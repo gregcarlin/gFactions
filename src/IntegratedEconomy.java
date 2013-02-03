@@ -45,7 +45,7 @@ public class IntegratedEconomy implements Economy {
 	public boolean modifyBalance(Faction fac, int amount) {
 		int id = fac.getId();
 		assert factions.containsKey(id);
-		int newAmt = factions.get(id) - amount;
+		int newAmt = factions.get(id) + amount;
 		if(newAmt >= 0) {
 			factions.put(id, newAmt);
 			return true;

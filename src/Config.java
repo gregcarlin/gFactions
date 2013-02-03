@@ -94,8 +94,40 @@ public class Config {
 		}
 	}
 	
+	/*public String setProperty(String key, String value) {
+		key = key.toLowerCase();
+		try {
+			boolean r = false;
+			if(key.equals("data-source")) {
+				props.setEnum(key, DataSourceEnum.valueOf(value));
+				r = true;
+			} else if(key.equals("start-power")) {
+				props.setInt(key, Integer.parseInt(value));
+			} else if(key.equals("faction-open-by-default")) {
+				props.setBoolean(key, Boolean.parseBoolean(value));
+			} else if(key.equals("default-faction-desc")) {
+				if(value.contains(":")) {
+					throw new Exception();
+				}
+				props.setString(key, value);
+			} else if(key.equals("save-interval")) {
+				return Utils.rose("This value can only be modified when the server is off.");
+			} else if(key.equals("power-regen-interval")) {
+				props.setInt(key, Integer.parseInt(value));
+			} else if(key.equals("economy")) {
+				
+			} else {
+				return Utils.rose("%s is not a valid key.", key);
+			}
+		} catch (Exception e) {
+			return Utils.rose("%s is not a valid value for the key %s.", value, key);
+		}
+		return String.format("%sProperty '%s' successfully set to '%s'.", Colors.Green, key, value);
+	}*/
+	
 	/**
-	 * Returns the datasource set by config.txt
+	 * Returns the datasource set by config.txt.
+	 * Should only be used once per start up.
 	 * 
 	 * @return Datasource
 	 * @throws DatasourceException

@@ -425,4 +425,27 @@ public abstract class Faction {
 		}
 		return false;
 	}
+	
+	/**
+	 * Returns the distance of the enemy closest to the given location.
+	 * Will return Double.MAX_VALUE if there are no enemies in the same world as the given location.
+	 * 
+	 * @param from The location to find the distances from.
+	 * @return double
+	 */
+	public double getNearestEnemyDist(Location from) {
+		double closest = Double.MAX_VALUE;
+		for(Faction f : Utils.plugin.getRelationManager().getRelations(this, Relation.Type.ENEMY)) {
+			for(Player p : f.getOnlineMembers()) {
+				Location l = p.getLocation();
+				if(l.world.equals(from.world) && l.dimension == from.dimension) {
+					double d = l.distanceTo(from);
+					if(d < closest) {
+						closest = d;
+					}
+				}
+			}
+		}
+		return closest;
+	}
 }

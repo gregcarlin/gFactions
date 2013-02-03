@@ -44,8 +44,15 @@ public abstract class Utils {
 		if(msgs == null) {
 			return;
 		}
-		for(String s : msgs) {
-			mr.notify(s);
+		if(mr instanceof Player) { // because notify adds a Colors.Rose for some reason.
+			Player p = (Player) mr;
+			for(String s : msgs) {
+				p.sendMessage(s);
+			}
+		} else {
+			for(String s : msgs) {
+				mr.notify(s);
+			}
 		}
 	}
 	

@@ -185,7 +185,11 @@ public class AdvancedPropertiesFile {
 	 * @param value The value of the property to set.
 	 */
 	public void setProperty(String key, String value) {
-		setProperty(key, new Property(value));
+		if(containsKey(key)) {
+			map.get(key).setValue(value); 
+		} else {
+			setProperty(key, new Property(value));
+		}
 	}
 	
 	/**
@@ -884,6 +888,10 @@ public class AdvancedPropertiesFile {
 		
 		public void setComment(String comment) {
 			this.comment = comment;
+		}
+		
+		public void setValue(String val) {
+			value = val;
 		}
 		
 		public String valueAsString() {
