@@ -141,7 +141,6 @@ public class CachedFaction extends Faction {
 
 	@Override
 	public void add(String player, PlayerRank rank) {
-		members.add(player);
 		switch(rank) {
 		default:
 		case MEMBER:

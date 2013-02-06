@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.sql.SQLException;
 
 /**
  * Manages the plugin's configuration.
@@ -41,7 +42,7 @@ public class Config {
 			props.setHeader("Main configuration file for gFactions.");
 		}
 		
-		props.getEnum("data-source", DataSourceEnum.OODB, "Available options are OODB, DB4O, FILE, FLAT-FILE, SQL, and MYSQL.");
+		props.getEnum("data-source", DataSourceEnum.OODB, "Available options are OODB and DB4O. Flatfile and SQL support is planned.");
 		props.getInt("start-power", 10, "The power new players are given when they join the server.");
 		props.getBoolean("faction-open-by-default", false, "Whether or not new factions allow anyone to join them.");
 		props.getString("default-faction-desc", "Default faction description", "The description new factions are set to.");
@@ -116,7 +117,11 @@ public class Config {
 			return new FileSource();
 		case SQL:
 		case MYSQL:
-			return new SQLSource();
+			try {
+				return new SQLSource();
+			} catch (SQLException e) {
+				throw new DatasourceException(e);
+			}
 		default:
 			throw new DatasourceException("Error retrieving datasource!");
 		}

@@ -27,9 +27,12 @@ public class IntegratedEconomy implements Economy {
 	@Override
 	public boolean modifyBalance(String player, int amount) {
 		assert players.containsKey(player);
-		int newAmt = players.get(player) - amount;
+		int newAmt = players.get(player) + amount;
 		if(newAmt >= 0) {
 			players.put(player, newAmt);
+			if(Utils.plugin.getConfig().getSaveInterval() < 0) {
+				Utils.plugin.getDataSource().savePlayerBalances(players);
+			}
 			return true;
 		}
 		return false;
@@ -48,6 +51,9 @@ public class IntegratedEconomy implements Economy {
 		int newAmt = factions.get(id) + amount;
 		if(newAmt >= 0) {
 			factions.put(id, newAmt);
+			if(Utils.plugin.getConfig().getSaveInterval() < 0) {
+				Utils.plugin.getDataSource().saveFactionBalances(factions);
+			}
 			return true;
 		}
 		return false;
@@ -57,5 +63,12 @@ public class IntegratedEconomy implements Economy {
 	public int getBalance(Faction fac) {
 		assert factions.containsKey(fac.getId());
 		return factions.get(fac.getId());
+	}
+	
+	@Override
+	public void save() {
+		Datasource ds = Utils.plugin.getDataSource();
+		ds.savePlayerBalances(players);
+		ds.saveFactionBalances(factions);
 	}
 }

@@ -52,4 +52,9 @@ public interface Economy {
 	 * @return int The balance.
 	 */
 	public int getBalance(Faction fac);
+	
+	/**
+	 * Saves the economy files.
+	 */
+	public void save();
 }

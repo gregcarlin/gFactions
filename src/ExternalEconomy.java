@@ -41,4 +41,10 @@ public class ExternalEconomy implements Economy {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	@Override
+	public void save() {
+		// TODO Auto-generated method stub
+		
+	}
 }

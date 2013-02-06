@@ -45,6 +45,12 @@ public abstract class Faction {
 	 */
 	public abstract String getName();
 	
+	/**
+	 * Returns the name of this faction colored according to its relation with the given faction.
+	 * 
+	 * @param to The faction to color according to.
+	 * @return String The faction name.
+	 */
 	public String getNameRelative(Faction to) {
 		Relation.Type r = Utils.plugin.getRelationManager().getRelation(this, to);
 		return r.getColor() + getName();
@@ -183,7 +189,7 @@ public abstract class Faction {
 			rt[i + 1] = mods[i];
 		}
 		for(int i=0; i<members.length; i++) {
-			rt[i + mods.length] = members[i];
+			rt[i + mods.length + 1] = members[i];
 		}
 		
 		return rt;

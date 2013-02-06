@@ -35,4 +35,8 @@ public class InactiveEconomy implements Economy {
 		return 0;
 	}
 
+	@Override
+	public void save() {
+		
+	}
 }

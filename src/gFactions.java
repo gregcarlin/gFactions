@@ -9,7 +9,7 @@ import java.util.logging.Logger;
  */
 public class gFactions extends Plugin {
     public static final String name = "gFactions";
-    public static final String version = "2.0";
+    public static final String version = "2.1";
     private final Logger log = Logger.getLogger("Minecraft");
     private final gFactionsListener listener = new gFactionsListener();
     private FactionManager fManager;
@@ -37,11 +37,11 @@ public class gFactions extends Plugin {
 		} catch (DatasourceException e) {
 			log.severe("Error retrieving initial data from datasource!");
 		}
+    	economy = config.getEconomy();
     	fManager = new FactionManager();
     	rManager = new RelationManager();
     	pManager = new gPlayerManager();
     	lManager = new LandManager();
-    	economy = config.getEconomy();
     	
     	PlayerCommands.getInstance().add("f", new FactionCommand());
     	
@@ -107,13 +107,14 @@ public class gFactions extends Plugin {
         
         @Override
         public HookParametersChat onChat(HookParametersChat hookParams) { // manages ally, faction, and public chat
-        	String player = hookParams.getPlayer().getName();
+        	Player player = hookParams.getPlayer();
+        	String pName = player.getName();
         	ArrayList<Player> receivers = new ArrayList<Player>();
-        	Faction f = Utils.plugin.getFactionManager().getFaction(player);
+        	Faction f = Utils.plugin.getFactionManager().getFaction(pName);
         	if(f == null || f instanceof SpecialFaction) {
         		return hookParams;
         	}
-        	gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(player);
+        	gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(pName);
         	gPlayer.ChatChannel cc = gp.getChatChannel();
         	switch(cc) {
         	case ALLY:
@@ -141,7 +142,28 @@ public class gFactions extends Plugin {
         	default:
         		// public chat
         		if(f != null && !(f instanceof SpecialFaction)) {
-        			hookParams.setPrefix(new StringBuilder("[").append(f.getName()).append("] ").append(gp.getName())); // [faction] name
+        			hookParams.setCanceled(true);
+        			Player[][] sorted = Utils.getOnlinePlayersSorted(f);
+        			
+        			String fName = f.getName();
+        			String pNamef = player.getFullName();
+        			String msg = hookParams.getMessage().toString();
+        			String format = "[%s%s] <%s%s> %s";
+        			
+        			String neutral = String.format(format, Relation.Type.NEUTRAL.getColor(), fName, pNamef, Colors.White, msg);
+        			for(Player p : sorted[0]) {
+        				p.sendMessage(neutral);
+        			}
+        			
+        			String ally = String.format(format, Relation.Type.ALLY.getColor(), fName, pNamef, Colors.White, msg);
+        			for(Player p : sorted[1]) {
+        				p.sendMessage(ally);
+        			}
+        			
+        			String enemy = String.format(format, Relation.Type.ENEMY.getColor(), fName, pNamef, Colors.White, msg);
+        			for(Player p : sorted[2]) {
+        				p.sendMessage(enemy);
+        			}
         		}
         		return hookParams;
         	}
@@ -217,7 +239,7 @@ public class gFactions extends Plugin {
 				for(Player p : etc.getServer().getPlayerList()) {
 					p.getUser().a.b(pkt);
 				}
-        		pDefend.sendMessage(String.format("%sDamage reduced by %d%%.", Colors.Yellow, (int) (reduction * 100)));
+        		pDefend.sendMessage(String.format("%sDamage reduced by %d%%", Colors.Yellow, (int) (reduction * 100)));
         		return true;
         	}
         	return false;

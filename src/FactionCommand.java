@@ -188,6 +188,7 @@ public class FactionCommand extends BaseCommand {
 						if(!Utils.plugin.getEconomy().modifyBalance(pName, -Utils.plugin.getConfig().getJoinCost())) {
 							return new String[] {Utils.rose("You cannot afford to join a faction.")};
 						}
+						nFac.sendToMembers(String.format("%s%s %sjoined your faction.", Colors.LightGreen, pName, Colors.Yellow));
 						nFac.add(pName);
 						return new String[] {String.format("%1$sYou are now a member of %2$s%3$s %1$s.", Colors.Yellow, Colors.Green, nFac.getName())};
 					} else {
@@ -203,6 +204,9 @@ public class FactionCommand extends BaseCommand {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				try {
+					if(args[0].length() > 16) {
+						return new String[] {Utils.rose("Faction tags cannot be longer than 16 characters.")};
+					}
 					FactionManager fm = Utils.plugin.getFactionManager();
 					String pName = ((Player) caller).getName();
 					Faction f = fm.getFaction(pName);

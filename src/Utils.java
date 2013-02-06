@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 
@@ -180,6 +182,7 @@ public abstract class Utils {
     	plugin.getPlayerManager().save();
     	plugin.getRelationManager().save();
     	plugin.getLandManager().save();
+    	plugin.getEconomy().save();
 	}
 	
 	/**
@@ -202,5 +205,38 @@ public abstract class Utils {
 	 */
 	public static boolean isBypass(Player p) {
 		return plugin.getPlayerManager().getPlayer(p.getName()).adminBypass;
+	}
+	
+	/**
+	 * Returns an array of the currently online players, sorted by relation.
+	 * 
+	 * @param basedOn Players are sorted by their relation to this faction.
+	 * @return Player[][] - [0] = neutral, [1] = allies, [2] = enemies
+	 */
+	public static Player[][] getOnlinePlayersSorted(Faction basedOn) {
+		RelationManager rManager = plugin.getRelationManager();
+		
+		ArrayList<Player> allies = new ArrayList<Player>();
+		for(Faction f : rManager.getRelations(basedOn, Relation.Type.ALLY)) {
+			for(Player p : f.getOnlineMembers()) {
+				allies.add(p);
+			}
+		}
+		
+		ArrayList<Player> enemies = new ArrayList<Player>();
+		for(Faction f : rManager.getRelations(basedOn, Relation.Type.ENEMY)) {
+			for(Player p : f.getOnlineMembers()) {
+				enemies.add(p);
+			}
+		}
+		
+		List<Player> neutral = Arrays.asList(plugin.getFactionManager().getFaction(-1).getOnlineMembers());
+		for(Faction f : rManager.getRelations(basedOn, Relation.Type.NEUTRAL)) {
+			for(Player p : f.getOnlineMembers()) {
+				neutral.add(p);
+			}
+		}
+		
+		return new Player[][] {neutral.toArray(new Player[0]), allies.toArray(new Player[0]), enemies.toArray(new Player[0])};
 	}
 }

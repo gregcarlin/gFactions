@@ -16,8 +16,10 @@ public class FactionManager {
 	public FactionManager() {
 		Faction[] facs = Utils.plugin.getDataSource().getAllFactions();
 		factions.ensureCapacity(facs.length);
+		Economy e = Utils.plugin.getEconomy();
 		for(Faction f : facs) {
 			factions.add(f);
+			e.initFaction(f.getId());
 		}
 	}
 	
@@ -153,6 +155,7 @@ public class FactionManager {
 		Config config = Utils.plugin.getConfig();
 		CachedFaction f = new CachedFaction(getNextId(), factionName, config.getDefaultFactionDesc(), config.isDefaultFactionOpen(), false, creator, null);
 		factions.add(f);
+		Utils.plugin.getEconomy().initFaction(f.getId());
 		
 		if(config.getSaveInterval() < 0) {
 			Utils.plugin.getDataSource().save(f);
