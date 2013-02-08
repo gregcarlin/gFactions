@@ -63,12 +63,20 @@ public class Land {
 	 * @param faction The faction to claim the land.
 	 */
 	public void claim(Faction faction) {
-		if(faction == null) {
-			this.faction = -1;
+		claim(faction == null ? -1 : faction.getId());
+	}
+	
+	/**
+	 * Set this land to be claimed by the given faction.
+	 * 
+	 * @param fID The id of the faction to claim the land.
+	 */
+	public void claim(int fID) {
+		faction = fID;
+		if(faction < 0) {
 			owners.clear();
 			Utils.plugin.getDataSource().delete(this);
 		} else {
-			this.faction = faction.getId();
 			save();
 		}
 	}

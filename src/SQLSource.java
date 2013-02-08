@@ -3,6 +3,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 /**
  * Manages the retrieval and storage of data in a MySQL database.
@@ -246,8 +247,35 @@ public class SQLSource implements Datasource {
 
 	@Override
 	public void save(Land land) {
-		// TODO Auto-generated method stub
-		
+		try {
+			String world = land.getWorld();
+			int dim = land.getDimension();
+			int x = land.getX();
+			int z = land.getZ();
+			
+			PreparedStatement test = conn.prepareStatement("SELECT `id` FROM `f_land` WHERE `world` = ? AND `dim` = ? AND `chunk_x` = ? AND `chunk_z` = ?");
+			test.setString(1, world);
+			test.setInt(2, dim);
+			test.setInt(3, x);
+			test.setInt(4, z);
+			ResultSet testr = test.executeQuery();
+			
+			if(testr.next()) { // land already exists
+				PreparedStatement ps = conn.prepareStatement("UPDATE `f_land` SET `owner_id` = ? WHERE `id` = ?");
+				ps.setInt(1, land.getClaimerId());
+				ps.setInt(2, testr.getInt("id"));
+			} else { // must create new land
+				PreparedStatement ps = conn.prepareStatement("INSERT INTO `f_land` VALUES(NULL, ?, ?, ?, ?, ?)");
+				ps.setString(1, world);
+				ps.setInt(2, dim);
+				ps.setInt(3, x);
+				ps.setInt(4, z);
+				ps.setInt(5, land.getClaimerId());
+				ps.execute();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -256,7 +284,9 @@ public class SQLSource implements Datasource {
 			ResultSet rs = conn.prepareStatement("SELECT * FROM `f_land`").executeQuery();
 			ArrayList<Land> rt = new ArrayList<Land>();
 			while(rs.next()) {
-				rt.add(new Land(rs.getInt("chunk_x"), rs.getInt("chunk_z"), rs.getString("world"), rs.getInt("dim")));
+				Land l = new Land(rs.getInt("chunk_x"), rs.getInt("chunk_z"), rs.getString("world"), rs.getInt("dim"));
+				l.claim(rs.getInt("owner_id"));
+				rt.add(l);
 			}
 			return rt.toArray(new Land[0]);
 		} catch (SQLException e) {
@@ -333,14 +363,30 @@ public class SQLSource implements Datasource {
 
 	@Override
 	public void savePlayerBalances(HashMap<String, Integer> players) {
-		// TODO Auto-generated method stub
-		
+		for(Entry<String, Integer> e : players.entrySet()) {
+			try {
+				PreparedStatement ps = conn.prepareStatement("UPDATE `f_members` SET `money` = ? WHERE `name` = ?");
+				ps.setInt(1, e.getValue());
+				ps.setString(2, e.getKey());
+				ps.execute();
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	@Override
 	public void saveFactionBalances(HashMap<Integer, Integer> factions) {
-		// TODO Auto-generated method stub
-		
+		for(Entry<Integer, Integer> e : factions.entrySet()) {
+			try {
+				PreparedStatement ps = conn.prepareStatement("UPDATE `factions` SET `money` = ? WHERE `id` = ?");
+				ps.setInt(1, e.getValue());
+				ps.setInt(2, e.getKey());
+				ps.execute();
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	@Override
