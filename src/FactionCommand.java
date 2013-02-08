@@ -126,7 +126,7 @@ public class FactionCommand extends BaseCommand {
 						} else if(x == 2 && y == 2) {
 							rt[y].append(dir == Direction.SOUTH_EAST ? Colors.Rose : Colors.Gold).append('\\');
 						} else {
-							Faction owner = lm.getLandAt(x - 20 + startX, y - 4 + startZ).claimedBy();
+							Faction owner = lm.getLandAt(x - 20 + startX, y - 4 + startZ, l.world, l.dimension).claimedBy();
 							String color = owner.getColorRelative(f);
 							if(!color.equals(lastColor)) {
 								lastColor = color;
@@ -139,7 +139,7 @@ public class FactionCommand extends BaseCommand {
 				HashMap<Integer, Character> fMap = gen.getFactionMap();
 				boolean useMap = fMap.size() > 0;
 				String[] str = new String[rt.length + (useMap ? 2 : 1)];
-				str[0] = String.format("%1$s-----------.[%2$s (%3$d, %4$d)%1$s].-----------", Colors.Gold, lm.getLandAt(startX, startZ).claimedBy().getNameRelative(f), startX, startZ);
+				str[0] = String.format("%1$s-----------.[%2$s (%3$d, %4$d)%1$s].-----------", Colors.Gold, lm.getLandAt(startX, startZ, l.world, l.dimension).claimedBy().getNameRelative(f), startX, startZ);
 				for(int i=0; i<rt.length; i++) {
 					str[i + 1] = rt[i].toString();
 				}
@@ -164,9 +164,9 @@ public class FactionCommand extends BaseCommand {
 				} else if(gp == null) {
 					return new String[] {Utils.rose("Player %s not found!", args[0])};
 				} else if(caller instanceof Player) {
-					return new String[] {String.format("%s%s%s: %d/%d", Utils.plugin.getRelationManager().getRelation(((Player) caller).getName(), player).getColor(), gp.getFormattedName(), Colors.Yellow, gp.getPower(), gp.maxPower)};
+					return new String[] {String.format("%s%s%s: %d/%d", Utils.plugin.getRelationManager().getRelation(((Player) caller).getName(), player).getColor(), gp.getFormattedName(), Colors.Yellow, gp.getPower(), gp.getMaxPower())};
 				} else {
-					return new String[] {String.format("%s: %d/%d", gp.getFormattedName(), gp.getPower(), gp.maxPower)};
+					return new String[] {String.format("%s: %d/%d", gp.getFormattedName(), gp.getPower(), gp.getMaxPower())};
 				}
 			}
 		};
@@ -576,6 +576,10 @@ public class FactionCommand extends BaseCommand {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				assert caller instanceof Player;
+				assert args.length > 1;
+				if(args[1].length() > 16) {
+					return new String[] {Utils.rose("A title cannot be longer than 16 characters.")};
+				}
 				String rt = powerOverHelper(((Player) caller).getName(), args[0], "You cannot change that player's title.");
 				if(rt != null) {
 					return new String[] {rt};

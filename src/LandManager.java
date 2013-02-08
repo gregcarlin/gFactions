@@ -24,7 +24,7 @@ public class LandManager {
 	 * @return Land
 	 */
 	public Land getLandAt(Location location) {
-		return getLandAt((int) location.x, (int) location.y, (int) location.z);
+		return getLandAt((int) location.x, (int) location.y, (int) location.z, location.world, location.dimension);
 	}
 	
 	/**
@@ -33,10 +33,12 @@ public class LandManager {
 	 * @param x Block x.
 	 * @param y Block y (irrelevant).
 	 * @param z Block z.
+	 * @param world The name of the world.
+	 * @param dim The dimension.
 	 * @return Land
 	 */
-	public Land getLandAt(int x, int y, int z) {
-		return getLandAt(x / 16, z / 16);
+	public Land getLandAt(int x, int y, int z, String world, int dim) {
+		return getLandAt(x / 16, z / 16, world, dim);
 	}
 	
 	/**
@@ -44,16 +46,18 @@ public class LandManager {
 	 * 
 	 * @param x Chunk x.
 	 * @param z Chunk z.
+	 * @param world The name of the world.
+	 * @param dim The dimension.
 	 * @return Land
 	 */
-	public Land getLandAt(int x, int z) {
+	public Land getLandAt(int x, int z, String world, int dim) {
 		for(Land l : lands) {
-			if(l.getX() == x && l.getZ() == z) {
+			if(l.getX() == x && l.getZ() == z && l.getWorld().equals(world) && l.getDimension() == dim) {
 				return l;
 			}
 		}
 		
-		Land l = new Land(x, z);
+		Land l = new Land(x, z, world, dim);
 		lands.add(l);
 		return l;
 	}

@@ -1,5 +1,7 @@
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -14,10 +16,10 @@ public class SQLSource implements Datasource {
 	public SQLSource() throws SQLException {
 		conn = etc.getConnection();
 		
-		tryCreate("CREATE TABLE factions(`id` INT NOT NULL, PRIMARY_KEY(`id`), `name` VARCHAR(16) NOT NULL, `desc` TEXT NOT NULL, `open` BIT(1) NOT NULL, `home_x` INT, `home_y` INT, `home_z` INT, `home_dim` INT, `world` VARCHAR(32), `money` INT(32))");
-		tryCreate("CREATE TABLE f_members(`name` VARCHAR(16) NOT NULL, PRIMARY_KEY(`name`), `power` INT(2) NOT NULL, `max_power` INT(2), `bonus` INT(2), `faction_id` INT)");
-		tryCreate("CREATE TABLE f_land(`id` INT NOT NULL AUTO_INCREMENT, PRIMARY_KEY(`id`), `world` VARCHAR(32) NOT NULL, `dim` INT(1) NOT NULL, `chunk_x` INT(5) NOT NULL, `chunk_z` INT(5) NOT NULL, `owner_id` INT)");
-		tryCreate("CREATE TABLE f_relations(`id` INT NOT NULL AUTO_INCREMENT, PRIMARY_KEY(`id`), `fac_one` INT NOT NULL, `fac_two` INT NOT NULL, `type` INT(1))");
+		tryCreate("CREATE TABLE factions(`id` INT NOT NULL, PRIMARY_KEY(`id`), `name` VARCHAR(16) NOT NULL, UNIQUE(`name`), `desc` TEXT NOT NULL, `open` BIT(1) NOT NULL, `peaceful` BIT(1) NOT NULL, `home_x` INT, `home_y` INT, `home_z` INT, `home_dim` INT, `world` VARCHAR(32), `money` INT)");
+		tryCreate("CREATE TABLE f_members(`name` VARCHAR(16) NOT NULL, PRIMARY_KEY(`name`), `power` SMALLINT NOT NULL, `bonus` SMALLINT NOT NULL, `faction_id` INT, `rank` TINYINT, `title` VARCHAR(16) NOT NULL, `money` INT)");
+		tryCreate("CREATE TABLE f_land(`id` INT NOT NULL AUTO_INCREMENT, PRIMARY_KEY(`id`), `world` VARCHAR(32) NOT NULL, `dim` TINYINT NOT NULL, `chunk_x` INT NOT NULL, UNIQUE(`chunk_x`), `chunk_z` INT NOT NULL, UNIQUE(`chunk_z`), `owner_id` INT)");
+		tryCreate("CREATE TABLE f_relations(`id` INT NOT NULL AUTO_INCREMENT, PRIMARY_KEY(`id`), `fac_one` INT NOT NULL, `fac_two` INT NOT NULL, `type` TINYINT)");
 	}
 	
 	private void tryCreate(String statement) throws SQLException {
@@ -32,14 +34,42 @@ public class SQLSource implements Datasource {
 
 	@Override
 	public CachedFaction getFaction(int id) {
-		// TODO Auto-generated method stub
+		try {
+			PreparedStatement ps = conn.prepareStatement("SELECT * from `factions` WHERE `id` = ?");
+			ps.setInt(1, id);
+			
+			ResultSet result = ps.executeQuery();
+			if(result.next()) {
+				PreparedStatement ps2 = conn.prepareStatement("SELECT `name` FROM `f_members` WHERE `faction_id` = ? AND `rank` = ?");
+				ps2.setInt(1, id);
+				ps2.setInt(2, Faction.PlayerRank.ADMIN.ordinal());
+				ResultSet rs = ps2.executeQuery();
+				rs.next();
+				
+				Location home = new Location(result.getInt("home_x"), result.getInt("home_y"), result.getInt("home_z"));
+				home.world = result.getString("world");
+				home.dimension = result.getInt("home_dim");
+				return new CachedFaction(id, result.getString("name"), result.getString("desc"), result.getBoolean("open"), result.getBoolean("peaceful"), rs.getString("name"), home);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
 	@Override
-	public Faction[] getAllFactions() { //return some lazy stuff
-		//TODO
-		return null;
+	public Faction[] getAllFactions() { // return some lazy stuff
+		try {
+			ResultSet rs = conn.prepareStatement("SELECT `id` from `factions`").executeQuery();
+			ArrayList<LazyFaction> facs = new ArrayList<LazyFaction>();
+			while(rs.next()) {
+				facs.add(new LazyFaction(rs.getInt("id")));
+			}
+			return facs.toArray(new Faction[0]);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return new Faction[0];
 	}
 
 	@Override
@@ -49,34 +79,169 @@ public class SQLSource implements Datasource {
 
 	@Override
 	public gPlayer getPlayer(String name) {
-		// TODO Auto-generated method stub
+		try {
+			PreparedStatement ps = conn.prepareStatement("SELECT * from `f_members` WHERE `name` = ?");
+			ps.setString(1, name);
+			
+			ResultSet rs = ps.executeQuery();
+			if(rs.next()) {
+				gPlayer gp = new gPlayer(rs.getString("name"), rs.getInt("power"));
+				gp.bonusPower = rs.getInt("bonus");
+				return gp;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public void save(CachedFaction faction) {
-		// TODO Auto-generated method stub
+		try {
+			int fId = faction.getId();
+			PreparedStatement test = conn.prepareStatement("SELECT `name` FROM `f_members` WHERE `faction_id` = ?");
+			test.setInt(1, fId);
+			ResultSet rs = test.executeQuery();
+			
+			PreparedStatement ps;
+			int startIndex;
+			if(rs.next()) { // faction already exists
+				ArrayList<String> oldPlayers = new ArrayList<String>();
+				do {
+					oldPlayers.add(rs.getString("name"));
+				} while (rs.next());
+				for(String s : getRemoved(oldPlayers.toArray(new String[0]), faction.getAllMembers())) {
+					PreparedStatement p = conn.prepareStatement("UPDATE `f_members` SET `faction_id` = NULL, `rank` = NULL, `title` = NULL WHERE `name` = ?");
+					p.setString(1, s);
+					p.execute();
+				}
+				
+				ps = conn.prepareStatement("UPDATE `factions` SET `name` = ?, `desc` = ?, `open` = ?, `peaceful` = ?, `home_x` = ?, `home_y` = ?, `home_z` = ?, `home_dim` = ?, `world` = ? WHERE `id` = ?");
+				startIndex = 1;
+				ps.setInt(10, fId);
+				ps.setInt(11, Utils.plugin.getEconomy().getBalance(faction));
+			} else { // must create faction
+				ps = conn.prepareStatement("INSERT INTO `factions` VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+				startIndex = 2;
+				ps.setInt(1, fId);
+			}
+			ps.setString(startIndex, faction.getName());
+			ps.setString(startIndex + 1, faction.getDescription());
+			ps.setBoolean(startIndex + 2, faction.isOpen());
+			ps.setBoolean(startIndex + 3, faction.isPeaceful());
+			Location home = faction.getHome();
+			ps.setInt(startIndex + 4, home == null ? null : (int) home.x);
+			ps.setInt(startIndex + 5, home == null ? null : (int) home.y);
+			ps.setInt(startIndex + 6, home == null ? null : (int) home.z);
+			ps.setInt(startIndex + 7, home == null ? null : (int) home.dimension);
+			ps.setString(startIndex + 8, home == null ? null : home.world);
+			
+			ps.execute();
+			
+			setPlayers(new String[] {faction.getAdmin()}, Faction.PlayerRank.ADMIN, fId);
+			setPlayers(faction.getMods(), Faction.PlayerRank.MODERATOR, fId);
+			setPlayers(faction.getMembers(), Faction.PlayerRank.MEMBER, fId);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void setPlayers(String[] players, Faction.PlayerRank rank, int fId) throws SQLException {
+		for(String p : players) {
+			PreparedStatement ps = conn.prepareStatement("UPDATE `f_members` SET `faction_id` = ?, `rank` = ? WHERE `name` = ?");
+			ps.setInt(1, fId);
+			ps.setInt(2, rank.ordinal());
+			ps.setString(3, p);
+			ps.execute();
+		}
+	}
+	
+	private String[] getRemoved(String[] one, String[] two) {
+		ArrayList<String> removed = new ArrayList<String>();
+		for(String o : one) {
+			if(!Utils.arrayContains(two, o)) {
+				removed.add(o);
+			}
+		}
+		return removed.toArray(new String[0]);
 	}
 
 	@Override
 	public void save(gPlayer[] players) {
-		// TODO Auto-generated method stub
+		for(gPlayer gp : players) {
+			try {
+				String name = gp.getName();
+				PreparedStatement test = conn.prepareStatement("SELECT `name` FROM `f_members` WHERE `name` = ?");
+				test.setString(1, name);
+				
+				if(test.executeQuery().next()) { // player already exists
+					PreparedStatement ps = conn.prepareStatement("UPDATE `f_members` SET `power` = ?, `bonus` = ?, `title` = ? WHERE `name` = ?");
+					ps.setInt(1, gp.getRawPower());
+					ps.setInt(2, gp.bonusPower);
+					ps.setString(3, gp.getTitle());
+					ps.setString(4, name);
+					ps.execute();
+				} else { // must create new player
+					PreparedStatement ps = conn.prepareStatement("INSERT INTO `f_members` VALUES(?, ?, ?, ?, ?, ?)");
+					ps.setString(1, name);
+					ps.setInt(2, gp.getRawPower());
+					ps.setInt(3, gp.bonusPower);
+					ps.setString(6, gp.getTitle());
+					Faction f = Utils.plugin.getFactionManager().getFaction(name);
+					boolean isWild = f == null || f instanceof SpecialFaction;
+					ps.setInt(4, isWild ? null : f.getId());
+					ps.setInt(5, isWild ? null : f.getRank(name).ordinal());
+					ps.execute();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
 	public void save(Relation[] relations) {
-		// TODO Auto-generated method stub
+		for(Relation r : relations) {
+			try {
+				PreparedStatement test = conn.prepareStatement("SELECT `id` FROM `f_relations` WHERE `fac_one` = ? AND `fac_two` = ?");
+				int id1 = r.getOne().getId();
+				int id2 = r.getTwo().getId();
+				test.setInt(1, id1);
+				test.setInt(2, id2);
+				ResultSet testr = test.executeQuery();
+				
+				if(testr.next()) { // relation already exists
+					PreparedStatement ps = conn.prepareStatement("UPDATE `f_relations` SET `type` = ? WHERE `id` = ?");
+					ps.setInt(1, r.type.ordinal());
+					ps.setInt(2, testr.getInt("id"));
+					ps.execute();
+				} else { // must create new relation
+					PreparedStatement ps = conn.prepareStatement("INSERT INTO `f_relations` VALUES(NULL, ?, ?, ?)");
+					ps.setInt(1, id1);
+					ps.setInt(2, id2);
+					ps.setInt(3, r.type.ordinal());
+					ps.execute();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
 	public void delete(Faction f) {
-		// TODO Auto-generated method stub
-		
+		try {
+			PreparedStatement ps = conn.prepareStatement("DELETE FROM `factions` WHERE `id` = ?");
+			ps.setInt(1, f.getId());
+			ps.execute();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -87,37 +252,82 @@ public class SQLSource implements Datasource {
 
 	@Override
 	public Land[] getAllLand() {
-		// TODO Auto-generated method stub
+		try {
+			ResultSet rs = conn.prepareStatement("SELECT * FROM `f_land`").executeQuery();
+			ArrayList<Land> rt = new ArrayList<Land>();
+			while(rs.next()) {
+				rt.add(new Land(rs.getInt("chunk_x"), rs.getInt("chunk_z"), rs.getString("world"), rs.getInt("dim")));
+			}
+			return rt.toArray(new Land[0]);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
 	@Override
 	public Relation getRelation(Faction one, Faction two) {
-		// TODO Auto-generated method stub
+		try {
+			PreparedStatement ps = conn.prepareStatement("SELECT `type` FROM `f_relations` WHERE `fac_one` = ? AND `fac_two` = ?");
+			ps.setInt(1, one.getId());
+			ps.setInt(2, two.getId());
+			ResultSet rs = ps.executeQuery();
+			return rs.next() ? new Relation(Relation.Type.values()[rs.getInt("type")], one, two) : null;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
 	@Override
 	public void delete(Land l) {
-		// TODO Auto-generated method stub
-		
+		try {
+			PreparedStatement ps = conn.prepareStatement("DELETE FROM `f_land` WHERE `world` = ? AND `dim` = ? AND `chunk_x` = ? AND `chunk_z` = ?");
+			ps.setString(1, l.getWorld());
+			ps.setInt(2, l.getDimension());
+			ps.setInt(3, l.getX());
+			ps.setInt(4, l.getZ());
+			ps.execute();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void delete(Relation r) {
-		// TODO Auto-generated method stub
-		
+		try {
+			PreparedStatement ps = conn.prepareStatement("DELETE FROM `f_relations` WHERE `fac_one` = ? AND `fac_two` = ?");
+			ps.setInt(1, r.getOne().getId());
+			ps.setInt(2, r.getTwo().getId());
+			ps.execute();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public int getBalance(String player) {
-		// TODO Auto-generated method stub
+		try {
+			PreparedStatement ps = conn.prepareStatement("SELECT `money` FROM `f_members` WHERE `name` = ?");
+			ps.setString(1, player);
+			ResultSet rs = ps.executeQuery();
+			return rs.next() ? rs.getInt("money") : 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return 0;
 	}
 
 	@Override
 	public int getBalance(int fID) {
-		// TODO Auto-generated method stub
+		try {
+			PreparedStatement ps = conn.prepareStatement("SELECT `money` FROM `factions` WHERE `id` = ?");
+			ps.setInt(1, fID);
+			ResultSet rs = ps.executeQuery();
+			return rs.next() ? rs.getInt("money") : 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return 0;
 	}
 
@@ -135,7 +345,21 @@ public class SQLSource implements Datasource {
 
 	@Override
 	public Relation[] getRelationsWith(Faction f) {
-		// TODO Auto-generated method stub
+		try {
+			PreparedStatement ps = conn.prepareStatement("SELECT * FROM `f_relations` WHERE `fac_one` = ? OR `fac_two` = ?");
+			int id = f.getId();
+			ps.setInt(1, id);
+			ps.setInt(2, id);
+			ResultSet rs = ps.executeQuery();
+			ArrayList<Relation> rt = new ArrayList<Relation>();
+			FactionManager fm = Utils.plugin.getFactionManager();
+			while(rs.next()) {
+				rt.add(new Relation(Relation.Type.values()[rs.getInt("type")], fm.getFaction(rs.getInt("one")), fm.getFaction(rs.getInt("two"))));
+			}
+			return rt.toArray(new Relation[0]);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 }

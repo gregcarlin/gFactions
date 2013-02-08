@@ -383,7 +383,7 @@ public abstract class Faction {
 		gPlayerManager pManager = Utils.plugin.getPlayerManager();
 		int maxPower = 0;
 		for(String member : getAllMembers()) {
-			maxPower += pManager.getPlayer(member).maxPower;
+			maxPower += pManager.getPlayer(member).getMaxPower();
 		}
 		return maxPower;
 	}

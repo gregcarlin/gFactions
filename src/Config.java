@@ -57,6 +57,7 @@ public class Config {
 		props.getInt("start-money-faction", 0, "The amount of money new factions are given when they are first created.");
 		props.getBoolean("tags-in-chat", true, "Whether or not public chat shows faction tags.");
 		props.getInt("no-tp-enemy-dist", 32, "Enemies must be this distance away or more in order to teleport.");
+		props.getInt("max_power", 10, "The maximum power level players can attain.");
 		
 		try {
 			props.save();
@@ -253,6 +254,15 @@ public class Config {
 	 */
 	public int getMinEnemyDist() {
 		return props.getInt("no-tp-enemy-dist");
+	}
+	
+	/**
+	 * The maximum power players can attain.
+	 * 
+	 * @return int
+	 */
+	public int getMaxPower() {
+		return props.getInt("max_power");
 	}
 	
 	// start prices

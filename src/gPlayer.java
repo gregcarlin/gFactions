@@ -49,7 +49,7 @@ public class gPlayer {
 	
 	private final String name;
 	private int power;
-	public int maxPower = 10;
+	public int bonusPower = 0;
 	private String title;
 	private transient Object powerLock;
 	public transient boolean adminBypass;
@@ -81,9 +81,7 @@ public class gPlayer {
 	 * @return int
 	 */
 	public int getPower() {
-		synchronized(getPowerLock()) {
-			return power;
-		}
+		return power + bonusPower;
 	}
 	
 	private Object getPowerLock() {
@@ -113,6 +111,7 @@ public class gPlayer {
 	 * @return Whether or not power is now maxed out.
 	 */
 	public boolean increasePower() {
+		int maxPower = Utils.plugin.getConfig().getMaxPower();
 		synchronized(getPowerLock()) {
 			power++;
 			if(power > maxPower) { // don't think I need this, but better safe than sorry
@@ -131,7 +130,7 @@ public class gPlayer {
 	 */
 	public boolean decreasePower(boolean warzone) {
 		Config config = Utils.plugin.getConfig();
-		if(power >= maxPower) { // if true, no power adder was running for this player
+		if(power >= Utils.plugin.getConfig().getMaxPower()) { // if true, no power adder was running for this player
 			etc.getServer().addToServerQueue(new PowerAdder(this), config.getPowerRegenInterval());
 		}
 		synchronized(getPowerLock()) {
@@ -211,5 +210,13 @@ public class gPlayer {
 	@Override
 	public String toString() {
 		return String.format("gPlayer[name=%s, power=%d, title=%s]", name, power, title);
+	}
+	
+	public int getMaxPower() {
+		return Utils.plugin.getConfig().getMaxPower() + bonusPower;
+	}
+	
+	public int getRawPower() {
+		return power;
 	}
 }

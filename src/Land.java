@@ -9,12 +9,16 @@ import java.util.ArrayList;
 public class Land {
 	private final int x;
 	private final int z;
+	private final String world;
+	private final int dim;
 	private int faction = -1;
 	private final ArrayList<String> owners = new ArrayList<String>();
 	
-	public Land(int x, int z) {
+	public Land(int x, int z, String world, int dim) {
 		this.x = x;
 		this.z = z;
+		this.world = world;
+		this.dim = dim;
 	}
 	
 	/**
@@ -39,7 +43,7 @@ public class Land {
 	public boolean equals(Object obj) {
 		if(obj instanceof Land) {
 			Land other = (Land) obj;
-			return getX() == other.getX() && getZ() == other.getZ();
+			return getX() == other.getX() && getZ() == other.getZ() && getWorld().equals(other.getWorld()) && getDimension() == other.getDimension();
 		}
 		return false;
 	}
@@ -119,5 +123,23 @@ public class Land {
 		if(Utils.plugin.getConfig().getSaveInterval() < 0) {
 			Utils.plugin.getDataSource().save(this);
 		}
+	}
+	
+	/**
+	 * Gets the name of the world this land is in.
+	 * 
+	 * @return String
+	 */
+	public String getWorld() {
+		return world;
+	}
+	
+	/**
+	 * Gets the dimension this land is in.
+	 * 
+	 * @return int
+	 */
+	public int getDimension() {
+		return dim;
 	}
 }

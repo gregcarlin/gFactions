@@ -35,7 +35,7 @@ public class gPlayerManager {
 			return null;
 		}
 		players.add(gp);
-		if(gp.getPower() < gp.maxPower) {
+		if(gp.getPower() < gp.getMaxPower()) {
 			etc.getServer().addToServerQueue(new PowerAdder(gp), Utils.plugin.getConfig().getPowerRegenInterval());
 		}
 		
@@ -57,7 +57,7 @@ public class gPlayerManager {
 				Utils.plugin.getDataSource().save(new gPlayer[] {gp});
 			}
 			
-			if(gp.getPower() < gp.maxPower) {
+			if(gp.getPower() < gp.getMaxPower()) {
 				etc.getServer().addToServerQueue(new PowerAdder(gp), config.getPowerRegenInterval());
 			}
 		}
