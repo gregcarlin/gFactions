@@ -1,4 +1,5 @@
 package en.gregthegeek.gfactions.faction;
+import net.canarymod.api.world.position.Location;
 import en.gregthegeek.util.Utils;
 
 /**

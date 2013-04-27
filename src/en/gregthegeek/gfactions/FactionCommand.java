@@ -3,6 +3,12 @@ package en.gregthegeek.gfactions;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import net.canarymod.Canary;
+import net.canarymod.api.entity.living.humanoid.Player;
+import net.canarymod.api.world.position.Location;
+import net.canarymod.chat.MessageReceiver;
+import net.canarymod.chat.TextFormat;
+import net.canarymod.commandsys.Command;
 import net.canarymod.commandsys.CommandListener;
 
 import en.gregthegeek.gfactions.economy.Economy;
@@ -62,7 +68,7 @@ public class FactionCommand implements CommandListener {
 					int page = args.length > 0 ? Integer.parseInt(args[0]) - 1 : 0;
 					int max = Utils.getCommandRank(caller).getListMax();
 					String[] rt = new String[6];
-					rt[0] = String.format("%s------------- Commands (Page %d/%d) -------------", Colors.Gold, page + 1, (max / (rt.length - 1)) + 1);;
+					rt[0] = String.format("%s------------- Commands (Page %d/%d) -------------", TextFormat.ORANGE, page + 1, (max / (rt.length - 1)) + 1);;
 					for(int i=0; i<rt.length-1; i++) {
 						int index = page * (rt.length-1) + i;
 						rt[i + 1] = index <= max && index >= 0 ? subCommands[index].toString() : Utils.rose("No more!");
@@ -116,37 +122,37 @@ public class FactionCommand implements CommandListener {
 				StringBuilder[] rt = new StringBuilder[8];
 				LandManager lm = Utils.plugin.getLandManager();
 				Location l = ((Player) caller).getLocation();
-				int startX = (int) l.x / 16;
-				int startZ = (int) l.z / 16;
+				int startX = (int) l.getX() / 16;
+				int startZ = (int) l.getZ() / 16;
 				MapIconGen gen = new MapIconGen();
-				Direction dir = Direction.fromRot(l.rotX + 90); // why +90 is needed? who knows
+				Direction dir = Direction.fromRot(l.getRotation() + 90); // why +90 is needed? who knows
 				for(int y=0; y<8; y++) {
 					String lastColor = null;
 					rt[y] = new StringBuilder();
 					for(int x=0; x<40; x++) {
 						if(x == 20 && y == 4) {
-							rt[y].append(Colors.LightBlue + "+");
-							lastColor = Colors.LightBlue;
+							rt[y].append(TextFormat.CYAN + "+");
+							lastColor = TextFormat.CYAN;
 						} else if(x == 0 && y == 0) {
-							rt[y].append(dir == Direction.NORTH_WEST ? Colors.Rose : Colors.Gold).append('\\');
+							rt[y].append(dir == Direction.NORTH_WEST ? TextFormat.PINK : TextFormat.ORANGE).append('\\');
 						} else if(x == 1 && y == 0) {
-							rt[y].append(dir == Direction.NORTH ? Colors.Rose : Colors.Gold).append('N');
+							rt[y].append(dir == Direction.NORTH ? TextFormat.PINK : TextFormat.ORANGE).append('N');
 						} else if(x == 2 && y == 0) {
-							rt[y].append(dir == Direction.NORTH_EAST ? Colors.Rose : Colors.Gold).append('/');
+							rt[y].append(dir == Direction.NORTH_EAST ? TextFormat.PINK : TextFormat.ORANGE).append('/');
 						} else if(x == 0 && y == 1) {
-							rt[y].append(dir == Direction.WEST ? Colors.Rose : Colors.Gold).append('W');
+							rt[y].append(dir == Direction.WEST ? TextFormat.PINK : TextFormat.ORANGE).append('W');
 						} else if(x == 1 && y == 1) {
-							rt[y].append(dir == Direction.ERROR ? Colors.Rose : Colors.Gold).append('+');
+							rt[y].append(dir == Direction.ERROR ? TextFormat.PINK : TextFormat.ORANGE).append('+');
 						} else if(x == 2 && y == 1) {
-							rt[y].append(dir == Direction.EAST ? Colors.Rose : Colors.Gold).append('E');
+							rt[y].append(dir == Direction.EAST ? TextFormat.PINK : TextFormat.ORANGE).append('E');
 						} else if(x == 0 && y == 2) {
-							rt[y].append(dir == Direction.SOUTH_WEST ? Colors.Rose : Colors.Gold).append('/');
+							rt[y].append(dir == Direction.SOUTH_WEST ? TextFormat.PINK : TextFormat.ORANGE).append('/');
 						} else if(x == 1 && y == 2) {
-							rt[y].append(dir == Direction.SOUTH ? Colors.Rose : Colors.Gold).append('S');
+							rt[y].append(dir == Direction.SOUTH ? TextFormat.PINK : TextFormat.ORANGE).append('S');
 						} else if(x == 2 && y == 2) {
-							rt[y].append(dir == Direction.SOUTH_EAST ? Colors.Rose : Colors.Gold).append('\\');
+							rt[y].append(dir == Direction.SOUTH_EAST ? TextFormat.PINK : TextFormat.ORANGE).append('\\');
 						} else {
-							Faction owner = lm.getLandAt(x - 20 + startX, y - 4 + startZ, l.world, l.dimension).claimedBy();
+							Faction owner = lm.getLandAt(x - 20 + startX, y - 4 + startZ, l.getWorldName(), l.getType().getId()).claimedBy();
 							String color = owner.getColorRelative(f);
 							if(!color.equals(lastColor)) {
 								lastColor = color;
@@ -159,12 +165,12 @@ public class FactionCommand implements CommandListener {
 				HashMap<Integer, Character> fMap = gen.getFactionMap();
 				boolean useMap = fMap.size() > 0;
 				String[] str = new String[rt.length + (useMap ? 2 : 1)];
-				str[0] = String.format("%1$s-----------.[%2$s (%3$d, %4$d)%1$s].-----------", Colors.Gold, lm.getLandAt(startX, startZ, l.world, l.dimension).claimedBy().getNameRelative(f), startX, startZ);
+				str[0] = String.format("%1$s-----------.[%2$s (%3$d, %4$d)%1$s].-----------", TextFormat.ORANGE, lm.getLandAt(startX, startZ, l.getWorldName(), l.getType().getId()).claimedBy().getNameRelative(f), startX, startZ);
 				for(int i=0; i<rt.length; i++) {
 					str[i + 1] = rt[i].toString();
 				}
 				if(useMap) {
-					StringBuilder sb = new StringBuilder(Colors.Gray);
+					StringBuilder sb = new StringBuilder(TextFormat.GRAY);
 					for(Entry<Integer, Character> e : fMap.entrySet()) {
 						sb.append(e.getValue()).append(": ").append(fm.getFaction(e.getKey()).getName()).append(", ");
 					}
@@ -184,7 +190,7 @@ public class FactionCommand implements CommandListener {
 				} else if(gp == null) {
 					return new String[] {Utils.rose("Player %s not found!", args[0])};
 				} else if(caller instanceof Player) {
-					return new String[] {String.format("%s%s%s: %d/%d", Utils.plugin.getRelationManager().getRelation(((Player) caller).getName(), player).getColor(), gp.getFormattedName(), Colors.Yellow, gp.getPower(), gp.getMaxPower())};
+					return new String[] {String.format("%s%s%s: %d/%d", Utils.plugin.getRelationManager().getRelation(((Player) caller).getName(), player).getColor(), gp.getFormattedName(), TextFormat.YELLOW, gp.getPower(), gp.getMaxPower())};
 				} else {
 					return new String[] {String.format("%s: %d/%d", gp.getFormattedName(), gp.getPower(), gp.getMaxPower())};
 				}
@@ -203,14 +209,14 @@ public class FactionCommand implements CommandListener {
 					}
 					Faction nFac = fManager.getFactionByName(args[0]);
 					if(nFac == null) {
-						return new String[] {Utils.rose("Faction %s%s %snot found.", Colors.Red, args[0], Colors.Rose)};
+						return new String[] {Utils.rose("Faction %s%s %snot found.", TextFormat.RED, args[0], TextFormat.PINK)};
 					} else if(nFac.isOpen() || nFac.isInvited(pName) || Utils.plugin.getPlayerManager().getPlayer(pName).adminBypass) {
 						if(!Utils.plugin.getEconomy().modifyBalance(pName, -Utils.plugin.getConfig().getJoinCost())) {
 							return new String[] {Utils.rose("You cannot afford to join a faction.")};
 						}
-						nFac.sendToMembers(String.format("%s%s %sjoined your faction.", Colors.LightGreen, pName, Colors.Yellow));
+						nFac.sendToMembers(String.format("%s%s %sjoined your faction.", TextFormat.LIGHT_GREEN, pName, TextFormat.YELLOW));
 						nFac.add(pName);
-						return new String[] {String.format("%1$sYou are now a member of %2$s%3$s %1$s.", Colors.Yellow, Colors.Green, nFac.getName())};
+						return new String[] {String.format("%1$sYou are now a member of %2$s%3$s %1$s.", TextFormat.YELLOW, TextFormat.GREEN, nFac.getName())};
 					} else {
 						return new String[] {Utils.rose("You must be invited to join that faction.")};
 					}
@@ -241,7 +247,7 @@ public class FactionCommand implements CommandListener {
 						return new String[] {Utils.rose("You cannot afford to create a faction.")};
 					}
 					Utils.plugin.getFactionManager().createFaction(pName, args[0]);
-					return new String[] {String.format("%1$sFaction %2$s%3$s %1$screated.", Colors.Yellow, Colors.Gold, args[0])};
+					return new String[] {String.format("%1$sFaction %2$s%3$s %1$screated.", TextFormat.YELLOW, TextFormat.ORANGE, args[0])};
 				} catch (ArrayIndexOutOfBoundsException e) {
 					return new String[] {Utils.rose("Usage: /f create [name]")};
 				} catch (ClassCastException e) {
@@ -261,7 +267,7 @@ public class FactionCommand implements CommandListener {
 					return new String[] {Utils.rose("You cannot afford to leave this faction.")};
 				}
 				f.remove(pName);
-				return new String[] {String.format("%sYou are no longer in any faction.", Colors.Yellow)};
+				return new String[] {String.format("%sYou are no longer in any faction.", TextFormat.YELLOW)};
 			}
 		};
 		
@@ -273,10 +279,10 @@ public class FactionCommand implements CommandListener {
 				gPlayer.ChatChannel chatChannel = args.length > 0 ? gPlayer.ChatChannel.fromString(args[0]) : gp.getChatChannel().increment();
 				if(chatChannel == null) {
 					assert args.length > 0;
-					return new String[] {Utils.rose("Chat channel %s%s %snot found.", Colors.Red, args[0], Colors.Rose)};
+					return new String[] {Utils.rose("Chat channel %s%s %snot found.", TextFormat.RED, args[0], TextFormat.PINK)};
 				}
 				gp.setChatChannel(chatChannel);
-				return new String[] {String.format("%1$sNow chatting in %2$s%3$s %1$smode.", Colors.Yellow, chatChannel.getColor(), chatChannel.toString())};
+				return new String[] {String.format("%1$sNow chatting in %2$s%3$s %1$smode.", TextFormat.YELLOW, chatChannel.getColor(), chatChannel.toString())};
 			}
 		};
 		
@@ -297,7 +303,7 @@ public class FactionCommand implements CommandListener {
 					return new String[] {Utils.rose("You cannot afford to teleport to your faction's home.")};
 				} else {
 					p.teleportTo(home);
-					return new String[] {String.format("%sTeleported.", Colors.Green)};
+					return new String[] {String.format("%sTeleported.", TextFormat.GREEN)};
 				}
 			}
 		};
@@ -313,9 +319,9 @@ public class FactionCommand implements CommandListener {
 				if(f.getId() == l.getClaimerId()) {
 					String[] ownerlist = l.getOwners();
 					if(ownerlist.length <= 0) {
-						return new String[] {String.format("%sThis land is open to all faction members.", Colors.Gray)};
+						return new String[] {String.format("%sThis land is open to all faction members.", TextFormat.GRAY)};
 					}
-					StringBuilder owners = new StringBuilder(Colors.Gray).append("Owners: ");
+					StringBuilder owners = new StringBuilder(TextFormat.GRAY).append("Owners: ");
 					for(String owner : ownerlist) {
 						owners.append(owner).append(", ");
 					}
@@ -335,17 +341,17 @@ public class FactionCommand implements CommandListener {
 				if(args.length > 0) {
 					if(args[0].equalsIgnoreCase("?") || args[0].equalsIgnoreCase("h") || args[0].equalsIgnoreCase("help")) {
 						String[] rt = new String[5];
-						rt[0] = Colors.Gold + "Available /f money commands:";
-						rt[1] = Colors.Gold + "/f money [?/help/h] - View this page.";
-						rt[2] = Colors.Gold + "/f money [b/balance] - View faction balance";
-						rt[3] = Colors.Gold + "/f money [d/deposit] [amount] - Deposit money into faction.";
-						rt[4] = Colors.Gold + "/f money [w/withdraw] [amount] - Withdraw money from faction.";
+						rt[0] = TextFormat.ORANGE + "Available /f money commands:";
+						rt[1] = TextFormat.ORANGE + "/f money [?/help/h] - View this page.";
+						rt[2] = TextFormat.ORANGE + "/f money [b/balance] - View faction balance";
+						rt[3] = TextFormat.ORANGE + "/f money [d/deposit] [amount] - Deposit money into faction.";
+						rt[4] = TextFormat.ORANGE + "/f money [w/withdraw] [amount] - Withdraw money from faction.";
 						return rt;
 					} else if(args[0].equalsIgnoreCase("b") || args[0].equalsIgnoreCase("balance")) {
 						assert caller instanceof Player;
 						Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
 						assert f != null && !(f instanceof SpecialFaction);
-						return new String[] {String.format("%sYour faction has %s%d", Colors.Yellow, Colors.Green, Utils.plugin.getEconomy().getBalance(f))};
+						return new String[] {String.format("%sYour faction has %s%d", TextFormat.YELLOW, TextFormat.GREEN, Utils.plugin.getEconomy().getBalance(f))};
 					} else if(args[0].equalsIgnoreCase("d") || args[0].equalsIgnoreCase("deposit")) {
 						return new String[] {factionBankHelper(caller, args.length > 1 ? args[1] : null, false)};
 					} else if(args[0].equalsIgnoreCase("w") || args[0].equalsIgnoreCase("withdraw")) {
@@ -358,7 +364,7 @@ public class FactionCommand implements CommandListener {
 						return new String[] {Utils.rose("Unknown command '%s'. Try '/f money help' for a list of commands.", args[0])};
 					}
 				} else {
-					return new String[] {String.format("%sYou currently have %s%d", Colors.Yellow, Colors.Green, Utils.plugin.getEconomy().getBalance(((Player) caller).getName()))};
+					return new String[] {String.format("%sYou currently have %s%d", TextFormat.YELLOW, TextFormat.GREEN, Utils.plugin.getEconomy().getBalance(((Player) caller).getName()))};
 				}
 			}
 		};
@@ -372,9 +378,9 @@ public class FactionCommand implements CommandListener {
 				if(!Utils.plugin.getEconomy().modifyBalance(f, -Utils.plugin.getConfig().getDescCost())) {
 					return new String[] {Utils.rose("Your faction cannot afford to change its description.")};
 				}
-				String dStr = etc.combineSplit(0, args, " ");
+				String dStr = Canary.glueString(args, 0, " ");
 				f.setDescription(dStr);
-				return new String[] {String.format("%1$sDescription set to %2$s%3$s%1$s.", Colors.Yellow, Colors.Green, dStr)};
+				return new String[] {String.format("%1$sDescription set to %2$s%3$s%1$s.", TextFormat.YELLOW, TextFormat.GREEN, dStr)};
 			}
 		};
 		
@@ -391,9 +397,9 @@ public class FactionCommand implements CommandListener {
 						return new String[] {Utils.rose("Your faction cannot afford to change its name.")};
 					}
 					f.setName(args[0]);
-					return new String[] {String.format("%1$sYour faction's name set to %2$s%3$s%1$s.", Colors.Yellow, Colors.Green, args[0])};
+					return new String[] {String.format("%1$sYour faction's name set to %2$s%3$s%1$s.", TextFormat.YELLOW, TextFormat.GREEN, args[0])};
 				} else {
-					return new String[] {Utils.rose("A faction with the name %s%s %salready exists!", Colors.Red, args[0], Colors.Rose)};
+					return new String[] {Utils.rose("A faction with the name %s%s %salready exists!", TextFormat.RED, args[0], TextFormat.PINK)};
 				}
 			}
 		};
@@ -408,7 +414,7 @@ public class FactionCommand implements CommandListener {
 					return new String[] {Utils.rose("Your faction cannot afford to become open.")};
 				}
 				f.setOpen(true);
-				return new String[] {String.format("%sYour faction is now %s%s", Colors.Yellow, Colors.Green, "Open")};
+				return new String[] {String.format("%sYour faction is now %s%s", TextFormat.YELLOW, TextFormat.GREEN, "Open")};
 			}
 		};
 		
@@ -422,7 +428,7 @@ public class FactionCommand implements CommandListener {
 					return new String[] {Utils.rose("Your faction cannot afford to become closed.")};
 				}
 				f.setOpen(false);
-				return new String[] {String.format("%sYour faction is now %s%s", Colors.Yellow, Colors.Red, "Closed")};
+				return new String[] {String.format("%sYour faction is now %s%s", TextFormat.YELLOW, TextFormat.RED, "Closed")};
 			}
 		};
 		
@@ -437,11 +443,11 @@ public class FactionCommand implements CommandListener {
 				} else if(!Utils.plugin.getEconomy().modifyBalance(f, -Utils.plugin.getConfig().getInviteCost())) {
 					return new String[] {Utils.rose("Your faction cannot afford to invite a player.")};
 				} else {
-					Player p = etc.getServer().getPlayer(args[0]);
+					Player p = Canary.getServer().getPlayer(args[0]);
 					if(p != null) {
-						p.sendMessage(String.format("%sYou have been invited to %s%s", Colors.Yellow, Colors.Gray, f.getName()));
+						p.sendMessage(String.format("%sYou have been invited to %s%s", TextFormat.YELLOW, TextFormat.GRAY, f.getName()));
 					}
-					return new String[] {String.format("%s%s %shas been invited to your faction.", Colors.Gray, args[0], Colors.Yellow)};
+					return new String[] {String.format("%s%s %shas been invited to your faction.", TextFormat.GRAY, args[0], TextFormat.YELLOW)};
 				}
 			}
 		};
@@ -453,13 +459,13 @@ public class FactionCommand implements CommandListener {
 				Faction f = Utils.plugin.getFactionManager().getFaction(((Player) caller).getName());
 				assert f != null && !(f instanceof SpecialFaction);
 				if(f.deinvite(args[0])) {
-					Player p = etc.getServer().getPlayer(args[0]);
+					Player p = Canary.getServer().getPlayer(args[0]);
 					if(p != null) {
-						p.sendMessage(Utils.rose("You are no longer invited to %s%s", Colors.Red, f.getName()));
+						p.sendMessage(Utils.rose("You are no longer invited to %s%s", TextFormat.RED, f.getName()));
 					}
-					return new String[] {String.format("%s%s%s's faction invitation was revoked.", Colors.Gray, args[0], Colors.Yellow)};
+					return new String[] {String.format("%s%s%s's faction invitation was revoked.", TextFormat.GRAY, args[0], TextFormat.YELLOW)};
 				} else {
-					return new String[] {String.format("%s%s %swas never invited to your faction.", Colors.Red, args[0], Colors.Rose)};
+					return new String[] {String.format("%s%s %swas never invited to your faction.", TextFormat.RED, args[0], TextFormat.PINK)};
 				}
 			}
 		};
@@ -476,7 +482,7 @@ public class FactionCommand implements CommandListener {
 					return new String[] {Utils.rose("Your faction cannot afford to set its home.")};
 				}
 				f.setHome(p.getLocation());
-				f.sendToMembers(String.format("%s%s %sjust set the faction home.", Colors.LightGreen, pName, Colors.Yellow));
+				f.sendToMembers(String.format("%s%s %sjust set the faction home.", TextFormat.LIGHT_GREEN, pName, TextFormat.YELLOW));
 				return null;
 			}
 		};
@@ -485,7 +491,7 @@ public class FactionCommand implements CommandListener {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				assert caller instanceof Player;
-				if(args.length > 0 && Utils.permCheck(caller, "/fadmin")) {
+				if(args.length > 0 && Utils.permCheck(caller, "gfactions.admin")) {
 					char c = Character.toLowerCase(args[0].charAt(0));
 					switch(c) {
 					default:
@@ -494,7 +500,7 @@ public class FactionCommand implements CommandListener {
 					case 'w':
 						Faction f = Utils.plugin.getFactionManager().getFaction(c == 's' ? -2 : -3);
 						Utils.plugin.getLandManager().getLandAt(((Player) caller).getLocation()).claim(f);
-						return new String[] {String.format("%sLand claimed for %s", Colors.Yellow, f.getName())};
+						return new String[] {String.format("%sLand claimed for %s", TextFormat.YELLOW, f.getName())};
 					}
 				}
 				String s = claimHelper((Player) caller);
@@ -524,7 +530,7 @@ public class FactionCommand implements CommandListener {
 				if(f.getId() == l.getClaimerId()) {
 					Utils.plugin.getEconomy().modifyBalance(f, -Utils.plugin.getConfig().getLandRefund());
 					l.claim(null);
-					f.sendToMembers(String.format("%s%s %sunclaimed land owned by your faction.", Colors.LightGreen, pName, Colors.Yellow));
+					f.sendToMembers(String.format("%s%s %sunclaimed land owned by your faction.", TextFormat.LIGHT_GREEN, pName, TextFormat.YELLOW));
 					return null;
 				} else {
 					return new String[] {Utils.rose("You do not own this land.")};
@@ -543,7 +549,7 @@ public class FactionCommand implements CommandListener {
 				for(Land l : lands) {
 					l.claim(null);
 				}
-				f.sendToMembers(String.format("%s%s %sunclaimed all your land.", Colors.LightGreen, pName, Colors.Yellow));
+				f.sendToMembers(String.format("%s%s %sunclaimed all your land.", TextFormat.LIGHT_GREEN, pName, TextFormat.YELLOW));
 				return null;
 			}
 		};
@@ -559,7 +565,7 @@ public class FactionCommand implements CommandListener {
 				if(l.getClaimerId() == f.getId()) {
 					String s = powerOverHelper(p.getName(), args[0], "You cannot change those person's build rights.");
 					if(s == null) {
-						return new String[] {String.format("%s%s %scan %s build here.", Colors.LightGreen, args[0], Colors.Yellow, l.toggleOwner(args[0]) ? "now" : "no longer")};
+						return new String[] {String.format("%s%s %scan %s build here.", TextFormat.LIGHT_GREEN, args[0], TextFormat.YELLOW, l.toggleOwner(args[0]) ? "now" : "no longer")};
 					} else {
 						return new String[] {s};
 					}
@@ -583,10 +589,10 @@ public class FactionCommand implements CommandListener {
 				}
 				f.deinvite(args[0]);
 				f.remove(args[0]);
-				f.sendToMembers(String.format("%s%s %swas kicked from the faction.", Colors.Gray, args[0], Colors.Yellow));
-				Player p = etc.getServer().getPlayer(args[0]);
+				f.sendToMembers(String.format("%s%s %swas kicked from the faction.", TextFormat.GRAY, args[0], TextFormat.YELLOW));
+				Player p = Canary.getServer().getPlayer(args[0]);
 				if(p != null) {
-					p.sendMessage(Utils.rose("You were kicked from %s%s", Colors.Red, f.getName()));
+					p.sendMessage(Utils.rose("You were kicked from %s%s", TextFormat.RED, f.getName()));
 				}
 				return null;
 			}
@@ -607,13 +613,13 @@ public class FactionCommand implements CommandListener {
 				if(!Utils.plugin.getEconomy().modifyBalance(Utils.plugin.getFactionManager().getFaction(((Player) caller).getName()), -Utils.plugin.getConfig().getTitleCost())) {
 					return new String[] {Utils.rose("Your faction cannot afford to change the titles of its members.")};
 				}
-				String title = etc.combineSplit(1, args, " ");
+				String title = Canary.glueString(args, 1, " ");
 				Utils.plugin.getPlayerManager().getPlayer(args[0]).setTitle(title);
-				Player p = etc.getServer().getPlayer(args[0]);
+				Player p = Canary.getServer().getPlayer(args[0]);
 				if(p != null) {
-					p.sendMessage(String.format("%sYour title has been set to %s%s", Colors.Yellow, Colors.LightGreen, title));
+					p.sendMessage(String.format("%sYour title has been set to %s%s", TextFormat.YELLOW, TextFormat.LIGHT_GREEN, title));
 				}
-				return new String[] {String.format("%1$s%2$s%3$s's title set to %1$s%4$s%3$s.", Colors.LightGreen, args[0], Colors.Yellow, title)};
+				return new String[] {String.format("%1$s%2$s%3$s's title set to %1$s%4$s%3$s.", TextFormat.LIGHT_GREEN, args[0], TextFormat.YELLOW, title)};
 			}
 		};
 		
@@ -639,13 +645,13 @@ public class FactionCommand implements CommandListener {
 						return new String[] {Utils.rose("Your faction cannot afford to ally another faction.")};
 					} else if(rm.request(f, other, false)) {
 						String color = Relation.Type.ALLY.getColor();
-						other.sendToMembers(String.format("%sYour faction is now allies with %s%s", Colors.Yellow, color, f.getName()));
-						f.sendToMembers(String.format("%sYour faction is now allies with %s%s", Colors.Yellow, color, other.getName()));
+						other.sendToMembers(String.format("%sYour faction is now allies with %s%s", TextFormat.YELLOW, color, f.getName()));
+						f.sendToMembers(String.format("%sYour faction is now allies with %s%s", TextFormat.YELLOW, color, other.getName()));
 						return null;
 					} else {
 						String color = relation.getColor();
-						other.sendToMembers(String.format("%s%s %swould like to be allies.", color, f.getName(), Colors.Yellow));
-						return new String[] {String.format("%sAlly request sent to %s%s", Colors.Yellow, color, other.getName())};
+						other.sendToMembers(String.format("%s%s %swould like to be allies.", color, f.getName(), TextFormat.YELLOW));
+						return new String[] {String.format("%sAlly request sent to %s%s", TextFormat.YELLOW, color, other.getName())};
 					}
 				}
 			}
@@ -675,13 +681,13 @@ public class FactionCommand implements CommandListener {
 							return new String[] {Utils.rose("Your faction cannot afford to neutral another faction.")};
 						} else if(rm.request(f, other, true)) {
 							String color = Relation.Type.NEUTRAL.getColor();
-							other.sendToMembers(String.format("%sYour faction is now neutral with %s%s", Colors.Yellow, color, f.getName()));
-							f.sendToMembers(String.format("%sYour faction is now neutral with %s%s", Colors.Yellow, color, other.getName()));
+							other.sendToMembers(String.format("%sYour faction is now neutral with %s%s", TextFormat.YELLOW, color, f.getName()));
+							f.sendToMembers(String.format("%sYour faction is now neutral with %s%s", TextFormat.YELLOW, color, other.getName()));
 							return null;
 						} else {
 							String color = relation.getColor();
-							other.sendToMembers(String.format("%s%s %swould like to be neutral.", color, f.getName(), Colors.Yellow));
-							return new String[] {String.format("%sNeutral request sent to %s%s", Colors.Yellow, color, other.getName())};
+							other.sendToMembers(String.format("%s%s %swould like to be neutral.", color, f.getName(), TextFormat.YELLOW));
+							return new String[] {String.format("%sNeutral request sent to %s%s", TextFormat.YELLOW, color, other.getName())};
 						}
 					case ALLY:
 						if(!Utils.plugin.getEconomy().modifyBalance(f, Utils.plugin.getConfig().getNeutralCost())) {
@@ -689,8 +695,8 @@ public class FactionCommand implements CommandListener {
 						}
 						rm.setRelation(f, other, Relation.Type.NEUTRAL);
 						String color = Relation.Type.NEUTRAL.getColor();
-						other.sendToMembers(String.format("%sYour faction is now neutral with %s%s", Colors.Yellow, color, f.getName()));
-						f.sendToMembers(String.format("%sYour faction is now neutral with %s%s", Colors.Yellow, color, other.getName()));
+						other.sendToMembers(String.format("%sYour faction is now neutral with %s%s", TextFormat.YELLOW, color, f.getName()));
+						f.sendToMembers(String.format("%sYour faction is now neutral with %s%s", TextFormat.YELLOW, color, other.getName()));
 						return null;
 					default:
 						assert false;
@@ -722,8 +728,8 @@ public class FactionCommand implements CommandListener {
 					} else {
 						rm.setRelation(f, other, Relation.Type.ENEMY);
 						String color = Relation.Type.ENEMY.getColor();
-						other.sendToMembers(String.format("%sYour faction is now enemies with %s%s", Colors.Yellow, color, f.getName()));
-						f.sendToMembers(String.format("%sYour faction is now enemies with %s%s", Colors.Yellow, color, other.getName()));
+						other.sendToMembers(String.format("%sYour faction is now enemies with %s%s", TextFormat.YELLOW, color, f.getName()));
+						f.sendToMembers(String.format("%sYour faction is now enemies with %s%s", TextFormat.YELLOW, color, other.getName()));
 						return null;
 					}
 				}
@@ -747,11 +753,11 @@ public class FactionCommand implements CommandListener {
 				}
 				boolean tMod = f.toggleMod(args[0]);
 				String msg = tMod ? "now a faction moderator!" : "no longer a faction moderator.";
-				Player p = etc.getServer().getPlayer(args[0]);
+				Player p = Canary.getServer().getPlayer(args[0]);
 				if(p != null) {
-					p.sendMessage(String.format("%s%s %s", tMod ? Colors.Green : Colors.Rose, "You are", msg));
+					p.sendMessage(String.format("%s%s %s", tMod ? TextFormat.GREEN : TextFormat.PINK, "You are", msg));
 				}
-				return new String[] {String.format("%s%s %sis %s", Colors.LightGreen, args[0], Colors.Yellow, msg)};
+				return new String[] {String.format("%s%s %sis %s", TextFormat.LIGHT_GREEN, args[0], TextFormat.YELLOW, msg)};
 			}
 		};
 		
@@ -772,7 +778,7 @@ public class FactionCommand implements CommandListener {
 				}
 				f.setAdmin(args[0]);
 				f.add(pName, Faction.PlayerRank.MODERATOR);
-				f.sendToMembers(String.format("%1$s%2$s %3$stransferred faction ownership to %1$s%4s%3$s.", Colors.LightGreen, pName, Colors.Yellow, args[0]));
+				f.sendToMembers(String.format("%1$s%2$s %3$stransferred faction ownership to %1$s%4s%3$s.", TextFormat.LIGHT_GREEN, pName, TextFormat.YELLOW, args[0]));
 				return null;
 			}
 		};
@@ -793,7 +799,7 @@ public class FactionCommand implements CommandListener {
 				assert f != null && !(f instanceof SpecialFaction);
 				f.disband();
 				String name = f.getName();
-				return new String[] {String.format("%1$s%2$s %3$swas disbanded by %1$s%4$s%3$s.", Colors.Gray, name, Colors.Yellow, pName)};
+				return new String[] {String.format("%1$s%2$s %3$swas disbanded by %1$s%4$s%3$s.", TextFormat.GRAY, name, TextFormat.YELLOW, pName)};
 			}
 		};
 		
@@ -810,7 +816,7 @@ public class FactionCommand implements CommandListener {
 				assert caller instanceof Player;
 				gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(((Player) caller).getName());
 				gp.adminBypass = !gp.adminBypass;
-				return new String[] {String.format("%sBypass mode set to: %s", Colors.Yellow, Utils.readBool(gp.adminBypass, "ON", "OFF"))};
+				return new String[] {String.format("%sBypass mode set to: %s", TextFormat.YELLOW, Utils.readBool(gp.adminBypass, "ON", "OFF"))};
 			}
 		};
 		
@@ -820,7 +826,7 @@ public class FactionCommand implements CommandListener {
 				assert caller instanceof Player;
 				gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(((Player) caller).getName());
 				gp.chatSpy = !gp.chatSpy;
-				return new String[] {String.format("%sChat spy set to %s", Colors.Yellow, Utils.readBool(gp.chatSpy, "ON", "OFF"))};
+				return new String[] {String.format("%sChat spy set to %s", TextFormat.YELLOW, Utils.readBool(gp.chatSpy, "ON", "OFF"))};
 			}
 		};
 		
@@ -835,14 +841,14 @@ public class FactionCommand implements CommandListener {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
 				Utils.saveAll();
-				return new String[] {String.format("%sAll data saved.", Colors.Green)};
+				return new String[] {String.format("%sAll data saved.", TextFormat.GREEN)};
 			}
 		};
 		
 		subCommands[38] = new FactionSubCommand(new String[] {"version"}, "View the running version of gFactions.", "", CommandUsageRank.SERVER_ADMIN) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return new String[] {String.format("%sYou are running gFactions version %s", Colors.Yellow, gFactions.version)};
+				return new String[] {String.format("%sYou are running gFactions version %s", TextFormat.YELLOW, gFactions.version)};
 			}
 		};
 	}
@@ -861,14 +867,14 @@ public class FactionCommand implements CommandListener {
 			if(withdraw) { // faction -> player
 				if(e.modifyBalance(f, -amt)) {
 					e.modifyBalance(pName, amt);
-					return Colors.Green + "Transfer successful.";
+					return TextFormat.GREEN + "Transfer successful.";
 				} else {
 					return Utils.rose("Your faction does not have %d", amt);
 				}
 			} else { // player -> faction
 				if(e.modifyBalance(pName, -amt)) {
 					e.modifyBalance(f, amt);
-					return Colors.Green + "Transfer successful.";
+					return TextFormat.GREEN + "Transfer successful.";
 				} else {
 					return Utils.rose("You do not have %d", amt);
 				}
@@ -897,9 +903,9 @@ public class FactionCommand implements CommandListener {
 			}
 			l.claim(f);
 			if(!wasWild) {
-				other.sendToMembers(String.format("%s %sclaimed your land.", f.getNameRelative(other), Colors.Yellow));
+				other.sendToMembers(String.format("%s %sclaimed your land.", f.getNameRelative(other), TextFormat.YELLOW));
 			}
-			f.sendToMembers(String.format("%s%s %sclaimed land for your faction from %s", Colors.LightGreen, pName, Colors.Yellow, other.getNameRelative(f)));
+			f.sendToMembers(String.format("%s%s %sclaimed land for your faction from %s", TextFormat.LIGHT_GREEN, pName, TextFormat.YELLOW, other.getNameRelative(f)));
 			return null;
 		} else {
 			return Utils.rose("%s owns this land and is strong enough to keep it.", other.getName());
@@ -929,12 +935,8 @@ public class FactionCommand implements CommandListener {
 		}
 		return null;
 	}
-	
-	public FactionCommand() {
-		super("- Base command for working with factions.", String.format("%s/f help %sfor a list of available commands.", Colors.Red, Colors.Rose), 2);
-	}
 
-	@Override
+	@Command(aliases = { "f" }, description = "Base command for working with factions.", permissions = { "gfactions" }, toolTip = TextFormat.RED + "/f help " + TextFormat.PINK + "for a list of available commands.")
 	protected void execute(MessageReceiver arg0, String[] args) {
 		String[] msgs = null;
 		boolean found = false;
@@ -946,7 +948,7 @@ public class FactionCommand implements CommandListener {
 			}
 		}
 		if(!found) {
-			arg0.notify(String.format("%1$sInvalid command. %2$s/f help %1$sfor a list of available commands.", Colors.Rose, Colors.Red));
+			arg0.message(String.format("%1$sInvalid command. %2$s/f help %1$sfor a list of available commands.", TextFormat.PINK, TextFormat.RED));
 		} else {
 			Utils.sendMsgs(arg0, msgs);
 		}

@@ -2,6 +2,8 @@ package en.gregthegeek.gfactions.faction;
 
 import java.util.ArrayList;
 
+import net.canarymod.chat.TextFormat;
+
 import en.gregthegeek.gfactions.Config;
 import en.gregthegeek.gfactions.db.Datasource;
 import en.gregthegeek.gfactions.economy.Economy;
@@ -42,7 +44,7 @@ public class FactionManager {
 	public String[] getList(int page, Faction relativeTo) {
 		String[] rt = new String[PAGESIZE + 2];
 		int max = factions.size();
-		rt[0] = String.format("%s---------- Factions | Page %d/%d ----------", Colors.Gold, page + 1, max / PAGESIZE + 1);
+		rt[0] = String.format("%s---------- Factions | Page %d/%d ----------", TextFormat.ORANGE, page + 1, max / PAGESIZE + 1);
 		for(int i=0; i<rt.length-2; i++) {
 			int index = page * PAGESIZE + i;
 			if(index < max && index >= 0) {
@@ -52,7 +54,7 @@ public class FactionManager {
 				rt[i + 1] = "No more.";
 			}
 		}
-		rt[rt.length - 1] = String.format("%s--------------------------------------", Colors.Gold);
+		rt[rt.length - 1] = String.format("%s--------------------------------------", TextFormat.ORANGE);
 		return rt;
 	}
 	

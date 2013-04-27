@@ -1,5 +1,7 @@
 package en.gregthegeek.gfactions.faction;
 
+import net.canarymod.chat.TextFormat;
+
 /**
  * Represents a SafeZone.
  * 
@@ -15,7 +17,7 @@ public class SafeZone extends ZoneFaction {
 
 	@Override
 	public String getName() {
-		return Colors.Gold + "Safe Zone";
+		return TextFormat.ORANGE + "Safe Zone";
 	}
 
 	@Override
@@ -25,6 +27,6 @@ public class SafeZone extends ZoneFaction {
 
 	@Override
 	public String getColorRelative(Faction to) {
-		return Colors.Gold;
+		return TextFormat.ORANGE;
 	}
 }

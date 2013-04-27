@@ -1,5 +1,7 @@
 package en.gregthegeek.gfactions.db;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,16 +9,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import net.canarymod.Canary;
+import net.canarymod.api.world.DimensionType;
+import net.canarymod.api.world.position.Location;
+import net.visualillusionsent.utils.PropertiesFile;
+import net.visualillusionsent.utils.UtilityException;
+
 import en.gregthegeek.gfactions.faction.CachedFaction;
 import en.gregthegeek.gfactions.faction.Faction;
 import en.gregthegeek.gfactions.faction.FactionManager;
 import en.gregthegeek.gfactions.faction.LazyFaction;
 import en.gregthegeek.gfactions.faction.SpecialFaction;
-import en.gregthegeek.gfactions.faction.Faction.PlayerRank;
 import en.gregthegeek.gfactions.land.Land;
 import en.gregthegeek.gfactions.player.gPlayer;
 import en.gregthegeek.gfactions.relation.Relation;
-import en.gregthegeek.gfactions.relation.Relation.Type;
 import en.gregthegeek.util.Utils;
 
 
@@ -27,11 +33,26 @@ import en.gregthegeek.util.Utils;
  *
  */
 public class SQLSource implements Datasource {
-	private final CanaryConnection conn;
+	private final Connection conn = getConnection();
+	
+	private static Connection getConnection() {
+	    PropertiesFile props = new PropertiesFile("config/db.cfg");
+	    
+	    try {
+            return DriverManager.getConnection(props.getString("host") + ":" + props.getString("port"));
+        } catch (UtilityException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+	    
+	    Canary.logSevere("Error connecting to MySQL Server!");
+	    return null;
+	}
 	
 	public SQLSource() throws SQLException {
-		conn = etc.getConnection();
-		
+	    if(conn == null) return;
+	    
 		tryCreate("CREATE TABLE factions(`id` INT NOT NULL, PRIMARY_KEY(`id`), `name` VARCHAR(16) NOT NULL, UNIQUE(`name`), `desc` TEXT NOT NULL, `open` BIT(1) NOT NULL, `peaceful` BIT(1) NOT NULL, `home_x` INT, `home_y` INT, `home_z` INT, `home_dim` INT, `world` VARCHAR(32), `money` INT)");
 		tryCreate("CREATE TABLE f_members(`name` VARCHAR(16) NOT NULL, PRIMARY_KEY(`name`), `power` SMALLINT NOT NULL, `bonus` SMALLINT NOT NULL, `faction_id` INT, `rank` TINYINT, `title` VARCHAR(16) NOT NULL, `money` INT)");
 		tryCreate("CREATE TABLE f_land(`id` INT NOT NULL AUTO_INCREMENT, PRIMARY_KEY(`id`), `world` VARCHAR(32) NOT NULL, `dim` TINYINT NOT NULL, `chunk_x` INT NOT NULL, UNIQUE(`chunk_x`), `chunk_z` INT NOT NULL, UNIQUE(`chunk_z`), `owner_id` INT)");
@@ -62,9 +83,8 @@ public class SQLSource implements Datasource {
 				ResultSet rs = ps2.executeQuery();
 				rs.next();
 				
-				Location home = new Location(result.getInt("home_x"), result.getInt("home_y"), result.getInt("home_z"));
-				home.world = result.getString("world");
-				home.dimension = result.getInt("home_dim");
+				Location home = new Location(Canary.getServer().getWorld(result.getString("world")), result.getInt("home_x"), result.getInt("home_y"), result.getInt("home_z"), 0, 0);
+				home.setType(DimensionType.fromId(result.getInt("home_dim")));
 				return new CachedFaction(id, result.getString("name"), result.getString("desc"), result.getBoolean("open"), result.getBoolean("peaceful"), rs.getString("name"), home);
 			}
 		} catch (SQLException e) {
@@ -151,11 +171,11 @@ public class SQLSource implements Datasource {
 			ps.setBoolean(startIndex + 2, faction.isOpen());
 			ps.setBoolean(startIndex + 3, faction.isPeaceful());
 			Location home = faction.getHome();
-			ps.setInt(startIndex + 4, home == null ? null : (int) home.x);
-			ps.setInt(startIndex + 5, home == null ? null : (int) home.y);
-			ps.setInt(startIndex + 6, home == null ? null : (int) home.z);
-			ps.setInt(startIndex + 7, home == null ? null : (int) home.dimension);
-			ps.setString(startIndex + 8, home == null ? null : home.world);
+			ps.setInt(startIndex + 4, home == null ? null : (int) home.getX());
+			ps.setInt(startIndex + 5, home == null ? null : (int) home.getY());
+			ps.setInt(startIndex + 6, home == null ? null : (int) home.getZ());
+			ps.setInt(startIndex + 7, home == null ? null : (int) home.getType().getId());
+			ps.setString(startIndex + 8, home == null ? null : home.getWorldName());
 			
 			ps.execute();
 			

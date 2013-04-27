@@ -1,4 +1,6 @@
 package en.gregthegeek.gfactions;
+import net.canarymod.chat.MessageReceiver;
+import net.canarymod.chat.TextFormat;
 import en.gregthegeek.util.Utils;
 
 /**
@@ -77,6 +79,6 @@ public abstract class FactionSubCommand {
 	
 	@Override
 	public String toString() {
-		return String.format("%s/f %s %s - %s", Colors.Yellow, aliases[0], argHelp, description);
+		return String.format("%s/f %s %s - %s", TextFormat.YELLOW, aliases[0], argHelp, description);
 	}
 }

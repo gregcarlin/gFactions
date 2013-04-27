@@ -1,4 +1,6 @@
 package en.gregthegeek.gfactions.faction;
+import net.canarymod.api.world.position.Location;
+import net.canarymod.chat.TextFormat;
 import en.gregthegeek.gfactions.land.Land;
 
 /**
@@ -36,7 +38,7 @@ public abstract class SpecialFaction extends Faction {
 	
 	@Override
 	public String[] getWho(Faction relativeTo) { //faction is irrelevant
-		return new String[] {String.format("%1$s-------------- %2$s %1$s--------------", Colors.Gold, getName())};
+		return new String[] {String.format("%1$s-------------- %2$s %1$s--------------", TextFormat.ORANGE, getName())};
 	}
 	
 	@Override

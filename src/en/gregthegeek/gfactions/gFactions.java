@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import net.canarymod.Canary;
-import net.canarymod.api.entity.living.EntityLiving;
 import net.canarymod.api.entity.living.humanoid.Player;
 import net.canarymod.api.world.blocks.Block;
 import net.canarymod.api.world.position.Location;
@@ -22,7 +21,6 @@ import net.canarymod.hook.player.PlayerMoveHook;
 import net.canarymod.hook.player.PlayerRespawnHook;
 import net.canarymod.plugin.Plugin;
 import net.canarymod.plugin.PluginListener;
-import net.canarymod.tasks.ServerTask;
 import net.canarymod.tasks.ServerTaskManager;
 import net.canarymod.tasks.TaskOwner;
 
@@ -277,8 +275,8 @@ public class gFactions extends Plugin implements TaskOwner {
         		if(reduction <= 0) {
         			return false;
         		}
-        		pDefend.dealDamage(type, (int) (hook.getDamageDealt() * reduction));
-        		// TODO
+        		pDefend.dealDamage(hook.getDamageSource().getDamagetype(), (int) (hook.getDamageDealt() * reduction));
+        		// TODO replace for recode
         		/*OPacket38EntityStatus pkt = new OPacket38EntityStatus(pDefend.getId(), (byte) 0x02);
 				for(Player p : etc.getServer().getPlayerList()) {
 					p.getUser().a.b(pkt);

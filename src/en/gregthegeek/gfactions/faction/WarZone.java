@@ -1,5 +1,7 @@
 package en.gregthegeek.gfactions.faction;
 
+import net.canarymod.chat.TextFormat;
+
 /**
  * Represents a WarZone.
  * 
@@ -15,7 +17,7 @@ public class WarZone extends ZoneFaction {
 
 	@Override
 	public String getName() {
-		return Colors.Red + "War Zone";
+		return TextFormat.RED + "War Zone";
 	}
 
 	@Override
@@ -25,6 +27,6 @@ public class WarZone extends ZoneFaction {
 
 	@Override
 	public String getColorRelative(Faction to) {
-		return Colors.Red;
+		return TextFormat.RED;
 	}
 }

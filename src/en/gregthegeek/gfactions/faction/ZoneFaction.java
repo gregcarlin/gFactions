@@ -1,4 +1,5 @@
 package en.gregthegeek.gfactions.faction;
+import net.canarymod.api.entity.living.humanoid.Player;
 import en.gregthegeek.util.MapIconGen;
 
 /**

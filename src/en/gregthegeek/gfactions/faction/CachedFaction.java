@@ -2,6 +2,10 @@ package en.gregthegeek.gfactions.faction;
 
 import java.util.ArrayList;
 
+import net.canarymod.Canary;
+import net.canarymod.api.world.position.Location;
+import net.canarymod.chat.TextFormat;
+
 import en.gregthegeek.util.Utils;
 
 /**
@@ -96,14 +100,14 @@ public class CachedFaction extends Faction {
 	public String[] getWho(Faction relativeTo) {
 		String[] rt = new String[6];
 		String relationColor = Utils.plugin.getRelationManager().getRelation(this, relativeTo).getColor();
-		rt[0] = String.format("%1$s------------ %2$s%3$s %1$s------------", Colors.Gold, relationColor, getName());
+		rt[0] = String.format("%1$s------------ %2$s%3$s %1$s------------", TextFormat.ORANGE, relationColor, getName());
 		rt[1] = String.format("%s%s", relationColor, getDescription());
-		rt[2] = String.format("%1$sOpen: %2$s    %1$sPeaceful: %3$s", Colors.Yellow, Utils.readBool(isOpen(), "Yes", "No"), Utils.readBool(isPeaceful(), "Yes", "No"));
-		rt[3] = String.format("%sLand/Power/Maxpower: %d/%d/%d", Colors.Yellow, getLand().length, getPower(), getMaxPower());
+		rt[2] = String.format("%1$sOpen: %2$s    %1$sPeaceful: %3$s", TextFormat.YELLOW, Utils.readBool(isOpen(), "Yes", "No"), Utils.readBool(isPeaceful(), "Yes", "No"));
+		rt[3] = String.format("%sLand/Power/Maxpower: %d/%d/%d", TextFormat.YELLOW, getLand().length, getPower(), getMaxPower());
 		String[] mems = getMembersFormatted(relationColor);
 		assert mems.length == 2;
-		rt[4] = String.format("%sMembers online: %s", Colors.Yellow, mems[0]);
-		rt[5] = String.format("%sMembers offline: %s", Colors.Yellow, mems[1]);
+		rt[4] = String.format("%sMembers online: %s", TextFormat.YELLOW, mems[0]);
+		rt[5] = String.format("%sMembers offline: %s", TextFormat.YELLOW, mems[1]);
 		return rt;
 	}
 	
@@ -122,10 +126,10 @@ public class CachedFaction extends Faction {
 			if(title != null && !title.isEmpty()) {
 				title += " ";
 			}
-			if(etc.getServer().getPlayer(member) == null) { //offline
-				offline.append(relationColor).append(title).append(rank).append(member).append(Colors.Gold).append(", ");
+			if(Canary.getServer().getPlayer(member) == null) { // offline
+				offline.append(relationColor).append(title).append(rank).append(member).append(TextFormat.ORANGE).append(", ");
 			} else { //online
-				online.append(relationColor).append(title).append(rank).append(member).append(Colors.Gold).append(", ");
+				online.append(relationColor).append(title).append(rank).append(member).append(TextFormat.ORANGE).append(", ");
 			}
 		}
 		int onLen = online.length();

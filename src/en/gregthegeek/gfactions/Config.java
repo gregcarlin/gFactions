@@ -22,7 +22,7 @@ import en.gregthegeek.util.Utils;
  *
  */
 public class Config {
-	public static final String FOLDER = etc.getInstance().getConfigFolder() + "gFactions/";
+	public static final String FOLDER = "config/gFactions/";
 	private final AdvancedPropertiesFile props = getProps(FOLDER + "config.txt");
 	private final AdvancedPropertiesFile prices = getProps(FOLDER + "prices.txt");
 	
@@ -120,7 +120,7 @@ public class Config {
 		case OODB:
 		case DB4O:
 			try {
-				((MyClassLoader) Utils.plugin.getClass().getClassLoader()).addURL(new File("db4o.jar").toURI().toURL());
+				((net.canarymod.plugin.CanaryClassLoader) Utils.plugin.getClass().getClassLoader()).addURL(new File("db4o.jar").toURI().toURL());
 				return new OODBSource();
 			} catch (MalformedURLException e) {
 				throw new DatasourceException(e);

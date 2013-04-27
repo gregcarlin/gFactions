@@ -147,12 +147,12 @@ public abstract class Utils {
 	 * @param cmd The command to check.
 	 * @return boolean
 	 */
-	/*public static boolean permCheck(MessageReceiver mr, String cmd) {
+	public static boolean permCheck(MessageReceiver mr, String cmd) {
 		if(mr instanceof Player) {
 			return ((Player) mr).hasPermission(cmd);
 		}
 		return true;
-	}*/
+	}
 	
 	/**
 	 * Returns the commandusagerank of a messagereceiver

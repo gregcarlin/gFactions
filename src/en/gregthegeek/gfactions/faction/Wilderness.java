@@ -2,6 +2,10 @@ package en.gregthegeek.gfactions.faction;
 
 import java.util.ArrayList;
 
+import net.canarymod.Canary;
+import net.canarymod.api.entity.living.humanoid.Player;
+import net.canarymod.chat.TextFormat;
+
 import en.gregthegeek.util.MapIconGen;
 import en.gregthegeek.util.Utils;
 
@@ -15,7 +19,7 @@ public class Wilderness extends SpecialFaction {
 
 	@Override
 	public String getName() {
-		return Colors.Green + "Wilderness";
+		return TextFormat.GREEN + "Wilderness";
 	}
 
 	@Override
@@ -32,7 +36,7 @@ public class Wilderness extends SpecialFaction {
 	public Player[] getOnlineMembers() {
 		FactionManager fManager = Utils.plugin.getFactionManager();
 		ArrayList<Player> rt = new ArrayList<Player>();
-		for(Player p : etc.getServer().getPlayerList()) {
+		for(Player p : Canary.getServer().getPlayerList()) {
 			if(fManager.getFaction(p.getName()) instanceof Wilderness) {
 				rt.add(p);
 			}
@@ -47,7 +51,7 @@ public class Wilderness extends SpecialFaction {
 	
 	@Override
 	public String getColorRelative(Faction to) {
-		return Colors.Gray;
+		return TextFormat.GRAY;
 	}
 	
 	@Override
