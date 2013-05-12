@@ -1,12 +1,11 @@
 package en.gregthegeek.util;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -112,32 +111,56 @@ public abstract class Utils {
 	}
 	
 	/**
-	 * Returns a file as an array of its lines.
+	 * Returns a file as a list of its lines.
 	 * 
 	 * @param path The path to the file.
 	 * @return String[]
 	 * @throws DatasourceException
 	 */
-	public static String[] readFile(String path) throws DatasourceException {
+	public static List<String> readFile(String path) throws DatasourceException {
 		try {
 			File file = new File(path);
 			if(!file.exists()) {
 				file.createNewFile();
-				return new String[0];
+				return new ArrayList<String>(0);
 			}
-			BufferedReader factionReader = new BufferedReader(new InputStreamReader(new DataInputStream(new FileInputStream(file))));
+			
+			BufferedReader factionReader = new BufferedReader(new FileReader(file));
 			String line = null;
 			ArrayList<String> lines = new ArrayList<String>();
 			while((line = factionReader.readLine()) != null) {
 				lines.add(line);
 			}
 			factionReader.close();
-			return lines.toArray(new String[0]);
-		} catch (FileNotFoundException e) {
-			throw new DatasourceException(e);
+			
+			return lines;
 		} catch (IOException e) {
 			throw new DatasourceException(e);
 		}
+	}
+	
+	/**
+	 * Writes the data in data to a file at the indicated path. All previous data will be overwritten.
+	 * 
+	 * @param path The path of the file to write to.
+	 * @param data The data to write into the file.
+	 * @throws DatasourceException 
+	 */
+	public static void writeFile(String path, List<String> data) throws DatasourceException {
+	    try {
+	        File file = new File(path);
+	        if(!file.exists()) file.createNewFile();
+	        
+	        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+	        for(String s : data) {
+	            writer.write(s);
+	            writer.newLine();
+	        }
+	        writer.close();
+	        
+	    } catch (IOException e) {
+	        throw new DatasourceException(e);
+	    }
 	}
 	
 	/**

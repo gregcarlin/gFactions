@@ -39,9 +39,13 @@ public class Relation {
 	private final int two;
 	
 	public Relation(Type type, Faction one, Faction two) {
-		this.type = type;
-		this.one = one.getId();
-		this.two = two.getId();
+		this(type, one.getId(), two.getId());
+	}
+	
+	public Relation(Type type, int one, int two) {
+	    this.type = type;
+	    this.one = one;
+	    this.two = two;
 	}
 	
 	/**
@@ -94,5 +98,14 @@ public class Relation {
 	@Override
 	public String toString() {
 		return String.format("Relation[type=%s, one=%d, two=%d]", type, one, two);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+	    if(obj instanceof Relation) {
+	        Relation other = (Relation) obj;
+	        return (other.one == one && other.two == two) || (other.one == two && other.two == one);
+	    }
+	    return false;
 	}
 }

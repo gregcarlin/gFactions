@@ -1,5 +1,7 @@
 package en.gregthegeek.gfactions.land;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import en.gregthegeek.gfactions.faction.Faction;
 import en.gregthegeek.util.Utils;
@@ -16,13 +18,22 @@ public class Land {
 	private final String world;
 	private final int dim;
 	private int faction = -1;
-	private final ArrayList<String> owners = new ArrayList<String>();
+	private final List<String> owners;
 	
 	public Land(int x, int z, String world, int dim) {
+	    this(x, z, world, dim, new ArrayList<String>());
+	}
+	
+	public Land(int x, int z, String world, int dim, String[] owners) {
+	    this(x, z, world, dim, Arrays.asList(owners));
+	}
+	
+	public Land(int x, int z, String world, int dim, List<String> owners) {
 		this.x = x;
 		this.z = z;
 		this.world = world;
 		this.dim = dim;
+		this.owners = owners;
 	}
 	
 	/**
