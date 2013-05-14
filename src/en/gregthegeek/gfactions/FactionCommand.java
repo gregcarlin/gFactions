@@ -134,23 +134,23 @@ public class FactionCommand implements CommandListener {
 							rt[y].append(TextFormat.CYAN + "+");
 							lastColor = TextFormat.CYAN;
 						} else if(x == 0 && y == 0) {
-							rt[y].append(dir == Direction.NORTH_WEST ? TextFormat.PINK : TextFormat.ORANGE).append('\\');
+							rt[y].append(dir == Direction.NORTH_WEST ? TextFormat.LIGHT_RED : TextFormat.ORANGE).append('\\');
 						} else if(x == 1 && y == 0) {
-							rt[y].append(dir == Direction.NORTH ? TextFormat.PINK : TextFormat.ORANGE).append('N');
+							rt[y].append(dir == Direction.NORTH ? TextFormat.LIGHT_RED : TextFormat.ORANGE).append('N');
 						} else if(x == 2 && y == 0) {
-							rt[y].append(dir == Direction.NORTH_EAST ? TextFormat.PINK : TextFormat.ORANGE).append('/');
+							rt[y].append(dir == Direction.NORTH_EAST ? TextFormat.LIGHT_RED : TextFormat.ORANGE).append('/');
 						} else if(x == 0 && y == 1) {
-							rt[y].append(dir == Direction.WEST ? TextFormat.PINK : TextFormat.ORANGE).append('W');
+							rt[y].append(dir == Direction.WEST ? TextFormat.LIGHT_RED : TextFormat.ORANGE).append('W');
 						} else if(x == 1 && y == 1) {
-							rt[y].append(dir == Direction.ERROR ? TextFormat.PINK : TextFormat.ORANGE).append('+');
+							rt[y].append(dir == Direction.ERROR ? TextFormat.LIGHT_RED : TextFormat.ORANGE).append('+');
 						} else if(x == 2 && y == 1) {
-							rt[y].append(dir == Direction.EAST ? TextFormat.PINK : TextFormat.ORANGE).append('E');
+							rt[y].append(dir == Direction.EAST ? TextFormat.LIGHT_RED : TextFormat.ORANGE).append('E');
 						} else if(x == 0 && y == 2) {
-							rt[y].append(dir == Direction.SOUTH_WEST ? TextFormat.PINK : TextFormat.ORANGE).append('/');
+							rt[y].append(dir == Direction.SOUTH_WEST ? TextFormat.LIGHT_RED : TextFormat.ORANGE).append('/');
 						} else if(x == 1 && y == 2) {
-							rt[y].append(dir == Direction.SOUTH ? TextFormat.PINK : TextFormat.ORANGE).append('S');
+							rt[y].append(dir == Direction.SOUTH ? TextFormat.LIGHT_RED : TextFormat.ORANGE).append('S');
 						} else if(x == 2 && y == 2) {
-							rt[y].append(dir == Direction.SOUTH_EAST ? TextFormat.PINK : TextFormat.ORANGE).append('\\');
+							rt[y].append(dir == Direction.SOUTH_EAST ? TextFormat.LIGHT_RED : TextFormat.ORANGE).append('\\');
 						} else {
 							Faction owner = lm.getLandAt(x - 20 + startX, y - 4 + startZ, l.getWorldName(), l.getType().getId()).claimedBy();
 							String color = owner.getColorRelative(f);
@@ -209,7 +209,7 @@ public class FactionCommand implements CommandListener {
 					}
 					Faction nFac = fManager.getFactionByName(args[0]);
 					if(nFac == null) {
-						return new String[] {Utils.rose("Faction %s%s %snot found.", TextFormat.RED, args[0], TextFormat.PINK)};
+						return new String[] {Utils.rose("Faction %s%s %snot found.", TextFormat.RED, args[0], TextFormat.LIGHT_RED)};
 					} else if(nFac.isOpen() || nFac.isInvited(pName) || Utils.plugin.getPlayerManager().getPlayer(pName).adminBypass) {
 						if(!Utils.plugin.getEconomy().modifyBalance(pName, -Utils.plugin.getConfig().getJoinCost())) {
 							return new String[] {Utils.rose("You cannot afford to join a faction.")};
@@ -279,7 +279,7 @@ public class FactionCommand implements CommandListener {
 				gPlayer.ChatChannel chatChannel = args.length > 0 ? gPlayer.ChatChannel.fromString(args[0]) : gp.getChatChannel().increment();
 				if(chatChannel == null) {
 					assert args.length > 0;
-					return new String[] {Utils.rose("Chat channel %s%s %snot found.", TextFormat.RED, args[0], TextFormat.PINK)};
+					return new String[] {Utils.rose("Chat channel %s%s %snot found.", TextFormat.RED, args[0], TextFormat.LIGHT_RED)};
 				}
 				gp.setChatChannel(chatChannel);
 				return new String[] {String.format("%1$sNow chatting in %2$s%3$s %1$smode.", TextFormat.YELLOW, chatChannel.getColor(), chatChannel.toString())};
@@ -399,7 +399,7 @@ public class FactionCommand implements CommandListener {
 					f.setName(args[0]);
 					return new String[] {String.format("%1$sYour faction's name set to %2$s%3$s%1$s.", TextFormat.YELLOW, TextFormat.GREEN, args[0])};
 				} else {
-					return new String[] {Utils.rose("A faction with the name %s%s %salready exists!", TextFormat.RED, args[0], TextFormat.PINK)};
+					return new String[] {Utils.rose("A faction with the name %s%s %salready exists!", TextFormat.RED, args[0], TextFormat.LIGHT_RED)};
 				}
 			}
 		};
@@ -465,7 +465,7 @@ public class FactionCommand implements CommandListener {
 					}
 					return new String[] {String.format("%s%s%s's faction invitation was revoked.", TextFormat.GRAY, args[0], TextFormat.YELLOW)};
 				} else {
-					return new String[] {String.format("%s%s %swas never invited to your faction.", TextFormat.RED, args[0], TextFormat.PINK)};
+					return new String[] {String.format("%s%s %swas never invited to your faction.", TextFormat.RED, args[0], TextFormat.LIGHT_RED)};
 				}
 			}
 		};
@@ -755,7 +755,7 @@ public class FactionCommand implements CommandListener {
 				String msg = tMod ? "now a faction moderator!" : "no longer a faction moderator.";
 				Player p = Canary.getServer().getPlayer(args[0]);
 				if(p != null) {
-					p.sendMessage(String.format("%s%s %s", tMod ? TextFormat.GREEN : TextFormat.PINK, "You are", msg));
+					p.sendMessage(String.format("%s%s %s", tMod ? TextFormat.GREEN : TextFormat.LIGHT_RED, "You are", msg));
 				}
 				return new String[] {String.format("%s%s %sis %s", TextFormat.LIGHT_GREEN, args[0], TextFormat.YELLOW, msg)};
 			}
@@ -936,8 +936,13 @@ public class FactionCommand implements CommandListener {
 		return null;
 	}
 
-	@Command(aliases = { "f" }, description = "Base command for working with factions.", permissions = { "gfactions" }, toolTip = TextFormat.RED + "/f help " + TextFormat.PINK + "for a list of available commands.")
-	protected void execute(MessageReceiver arg0, String[] args) {
+	@Command(aliases = { "f" }, description = "Base command for working with factions.", permissions = { "gfactions" }, toolTip = TextFormat.RED + "/f help " + TextFormat.LIGHT_RED + "for a list of available commands.")
+	public void execute(MessageReceiver arg0, String[] args) {
+	    if(args.length < 2) {
+	        arg0.message(TextFormat.RED + "/f help " + TextFormat.LIGHT_RED + "for a list of available commands.");
+	        return;
+	    }
+	    
 		String[] msgs = null;
 		boolean found = false;
 		for(FactionSubCommand cmd : subCommands) {
@@ -948,7 +953,7 @@ public class FactionCommand implements CommandListener {
 			}
 		}
 		if(!found) {
-			arg0.message(String.format("%1$sInvalid command. %2$s/f help %1$sfor a list of available commands.", TextFormat.PINK, TextFormat.RED));
+			arg0.message(String.format("%1$sInvalid command. %2$s/f help %1$sfor a list of available commands.", TextFormat.LIGHT_RED, TextFormat.RED));
 		} else {
 			Utils.sendMsgs(arg0, msgs);
 		}

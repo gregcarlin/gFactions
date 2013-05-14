@@ -1,8 +1,14 @@
 package en.gregthegeek.gfactions;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.channels.Channels;
 import java.sql.SQLException;
+import java.util.zip.ZipInputStream;
+
+import net.canarymod.Canary;
 
 import en.gregthegeek.gfactions.db.Datasource;
 import en.gregthegeek.gfactions.db.DatasourceException;
@@ -54,7 +60,7 @@ public class Config {
 			props.setHeader("Main configuration file for gFactions.");
 		}
 		
-		props.getEnum("data-source", DataSourceEnum.OODB, "Available options are OODB and DB4O. Flatfile and SQL support is planned.");
+		props.getEnum("data-source", DataSourceEnum.OODB, "Available options are OODB/DB4O, FILE/FLAT_FILE, and SQL/MYSQL. ");
 		props.getInt("start-power", 10, "The power new players are given when they join the server.");
 		props.getBoolean("faction-open-by-default", false, "Whether or not new factions allow anyone to join them.");
 		props.getString("default-faction-desc", "Default faction description", "The description new factions are set to.");
@@ -120,9 +126,28 @@ public class Config {
 		case OODB:
 		case DB4O:
 			try {
-				((net.canarymod.plugin.CanaryClassLoader) Utils.plugin.getClass().getClassLoader()).addURL(new File("db4o.jar").toURI().toURL());
+			    File db4o = new File("db4o.jar");
+		        if(!db4o.exists()) {
+		            Canary.logInfo("Downloading db4o.jar");
+		            
+		            FileOutputStream fos = new FileOutputStream("db4o.zip");
+		            fos.getChannel().transferFrom(Channels.newChannel(new URL("http://www.db4o.com/downloads/db4o-8.0-java.zip").openStream()), 0, 1 << 24);
+		            fos.close();
+		            
+		            ZipInputStream zis = new ZipInputStream(new FileInputStream(new File("db4o.zip")));
+		            byte[] buffer = new byte[1024];
+		            FileOutputStream out = new FileOutputStream(db4o);
+		            int len;
+		            while((len = zis.read(buffer)) > 0) {
+		                out.write(buffer, 0, len);
+		            }
+		            out.close();
+		            zis.closeEntry();
+		            zis.close();
+		        }
+		        ((net.canarymod.plugin.CanaryClassLoader) Utils.plugin.getClass().getClassLoader()).addURL(db4o.toURI().toURL());
 				return new OODBSource();
-			} catch (MalformedURLException e) {
+			} catch (IOException e) {
 				throw new DatasourceException(e);
 			}
 		case FILE:

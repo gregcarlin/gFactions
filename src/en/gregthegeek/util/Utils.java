@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import net.canarymod.api.entity.living.humanoid.Player;
+import net.canarymod.api.world.position.Location;
 import net.canarymod.chat.MessageReceiver;
 import net.canarymod.chat.TextFormat;
 
@@ -36,7 +37,7 @@ public abstract class Utils {
 	 * @return String
 	 */
 	public static String rose(String s) {
-		return String.format("%s%s", TextFormat.PINK, s);
+		return String.format("%s%s", TextFormat.LIGHT_RED, s);
 	}
 	
 	/**
@@ -47,7 +48,7 @@ public abstract class Utils {
 	 * @return String
 	 */
 	public static String rose(String s, Object... objs) {
-		return String.format(TextFormat.PINK + s, objs); //ehh
+		return String.format(TextFormat.LIGHT_RED + s, objs); //ehh
 	}
 	
 	/**
@@ -216,6 +217,8 @@ public abstract class Utils {
 	 * Saves all data.
 	 */
 	public static void saveAll() {
+	    System.out.printf("Utils.java: plugin=%s%n", plugin);
+	    System.out.printf("Utils.java: fManager=%s%n", plugin.getFactionManager());
 		plugin.getFactionManager().save();
     	plugin.getPlayerManager().save();
     	plugin.getRelationManager().save();
@@ -276,5 +279,20 @@ public abstract class Utils {
 		}
 		
 		return new Player[][] {neutral.toArray(new Player[0]), allies.toArray(new Player[0]), enemies.toArray(new Player[0])};
+	}
+	
+	/**
+	 * Returns the distance between two locations.
+	 * Why was this removed from Location?
+	 * 
+	 * @param one The first location.
+	 * @param two The second location.
+	 * @return The distance.
+	 */
+	public static double distance(Location one, Location two) {
+	    double x = one.getX() - two.getX();
+	    double y = one.getY() - two.getY();
+	    double z = one.getZ() - two.getZ();
+	    return Math.sqrt(x * x + y * y + z * z);
 	}
 }

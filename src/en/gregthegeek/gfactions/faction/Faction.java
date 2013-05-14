@@ -461,7 +461,7 @@ public abstract class Faction {
 			for(Player p : f.getOnlineMembers()) {
 				Location l = p.getLocation();
 				if(l.getWorldName().equals(from.getWorldName()) && l.getType().getId() == from.getType().getId()) {
-					double d = l.getDistance(from);
+					double d = Utils.distance(l, from);
 					if(d < closest) {
 						closest = d;
 					}
