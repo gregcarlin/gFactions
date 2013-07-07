@@ -10,6 +10,7 @@ import net.canarymod.chat.MessageReceiver;
 import net.canarymod.chat.TextFormat;
 import net.canarymod.commandsys.Command;
 import net.canarymod.commandsys.CommandListener;
+import net.visualillusionsent.utils.StringUtils;
 
 import en.gregthegeek.gfactions.economy.Economy;
 import en.gregthegeek.gfactions.economy.InactiveEconomy;
@@ -378,7 +379,8 @@ public class FactionCommand implements CommandListener {
 				if(!Utils.plugin.getEconomy().modifyBalance(f, -Utils.plugin.getConfig().getDescCost())) {
 					return new String[] {Utils.rose("Your faction cannot afford to change its description.")};
 				}
-				String dStr = Canary.glueString(args, 0, " ");
+				//String dStr = Canary.glueString(args, 0, " ");
+				String dStr = StringUtils.joinString(args, " ", 0);
 				f.setDescription(dStr);
 				return new String[] {String.format("%1$sDescription set to %2$s%3$s%1$s.", TextFormat.YELLOW, TextFormat.GREEN, dStr)};
 			}
@@ -445,7 +447,7 @@ public class FactionCommand implements CommandListener {
 				} else {
 					Player p = Canary.getServer().getPlayer(args[0]);
 					if(p != null) {
-						p.sendMessage(String.format("%sYou have been invited to %s%s", TextFormat.YELLOW, TextFormat.GRAY, f.getName()));
+						p.message(String.format("%sYou have been invited to %s%s", TextFormat.YELLOW, TextFormat.GRAY, f.getName()));
 					}
 					return new String[] {String.format("%s%s %shas been invited to your faction.", TextFormat.GRAY, args[0], TextFormat.YELLOW)};
 				}
@@ -461,7 +463,7 @@ public class FactionCommand implements CommandListener {
 				if(f.deinvite(args[0])) {
 					Player p = Canary.getServer().getPlayer(args[0]);
 					if(p != null) {
-						p.sendMessage(Utils.rose("You are no longer invited to %s%s", TextFormat.RED, f.getName()));
+						p.message(Utils.rose("You are no longer invited to %s%s", TextFormat.RED, f.getName()));
 					}
 					return new String[] {String.format("%s%s%s's faction invitation was revoked.", TextFormat.GRAY, args[0], TextFormat.YELLOW)};
 				} else {
@@ -592,7 +594,7 @@ public class FactionCommand implements CommandListener {
 				f.sendToMembers(String.format("%s%s %swas kicked from the faction.", TextFormat.GRAY, args[0], TextFormat.YELLOW));
 				Player p = Canary.getServer().getPlayer(args[0]);
 				if(p != null) {
-					p.sendMessage(Utils.rose("You were kicked from %s%s", TextFormat.RED, f.getName()));
+					p.message(Utils.rose("You were kicked from %s%s", TextFormat.RED, f.getName()));
 				}
 				return null;
 			}
@@ -613,11 +615,12 @@ public class FactionCommand implements CommandListener {
 				if(!Utils.plugin.getEconomy().modifyBalance(Utils.plugin.getFactionManager().getFaction(((Player) caller).getName()), -Utils.plugin.getConfig().getTitleCost())) {
 					return new String[] {Utils.rose("Your faction cannot afford to change the titles of its members.")};
 				}
-				String title = Canary.glueString(args, 1, " ");
+				String title = StringUtils.joinString(args, " ", 1);
+				//String title = Canary.glueString(args, 1, " ");
 				Utils.plugin.getPlayerManager().getPlayer(args[0]).setTitle(title);
 				Player p = Canary.getServer().getPlayer(args[0]);
 				if(p != null) {
-					p.sendMessage(String.format("%sYour title has been set to %s%s", TextFormat.YELLOW, TextFormat.LIGHT_GREEN, title));
+					p.message(String.format("%sYour title has been set to %s%s", TextFormat.YELLOW, TextFormat.LIGHT_GREEN, title));
 				}
 				return new String[] {String.format("%1$s%2$s%3$s's title set to %1$s%4$s%3$s.", TextFormat.LIGHT_GREEN, args[0], TextFormat.YELLOW, title)};
 			}
@@ -755,7 +758,7 @@ public class FactionCommand implements CommandListener {
 				String msg = tMod ? "now a faction moderator!" : "no longer a faction moderator.";
 				Player p = Canary.getServer().getPlayer(args[0]);
 				if(p != null) {
-					p.sendMessage(String.format("%s%s %s", tMod ? TextFormat.GREEN : TextFormat.LIGHT_RED, "You are", msg));
+					p.message(String.format("%s%s %s", tMod ? TextFormat.GREEN : TextFormat.LIGHT_RED, "You are", msg));
 				}
 				return new String[] {String.format("%s%s %sis %s", TextFormat.LIGHT_GREEN, args[0], TextFormat.YELLOW, msg)};
 			}

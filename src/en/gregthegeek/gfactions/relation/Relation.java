@@ -67,6 +67,24 @@ public class Relation {
 	}
 	
 	/**
+	 * Gets the id of the first faction described in the relation.
+	 * 
+	 * @return int
+	 */
+	public int getOneId() {
+	    return one;
+	}
+	
+	/**
+	 * Gets the id of the second faction described in the relation
+	 * 
+	 * @return int 
+	 */
+	public int getTwoId() {
+	    return two;
+	}
+	
+	/**
 	 * Returns whether or not the given faction is either one or two in this relation.
 	 * 
 	 * @param f The faction to check for.

@@ -88,10 +88,12 @@ public class FileSource implements Datasource {
 	}
 	
 	private static String serialize(Location location) {
+	    if(location == null) return "";
 		return String.format("%s,%d,%d,%d,%d,%d", location.getWorldName(), location.getX(), location.getY(), location.getZ(), location.getRotation(), location.getPitch());
 	}
 	
 	private static Location expand(String s) {
+	    if(s == null || s.isEmpty()) return null;
 		String[] split = s.split(",");
 		Location rt = new Location(Canary.getServer().getWorld(split[0]), d(split[1]), d(split[2]), d(split[3]), f(split[4]), f(split[5]));
 		return rt;

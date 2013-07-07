@@ -61,15 +61,18 @@ public abstract class Utils {
 		if(msgs == null) {
 			return;
 		}
-		if(mr instanceof Player) { // because notify adds a Colors.Rose for some reason.
+		/*if(mr instanceof Player) { // because notify adds a Colors.Rose for some reason.
 			Player p = (Player) mr;
 			for(String s : msgs) {
-				p.sendMessage(s);
+				p.message(s);
 			}
 		} else {
 			for(String s : msgs) {
 				mr.message(s);
 			}
+		}*/
+		for(String s : msgs) {
+		    mr.message(s);
 		}
 	}
 	
@@ -217,8 +220,6 @@ public abstract class Utils {
 	 * Saves all data.
 	 */
 	public static void saveAll() {
-	    System.out.printf("Utils.java: plugin=%s%n", plugin);
-	    System.out.printf("Utils.java: fManager=%s%n", plugin.getFactionManager());
 		plugin.getFactionManager().save();
     	plugin.getPlayerManager().save();
     	plugin.getRelationManager().save();

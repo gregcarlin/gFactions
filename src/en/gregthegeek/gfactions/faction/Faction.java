@@ -328,7 +328,7 @@ public abstract class Faction {
 		for(String member : getAllMembers()) {
 			Player p = server.getPlayer(member);
 			if(p != null) {
-				p.sendMessage(message);
+				p.message(message);
 			}
 		}
 	}

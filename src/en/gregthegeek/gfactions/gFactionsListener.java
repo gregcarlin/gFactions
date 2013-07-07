@@ -88,17 +88,17 @@ public class gFactionsListener implements PluginListener {
                 
                 String neutral = String.format(format, Relation.Type.NEUTRAL.getColor(), fName, pNamef, TextFormat.WHITE, msg);
                 for(Player p : sorted[0]) {
-                    p.sendMessage(neutral);
+                    p.message(neutral);
                 }
                 
                 String ally = String.format(format, Relation.Type.ALLY.getColor(), fName, pNamef, TextFormat.WHITE, msg);
                 for(Player p : sorted[1]) {
-                    p.sendMessage(ally);
+                    p.message(ally);
                 }
                 
                 String enemy = String.format(format, Relation.Type.ENEMY.getColor(), fName, pNamef, TextFormat.WHITE, msg);
                 for(Player p : sorted[2]) {
-                    p.sendMessage(enemy);
+                    p.message(enemy);
                 }
             }
             return;
@@ -110,7 +110,7 @@ public class gFactionsListener implements PluginListener {
         Player p = hook.getPlayer();
         gPlayer gp = Utils.plugin.getPlayerManager().getPlayer(p.getName());
         gp.decreasePower(Utils.plugin.getLandManager().getLandAt(p.getLocation()).claimedBy() instanceof WarZone);
-        p.sendMessage(String.format("%sYour power is now %s%s", TextFormat.YELLOW, TextFormat.WHITE, gp.getPower()));
+        p.message(String.format("%sYour power is now %s%s", TextFormat.YELLOW, TextFormat.WHITE, gp.getPower()));
     }
     
     @HookHandler
@@ -124,12 +124,12 @@ public class gFactionsListener implements PluginListener {
             if(Utils.plugin.getPlayerManager().getPlayer(pName).autoClaim) {
                 String msg = FactionCommand.claimHelper(player);
                 if(msg != null) {
-                    player.sendMessage(msg);
+                    player.message(msg);
                 }
             } else {
                 FactionManager fm = Utils.plugin.getFactionManager();
                 Faction landFac = fm.getFaction(finish);
-                player.sendMessage(String.format("%s~ %s - %s", TextFormat.YELLOW, landFac.getNameRelative(fm.getFaction(pName)), landFac.getDescription()));
+                player.message(String.format("%s~ %s - %s", TextFormat.YELLOW, landFac.getNameRelative(fm.getFaction(pName)), landFac.getDescription()));
             }
         }
     }
@@ -153,7 +153,7 @@ public class gFactionsListener implements PluginListener {
             return false;
         }
         if(lm.getLandAt(hook.getAttacker().getLocation()).claimedBy() instanceof SafeZone) { // attacker is in safe zone
-            ((Player) hook.getAttacker()).sendMessage(String.format("%sYou cannot hurt someone while you are in a safe zone.", TextFormat.YELLOW));
+            ((Player) hook.getAttacker()).message(String.format("%sYou cannot hurt someone while you are in a safe zone.", TextFormat.YELLOW));
             return true;
         }
         // we now know: attacker nor defender is not in safe zone, attacker and defender are both players
@@ -161,7 +161,7 @@ public class gFactionsListener implements PluginListener {
         Faction defense = Utils.plugin.getFactionManager().getFaction(pDefend.getName());
         Player pAttack = (Player) hook.getAttacker();
         if(defense.has(pAttack.getName())) { // attacker and defender are in the same faction
-            pAttack.sendMessage(String.format("%sYou cannot hurt members of your own faction.", TextFormat.YELLOW));
+            pAttack.message(String.format("%sYou cannot hurt members of your own faction.", TextFormat.YELLOW));
             return true;
         }
         if(defense != null && !(defense instanceof SpecialFaction) && defense.equals(owner)) { // defender belongs to a faction and is in his own faction territory
@@ -175,7 +175,7 @@ public class gFactionsListener implements PluginListener {
             for(Player p : etc.getServer().getPlayerList()) {
                 p.getUser().a.b(pkt);
             }*/
-            pDefend.sendMessage(String.format("%sDamage reduced by %d%%", TextFormat.YELLOW, (int) (reduction * 100)));
+            pDefend.message(String.format("%sDamage reduced by %d%%", TextFormat.YELLOW, (int) (reduction * 100)));
             return true;
         }
         return false;
@@ -192,7 +192,7 @@ public class gFactionsListener implements PluginListener {
         }
         Faction f = Utils.plugin.getLandManager().getLandAt(block.getLocation()).claimedBy();
         if(f instanceof ZoneFaction) {
-            player.sendMessage(String.format("%sYou cannot build in %s.", f.getColorRelative(null), f.getName()));
+            player.message(String.format("%sYou cannot build in %s.", f.getColorRelative(null), f.getName()));
             return true;
         }
         if(f == null || f instanceof Wilderness) {
@@ -200,7 +200,7 @@ public class gFactionsListener implements PluginListener {
         }
         Faction me = Utils.plugin.getFactionManager().getFaction(player.getName());
         if(me == null || me instanceof Wilderness || !me.equals(f)) {
-            player.sendMessage(Utils.rose("You cannot build in the territory of %s.", f.getName()));
+            player.message(Utils.rose("You cannot build in the territory of %s.", f.getName()));
             return true;
         }
         return false;

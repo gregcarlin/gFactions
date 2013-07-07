@@ -4,11 +4,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.sql.SQLException;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import net.canarymod.Canary;
+import net.canarymod.CanaryClassLoader;
 
 import en.gregthegeek.gfactions.db.Datasource;
 import en.gregthegeek.gfactions.db.DatasourceException;
@@ -128,24 +131,43 @@ public class Config {
 			try {
 			    File db4o = new File("db4o.jar");
 		        if(!db4o.exists()) {
-		            Canary.logInfo("Downloading db4o.jar");
+		            Canary.logInfo("Downloading db4o.zip");
 		            
 		            FileOutputStream fos = new FileOutputStream("db4o.zip");
 		            fos.getChannel().transferFrom(Channels.newChannel(new URL("http://www.db4o.com/downloads/db4o-8.0-java.zip").openStream()), 0, 1 << 24);
 		            fos.close();
 		            
 		            ZipInputStream zis = new ZipInputStream(new FileInputStream(new File("db4o.zip")));
-		            byte[] buffer = new byte[1024];
-		            FileOutputStream out = new FileOutputStream(db4o);
-		            int len;
-		            while((len = zis.read(buffer)) > 0) {
-		                out.write(buffer, 0, len);
+		            ZipEntry ze = zis.getNextEntry();
+		            while(ze != null) {
+    		            byte[] buffer = new byte[1024];
+    		            String name = ze.getName();
+    		            File outFile = new File(name);
+    		            new File(outFile.getParent()).mkdirs();
+    		            FileOutputStream out = new FileOutputStream(outFile);
+    		            int len;
+    		            while((len = zis.read(buffer)) > 0) {
+    		                System.out.printf("Transferring data with length %d%n.", len);
+    		                out.write(buffer, 0, len);
+    		            }
+    		            out.close();
+    		            ze = zis.getNextEntry();
+    		            zis.closeEntry();
 		            }
-		            out.close();
-		            zis.closeEntry();
 		            zis.close();
 		        }
-		        ((net.canarymod.plugin.CanaryClassLoader) Utils.plugin.getClass().getClassLoader()).addURL(db4o.toURI().toURL());
+		        // TODO implement fix
+		        /*URL url = db4o.toURI().toURL();
+		        CanaryClassLoader ccl = new CanaryClassLoader(url, new URLClassLoader(new URL[] {url}));
+		        try {
+                    java.lang.reflect.Field f = CanaryClassLoader.class.getDeclaredField("ccw");
+                    f.setAccessible(true);
+                    CanaryClassWatcher ccw = (CanaryClassWatcher) f.get(null);
+                    
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }*/
+		        //((CanaryClassLoader) Utils.plugin.getClass().getClassLoader()).addURL(db4o.toURI().toURL());
 				return new OODBSource();
 			} catch (IOException e) {
 				throw new DatasourceException(e);

@@ -43,7 +43,6 @@ public class gFactions extends Plugin implements TaskOwner {
     @Override
     public void disable() {
     	ThreadManager.stopAll();
-    	System.out.printf("saving all, fManager=%s%n", fManager);
     	Utils.saveAll();
     	dataSource.close();
         log.info(name + " version " + version + " disabled.");
