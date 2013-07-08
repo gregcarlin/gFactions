@@ -9,8 +9,8 @@ import net.canarymod.plugin.Plugin;
 import net.canarymod.tasks.ServerTaskManager;
 import net.canarymod.tasks.TaskOwner;
 
+import en.gregthegeek.gfactions.db.CanarySource;
 import en.gregthegeek.gfactions.db.Datasource;
-import en.gregthegeek.gfactions.db.DatasourceException;
 import en.gregthegeek.gfactions.db.NullSource;
 import en.gregthegeek.gfactions.economy.Economy;
 import en.gregthegeek.gfactions.faction.FactionManager;
@@ -50,8 +50,8 @@ public class gFactions extends Plugin implements TaskOwner {
     	Utils.plugin = this;
     	config = new Config();
     	try {
-			dataSource = config.getDataSource();
-		} catch (DatasourceException e) {
+			dataSource = new CanarySource();
+		} catch (Exception e) {
 			log.severe("Error retrieving initial data from datasource!");
 			dataSource = new NullSource();
 		}
