@@ -1,8 +1,10 @@
 package en.gregthegeek.gfactions.db;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import net.canarymod.Canary;
 import net.canarymod.database.DataAccess;
@@ -15,10 +17,12 @@ import en.gregthegeek.gfactions.faction.Faction;
 import en.gregthegeek.gfactions.land.Land;
 import en.gregthegeek.gfactions.player.gPlayer;
 import en.gregthegeek.gfactions.relation.Relation;
+import en.gregthegeek.util.AdvancedPropertiesFile;
 import en.gregthegeek.util.Utils;
 
 public class CanarySource implements Datasource {
     private static final Database db = Canary.db();
+    private static final AdvancedPropertiesFile balances = getProps("balances.txt");
     
     public CanarySource() {
         DataAccess table = new FactionDataAccess(); // empty
@@ -267,26 +271,36 @@ public class CanarySource implements Datasource {
 
     @Override
     public int getBalance(String player) {
-        // TODO Auto-generated method stub
-        return 0;
+        return balances.getInt(player);
     }
 
     @Override
     public int getBalance(int fID) {
-        // TODO Auto-generated method stub
-        return 0;
+        return balances.getInt(Integer.toString(fID));
     }
 
     @Override
     public void savePlayerBalances(HashMap<String, Integer> players) {
-        // TODO Auto-generated method stub
-        
+        for(Entry<String, Integer>  e : players.entrySet()) {
+            balances.setInt(e.getKey(), e.getValue());
+        }
+        try {
+            balances.save();
+        } catch (IOException e1) {
+            Utils.warning("Error writing balances.txt file: %s", e1.getMessage());
+        }
     }
 
     @Override
     public void saveFactionBalances(HashMap<Integer, Integer> factions) {
-        // TODO Auto-generated method stub
-        
+        for(Entry<Integer, Integer>  e : factions.entrySet()) {
+            balances.setInt(Integer.toString(e.getKey()), e.getValue());
+        }
+        try {
+            balances.save();
+        } catch (IOException e1) {
+            Utils.warning("Error writing balances.txt file: %s", e1.getMessage());
+        }
     }
     
     private static void report(DatabaseReadException e) {
@@ -295,5 +309,14 @@ public class CanarySource implements Datasource {
     
     private static void report(DatabaseWriteException e) {
         Utils.warning("Error writing to database: %s", e.getMessage());
+    }
+    
+    private static AdvancedPropertiesFile getProps(String name) {
+        try {
+            return new AdvancedPropertiesFile("config/gFactions/" + name);
+        } catch (IOException e) {
+            Utils.warning("Error reading balances.txt file: %s", e.getMessage());
+        }
+        return null;
     }
 }

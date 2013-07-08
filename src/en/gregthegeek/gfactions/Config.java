@@ -4,15 +4,16 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLClassLoader;
+//import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.sql.SQLException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import net.canarymod.Canary;
-import net.canarymod.CanaryClassLoader;
+//import net.canarymod.CanaryClassLoader;
 
+import en.gregthegeek.gfactions.db.CanarySource;
 import en.gregthegeek.gfactions.db.Datasource;
 import en.gregthegeek.gfactions.db.DatasourceException;
 import en.gregthegeek.gfactions.db.FileSource;
@@ -41,7 +42,10 @@ public class Config {
 		FILE,
 		FLAT_FILE,
 		SQL,
-		MYSQL;
+		MYSQL,
+		CANARY,
+		BUILT_IN,
+		INTEGRATED;
 	}
 	
 	private enum EconomyEnum {
@@ -55,13 +59,9 @@ public class Config {
 	public Config() {
 		new File(FOLDER).mkdirs();
 		
-		if(props == null) {
-			return;
-		}
+		if(props == null) return;
 		
-		if(props.getHeader() == null) {
-			props.setHeader("Main configuration file for gFactions.");
-		}
+		if(props.getHeader() == null) props.setHeader("Main configuration file for gFactions.");
 		
 		props.getEnum("data-source", DataSourceEnum.OODB, "Available options are OODB/DB4O, FILE/FLAT_FILE, and SQL/MYSQL. ");
 		props.getInt("start-power", 10, "The power new players are given when they join the server.");
@@ -182,6 +182,10 @@ public class Config {
 			} catch (SQLException e) {
 				throw new DatasourceException(e);
 			}
+		case CANARY:
+		case INTEGRATED:
+		case BUILT_IN:
+		    return new CanarySource();
 		default:
 			throw new DatasourceException("Error retrieving datasource!");
 		}
