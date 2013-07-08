@@ -29,7 +29,7 @@ import en.gregthegeek.util.Utils;
  */
 public class gFactions extends Plugin implements TaskOwner {
     public static final String name = "gFactions";
-    public static final String version = "2.1";
+    public static final String version = "3.0";
     private final Logger log = Logger.getLogger("Minecraft");
     private final gFactionsListener listener = new gFactionsListener();
     private FactionManager fManager;

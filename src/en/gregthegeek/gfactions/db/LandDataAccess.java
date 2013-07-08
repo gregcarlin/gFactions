@@ -1,23 +1,26 @@
 package en.gregthegeek.gfactions.db;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import en.gregthegeek.gfactions.land.Land;
-import en.gregthegeek.util.Utils;
 import net.canarymod.database.Column;
 import net.canarymod.database.DataAccess;
 
 public class LandDataAccess extends DataAccess {
     @Column(columnName = "x", dataType = Column.DataType.INTEGER)
-    private int x;
+    public int x;
     @Column(columnName = "z", dataType = Column.DataType.INTEGER)
-    private int z;
+    public int z;
     @Column(columnName = "world", dataType = Column.DataType.STRING)
-    private String world;
+    public String world;
     @Column(columnName = "dim", dataType = Column.DataType.INTEGER)
-    private int dim;
+    public int dim;
     @Column(columnName = "faction", dataType = Column.DataType.INTEGER)
-    private int faction = -1;
+    public int faction = -1;
     @Column(columnName = "owners", dataType = Column.DataType.STRING, isList = true)
-    private String[] owners;
+    public List<String> owners;
     
     public LandDataAccess() {
         super("factions", "land");
@@ -26,7 +29,7 @@ public class LandDataAccess extends DataAccess {
         this.world = "";
         this.dim = -2;
         this.faction = -1;
-        this.owners = new String[0];
+        this.owners = new ArrayList<String>(0);
     }
     
     public LandDataAccess(Land land) {
@@ -36,7 +39,7 @@ public class LandDataAccess extends DataAccess {
         this.world = land.getWorld();
         this.dim = land.getDimension();
         this.faction = land.getClaimerId();
-        this.owners = land.getOwners();
+        this.owners = Arrays.asList(land.getOwners());
     }
     
     public Land toLand() {
@@ -45,8 +48,7 @@ public class LandDataAccess extends DataAccess {
 
     @Override
     public DataAccess getInstance() {
-        Utils.warning("Someone's calling getInstance() on LandDataAccess!");
-        return null;
+        return new LandDataAccess();
     }
     
     public Object[] getUpdateFieldValues() {

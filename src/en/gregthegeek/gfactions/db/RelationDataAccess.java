@@ -1,17 +1,16 @@
 package en.gregthegeek.gfactions.db;
 
 import en.gregthegeek.gfactions.relation.Relation;
-import en.gregthegeek.util.Utils;
 import net.canarymod.database.Column;
 import net.canarymod.database.DataAccess;
 
 public class RelationDataAccess extends DataAccess {
     @Column(columnName = "type", dataType = Column.DataType.INTEGER)
-    private int type;
+    public int type;
     @Column(columnName = "one", dataType = Column.DataType.INTEGER)
-    private int one;
+    public int one;
     @Column(columnName = "two", dataType = Column.DataType.INTEGER)
-    private int two;
+    public int two;
     
     public RelationDataAccess() {
         super("factions", "relations");
@@ -33,7 +32,6 @@ public class RelationDataAccess extends DataAccess {
 
     @Override
     public DataAccess getInstance() {
-        Utils.warning("Someone's calling getInstance() on FactionDataAccess!");
-        return null;
+        return new RelationDataAccess();
     }
 }

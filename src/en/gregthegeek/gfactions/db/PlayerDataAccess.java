@@ -3,17 +3,16 @@ package en.gregthegeek.gfactions.db;
 import net.canarymod.database.Column;
 import net.canarymod.database.DataAccess;
 import en.gregthegeek.gfactions.player.gPlayer;
-import en.gregthegeek.util.Utils;
 
 public class PlayerDataAccess extends DataAccess {
     @Column(columnName = "name", dataType = Column.DataType.STRING)
-    private String name;
+    public String name;
     @Column(columnName = "power", dataType = Column.DataType.INTEGER)
-    private int power;
+    public int power;
     @Column(columnName = "bonusPower", dataType = Column.DataType.INTEGER)
-    private int bonusPower;
+    public int bonusPower;
     @Column(columnName = "title", dataType = Column.DataType.STRING)
-    private String title;
+    public String title;
     
     public PlayerDataAccess() {
         super("factions", "players");
@@ -40,8 +39,7 @@ public class PlayerDataAccess extends DataAccess {
 
     @Override
     public DataAccess getInstance() {
-        Utils.warning("Someone's calling getInstance() on PlayerDataAccess!");
-        return null;
+        return new PlayerDataAccess();
     }
     
     public Object[] getUpdateFieldValues() {

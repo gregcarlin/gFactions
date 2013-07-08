@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import net.canarymod.Canary;
 import net.canarymod.database.DataAccess;
 import net.canarymod.database.Database;
 import net.canarymod.database.exceptions.DatabaseReadException;
@@ -21,23 +20,22 @@ import en.gregthegeek.util.AdvancedPropertiesFile;
 import en.gregthegeek.util.Utils;
 
 public class CanarySource implements Datasource {
-    private static final Database db = Canary.db();
     private static final AdvancedPropertiesFile balances = getProps("balances.txt");
     
     public CanarySource() {
-        DataAccess table = new FactionDataAccess(); // empty
+        /*DataAccess table = new FactionDataAccess(); // empty
         try {
-            db.updateSchema(table);
+            Database.get().updateSchema(table);
         } catch (DatabaseWriteException e) {
             report(e);
-        }
+        }*/
     }
 
     @Override
     public CachedFaction getFaction(int id) {
         try {
             FactionDataAccess da = new FactionDataAccess();
-            db.load(da, new String[] {"id"}, new Object[] {id});
+            Database.get().load(da, new String[] {"id"}, new Object[] {id});
             if(da.hasData()) return da.toCachedFaction();
         } catch (DatabaseReadException e) {
             report(e);
@@ -50,7 +48,7 @@ public class CanarySource implements Datasource {
         // this 'query' sucks
         try {
             List<DataAccess> list = new ArrayList<DataAccess>();
-            db.loadAll(new FactionDataAccess(), list, new String[0], new Object[0]);
+            Database.get().loadAll(new FactionDataAccess(), list, new String[0], new Object[0]);
             Faction[] rt = new Faction[list.size()];
             for(int i=0; i<rt.length; i++) {
                 rt[i] = ((FactionDataAccess) list.get(i)).toCachedFaction();
@@ -66,7 +64,7 @@ public class CanarySource implements Datasource {
     public Land[] getAllLand() {
         try {
             List<DataAccess> list = new ArrayList<DataAccess>();
-            db.loadAll(new LandDataAccess(), list, new String[0], new Object[0]);
+            Database.get().loadAll(new LandDataAccess(), list, new String[0], new Object[0]);
             Land[] rt = new Land[list.size()];
             for(int i=0; i<rt.length; i++) {
                 rt[i] = ((LandDataAccess) list.get(i)).toLand();
@@ -84,9 +82,9 @@ public class CanarySource implements Datasource {
             RelationDataAccess da = new RelationDataAccess();
             int a = one.getId();
             int b = two.getId();
-            db.load(da, new String[] {"one", "two"}, new Object[] {a, b});
+            Database.get().load(da, new String[] {"one", "two"}, new Object[] {a, b});
             if(da.hasData()) return da.toRelation();
-            db.load(da, new String[] {"one", "two"}, new Object[] {b, a});
+            Database.get().load(da, new String[] {"one", "two"}, new Object[] {b, a});
             if(da.hasData()) return da.toRelation();
         } catch (DatabaseReadException e) {
             report(e);
@@ -99,8 +97,8 @@ public class CanarySource implements Datasource {
         try {
             List<DataAccess> list = new ArrayList<DataAccess>();
             int id = f.getId();
-            db.loadAll(new LandDataAccess(), list, new String[] {"one"}, new Object[] {id});
-            db.loadAll(new LandDataAccess(), list, new String[] {"two"}, new Object[] {id});
+            Database.get().loadAll(new LandDataAccess(), list, new String[] {"one"}, new Object[] {id});
+            Database.get().loadAll(new LandDataAccess(), list, new String[] {"two"}, new Object[] {id});
             Relation[] rt = new Relation[list.size()];
             for(int i=0; i<rt.length; i++) {
                 rt[i] = ((RelationDataAccess) list.get(i)).toRelation();
@@ -121,7 +119,7 @@ public class CanarySource implements Datasource {
     public gPlayer getPlayer(String name) {
         try {
             PlayerDataAccess da = new PlayerDataAccess();
-            db.load(da, new String[] {"name"}, new Object[] {name});
+            Database.get().load(da, new String[] {"name"}, new Object[] {name});
             if(da.hasData()) return da.toGPlayer();
         } catch (DatabaseReadException e) {
             report(e);
@@ -137,7 +135,7 @@ public class CanarySource implements Datasource {
     private boolean hasFaction(String name) {
         try {
             FactionDataAccess da = new FactionDataAccess();
-            db.load(da, new String[] {"name"}, new Object[] {name});
+            Database.get().load(da, new String[] {"name"}, new Object[] {name});
             return da.hasData();
         } catch (DatabaseReadException e) {
             report(e);
@@ -150,9 +148,9 @@ public class CanarySource implements Datasource {
         try {
             FactionDataAccess da = new FactionDataAccess(faction);
             if(hasFaction(faction.getName())) {
-                db.update(da, FactionDataAccess.getUpdateFieldNames(), da.getUpdateFieldValues());
+                Database.get().update(da, FactionDataAccess.getUpdateFieldNames(), da.getUpdateFieldValues());
             } else {
-                db.insert(da);
+                Database.get().insert(da);
             }
         } catch (DatabaseWriteException e) {
             report(e);
@@ -162,7 +160,7 @@ public class CanarySource implements Datasource {
     private boolean hasPlayer(String name) {
         try {
             PlayerDataAccess da = new PlayerDataAccess();
-            db.load(da, new String[] {"name"}, new Object[] {name});
+            Database.get().load(da, new String[] {"name"}, new Object[] {name});
             return da.hasData();
         } catch (DatabaseReadException e) {
             report(e);
@@ -177,9 +175,9 @@ public class CanarySource implements Datasource {
             try {
                 PlayerDataAccess da = new PlayerDataAccess(gp);
                 if(hasPlayer(gp.getName())) {
-                    db.update(da, PlayerDataAccess.getUpdateFieldNames(), da.getUpdateFieldValues());
+                    Database.get().update(da, PlayerDataAccess.getUpdateFieldNames(), da.getUpdateFieldValues());
                 } else {
-                    db.insert(da);
+                    Database.get().insert(da);
                 }
             } catch (DatabaseWriteException e) {
                 ex = e;
@@ -191,7 +189,7 @@ public class CanarySource implements Datasource {
     private boolean hasRelation(int one, int two) {
         try {
             RelationDataAccess da = new RelationDataAccess();
-            db.load(da, new String[] {"one", "two"}, new Object[] {one, two});
+            Database.get().load(da, new String[] {"one", "two"}, new Object[] {one, two});
             return da.hasData();
         } catch (DatabaseReadException e) {
             report(e);
@@ -206,9 +204,9 @@ public class CanarySource implements Datasource {
             try {
                 RelationDataAccess da = new RelationDataAccess(r);
                 if(hasRelation(r.getOneId(), r.getTwoId())) {
-                    db.update(da, new String[] {"type"}, new Object[] {r.type.ordinal()});
+                    Database.get().update(da, new String[] {"type"}, new Object[] {r.type.ordinal()});
                 } else {
-                    db.insert(da);
+                    Database.get().insert(da);
                 }
             } catch (DatabaseWriteException e) {
                 ex = e;
@@ -220,7 +218,7 @@ public class CanarySource implements Datasource {
     private boolean hasLand(int x, int z) {
         try {
             LandDataAccess da = new LandDataAccess();
-            db.load(da, new String[] {"x", "z"}, new Object[] {x, z});
+            Database.get().load(da, new String[] {"x", "z"}, new Object[] {x, z});
             return da.hasData();
         } catch (DatabaseReadException e) {
             report(e);
@@ -233,9 +231,9 @@ public class CanarySource implements Datasource {
         try {
             LandDataAccess da = new LandDataAccess(land);
             if(hasLand(land.getX(), land.getZ())) {
-                db.update(da, LandDataAccess.getUpdateFieldNames(), da.getUpdateFieldValues());
+                Database.get().update(da, LandDataAccess.getUpdateFieldNames(), da.getUpdateFieldValues());
             } else {
-                db.insert(da);
+                Database.get().insert(da);
             }
         } catch (DatabaseWriteException e) {
             report(e);
@@ -245,7 +243,7 @@ public class CanarySource implements Datasource {
     @Override
     public void delete(Faction f) {
         try {
-            db.remove(new FactionDataAccess().getName(), new String[] {"id"}, new Object[] {f.getId()});
+            Database.get().remove(new FactionDataAccess().getName(), new String[] {"id"}, new Object[] {f.getId()});
         } catch (DatabaseWriteException e) {
             report(e);
         }
@@ -254,7 +252,7 @@ public class CanarySource implements Datasource {
     @Override
     public void delete(Land l) {
         try {
-            db.remove(new LandDataAccess().getName(), new String[] {"x", "z"}, new Object[] {l.getX(), l.getZ()});
+            Database.get().remove(new LandDataAccess().getName(), new String[] {"x", "z"}, new Object[] {l.getX(), l.getZ()});
         } catch (DatabaseWriteException e) {
             report(e);
         }
@@ -263,7 +261,7 @@ public class CanarySource implements Datasource {
     @Override
     public void delete(Relation r) {
         try {
-            db.remove(new RelationDataAccess().getName(), new String[] {"one", "two"}, new Object[] {r.getOneId(), r.getTwoId()});
+            Database.get().remove(new RelationDataAccess().getName(), new String[] {"one", "two"}, new Object[] {r.getOneId(), r.getTwoId()});
         } catch (DatabaseWriteException e) {
             report(e);
         }
