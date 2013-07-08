@@ -5,17 +5,19 @@ import net.canarymod.database.DataAccess;
 import en.gregthegeek.gfactions.player.gPlayer;
 
 public class PlayerDataAccess extends DataAccess {
-    @Column(columnName = "name", dataType = Column.DataType.STRING)
+    private static final String NAME = "players";
+    
+    @Column(columnName = "name", dataType = Column.DataType.STRING, columnType = Column.ColumnType.PRIMARY)
     public String name;
     @Column(columnName = "power", dataType = Column.DataType.INTEGER)
     public int power;
-    @Column(columnName = "bonusPower", dataType = Column.DataType.INTEGER)
+    @Column(columnName = "bonus_power", dataType = Column.DataType.INTEGER)
     public int bonusPower;
     @Column(columnName = "title", dataType = Column.DataType.STRING)
     public String title;
     
     public PlayerDataAccess() {
-        super("factions", "players");
+        super(CanarySource.PREFIX, NAME);
         name = "";
         power = 0;
         bonusPower = 0;
@@ -23,7 +25,7 @@ public class PlayerDataAccess extends DataAccess {
     }
     
     public PlayerDataAccess(gPlayer gp) {
-        super("factions", "players");
+        super(CanarySource.PREFIX, NAME);
         name = gp.getName();
         power = gp.getPower();
         bonusPower = gp.bonusPower;
@@ -40,13 +42,5 @@ public class PlayerDataAccess extends DataAccess {
     @Override
     public DataAccess getInstance() {
         return new PlayerDataAccess();
-    }
-    
-    public Object[] getUpdateFieldValues() {
-        return new Object[] {name, power, bonusPower, title};
-    }
-    
-    public static String[] getUpdateFieldNames() {
-        return new String[] {"name", "power", "bonusPower", "title"};
     }
 }

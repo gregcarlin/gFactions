@@ -28,8 +28,6 @@ import en.gregthegeek.util.Utils;
  *
  */
 public class gFactions extends Plugin implements TaskOwner {
-    public static final String name = "gFactions";
-    public static final String version = "3.0";
     private final Logger log = Logger.getLogger("Minecraft");
     private final gFactionsListener listener = new gFactionsListener();
     private FactionManager fManager;
@@ -45,7 +43,6 @@ public class gFactions extends Plugin implements TaskOwner {
     	ThreadManager.stopAll();
     	Utils.saveAll();
     	dataSource.close();
-        log.info(name + " version " + version + " disabled.");
     }
     
     @Override
@@ -72,20 +69,14 @@ public class gFactions extends Plugin implements TaskOwner {
     	Canary.hooks().registerListener(new gFactionsListener(), this);
     	
     	// in case plugin is enabled when players are already online
-    	try {
-        	for(Player p : Canary.getServer().getPlayerList()) {
-        		listener.onLogin(p);
-        	}
-    	} catch (NullPointerException e) {
-    	    // throws an NPE when loading on first server start
+    	for(Player p : Canary.getServer().getPlayerList()) {
+    		listener.onLogin(p);
     	}
     	
     	int interval = config.getSaveInterval();
     	if(interval > 0) {
     		ServerTaskManager.addTask(new AutoSaver(this, config.getSaveInterval()));
     	}
-    	
-        log.info(name + " version " + version + " enabled.");
         
         return true;
     }

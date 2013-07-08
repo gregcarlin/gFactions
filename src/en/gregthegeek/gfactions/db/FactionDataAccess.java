@@ -12,15 +12,17 @@ import net.canarymod.database.Column;
 import net.canarymod.database.DataAccess;
 
 public class FactionDataAccess extends DataAccess {
-    @Column(columnName = "id", dataType = Column.DataType.INTEGER, columnType = Column.ColumnType.PRIMARY, autoIncrement = true)
+    private static final String NAME = "factions";
+    
+    @Column(columnName = "id", dataType = Column.DataType.INTEGER, columnType = Column.ColumnType.PRIMARY)
     public int id;
     @Column(columnName = "name", dataType = Column.DataType.STRING, columnType = Column.ColumnType.UNIQUE)
     public String name;
     @Column(columnName = "desc", dataType = Column.DataType.STRING)
     public String desc;
-    @Column(columnName = "isOpen", dataType = Column.DataType.BOOLEAN)
+    @Column(columnName = "is_open", dataType = Column.DataType.BOOLEAN)
     public boolean isOpen;
-    @Column(columnName = "isPeaceful", dataType = Column.DataType.BOOLEAN)
+    @Column(columnName = "is_peaceful", dataType = Column.DataType.BOOLEAN)
     public boolean isPeaceful;
     @Column(columnName = "admin", dataType = Column.DataType.STRING, columnType = Column.ColumnType.UNIQUE)
     public String admin;
@@ -32,7 +34,7 @@ public class FactionDataAccess extends DataAccess {
     public List<String> members;
     
     public FactionDataAccess() {
-        super("factions", "factions");
+        super(CanarySource.PREFIX, NAME);
         this.id = -1;
         this.name = "";
         this.desc = "";
@@ -45,7 +47,7 @@ public class FactionDataAccess extends DataAccess {
     }
     
     public FactionDataAccess(CachedFaction fac) {
-        super("factions");
+        super(CanarySource.PREFIX, NAME);
         this.id = fac.getId();
         this.name = fac.getName();
         this.desc = fac.getDescription();
@@ -74,13 +76,5 @@ public class FactionDataAccess extends DataAccess {
     @Override
     public DataAccess getInstance() {
         return new FactionDataAccess();
-    }
-    
-    public Object[] getUpdateFieldValues() {
-        return new Object[] {name, desc, isOpen, isPeaceful, admin, home, mods, members};
-    }
-    
-    public static String[] getUpdateFieldNames() {
-        return new String[] {"name", "desc", "isOpen", "isPeaceful", "admin", "home", "mods", "members"};
     }
 }

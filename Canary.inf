@@ -1,4 +1,6 @@
-main-class = en.gregthegeek.gfactions.gFactions
-isLibrary = false
-author = gregthegeek
-version = 1.0
+main-class=en.gregthegeek.gfactions.gFactions
+isLibrary=false
+author=gregthegeek
+version=3.0
+name=gFactions
+jarPath=gFactions.jar

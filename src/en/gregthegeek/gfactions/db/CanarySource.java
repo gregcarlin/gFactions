@@ -20,15 +20,15 @@ import en.gregthegeek.util.AdvancedPropertiesFile;
 import en.gregthegeek.util.Utils;
 
 public class CanarySource implements Datasource {
+    protected static final String PREFIX = "factions";
     private static final AdvancedPropertiesFile balances = getProps("balances.txt");
     
     public CanarySource() {
-        /*DataAccess table = new FactionDataAccess(); // empty
         try {
-            Database.get().updateSchema(table);
+            Database.get().updateSchema(new FactionDataAccess());
         } catch (DatabaseWriteException e) {
-            report(e);
-        }*/
+            report(e, "CanarySource()");
+        }
     }
 
     @Override
@@ -38,7 +38,7 @@ public class CanarySource implements Datasource {
             Database.get().load(da, new String[] {"id"}, new Object[] {id});
             if(da.hasData()) return da.toCachedFaction();
         } catch (DatabaseReadException e) {
-            report(e);
+            report(e, "getFaction(int)");
         }
         return null;
     }
@@ -55,7 +55,7 @@ public class CanarySource implements Datasource {
             }
             return rt;
         } catch (DatabaseReadException e) {
-            report(e);
+            report(e, "getAllFactions()");
         }
         return new Faction[0];
     }
@@ -71,7 +71,7 @@ public class CanarySource implements Datasource {
             }
             return rt;
         } catch (DatabaseReadException e) {
-            report(e);
+            report(e, "getAllLand()");
         }
         return new Land[0];
     }
@@ -87,7 +87,7 @@ public class CanarySource implements Datasource {
             Database.get().load(da, new String[] {"one", "two"}, new Object[] {b, a});
             if(da.hasData()) return da.toRelation();
         } catch (DatabaseReadException e) {
-            report(e);
+            report(e, "getRelation(Faction, Faction)");
         }
         return new Relation(Relation.Type.NEUTRAL, one, two);
     }
@@ -105,7 +105,7 @@ public class CanarySource implements Datasource {
             }
             return rt;
         } catch (DatabaseReadException e) {
-            report(e);
+            report(e, "getRelationsWith(Faction)");
         }
         return new Relation[0];
     }
@@ -122,7 +122,7 @@ public class CanarySource implements Datasource {
             Database.get().load(da, new String[] {"name"}, new Object[] {name});
             if(da.hasData()) return da.toGPlayer();
         } catch (DatabaseReadException e) {
-            report(e);
+            report(e, "getPlayer(String)");
         }
         return null;
     }
@@ -132,13 +132,16 @@ public class CanarySource implements Datasource {
         // do nothing?
     }
     
-    private boolean hasFaction(String name) {
+    private boolean hasFaction(int id) { // TODO: remove comments
         try {
+            System.out.printf("searching for fac with id %d%n", id);
             FactionDataAccess da = new FactionDataAccess();
-            Database.get().load(da, new String[] {"name"}, new Object[] {name});
+            Database.get().load(da, new String[] {"id"}, new Object[] {id});
+            System.out.printf("loaded, hasData: %s%n", da.hasData() ? "yes" : "no");
             return da.hasData();
         } catch (DatabaseReadException e) {
-            report(e);
+            System.out.printf("read exception while looking for fac%n");
+            report(e, "hasFaction(int)");
         }
         return false;
     }
@@ -147,13 +150,15 @@ public class CanarySource implements Datasource {
     public void save(CachedFaction faction) {
         try {
             FactionDataAccess da = new FactionDataAccess(faction);
-            if(hasFaction(faction.getName())) {
-                Database.get().update(da, FactionDataAccess.getUpdateFieldNames(), da.getUpdateFieldValues());
+            if(hasFaction(da.id)) {
+                //System.out.printf("UPDATING FACTION %d WITH VALUES %s%n", da.id, da.getUpdateFieldValues());
+                Database.get().update(da, new String[] {"id"}, new Object[] {da.id});
             } else {
+                //System.out.printf("INSERTING NEW FACTION WITH VALUES %s%n", da.getUpdateFieldValues());
                 Database.get().insert(da);
             }
         } catch (DatabaseWriteException e) {
-            report(e);
+            report(e, "save(CachedFaction)");
         }
     }
 
@@ -163,7 +168,7 @@ public class CanarySource implements Datasource {
             Database.get().load(da, new String[] {"name"}, new Object[] {name});
             return da.hasData();
         } catch (DatabaseReadException e) {
-            report(e);
+            report(e, "hasPlayer(String)");
         }
         return false;
     }
@@ -174,8 +179,8 @@ public class CanarySource implements Datasource {
         for(gPlayer gp : players) {
             try {
                 PlayerDataAccess da = new PlayerDataAccess(gp);
-                if(hasPlayer(gp.getName())) {
-                    Database.get().update(da, PlayerDataAccess.getUpdateFieldNames(), da.getUpdateFieldValues());
+                if(hasPlayer(da.name)) {
+                    Database.get().update(da, new String[] {"name"}, new Object[] {da.name});
                 } else {
                     Database.get().insert(da);
                 }
@@ -183,7 +188,7 @@ public class CanarySource implements Datasource {
                 ex = e;
             }
         }
-        if(ex != null) report(ex);
+        if(ex != null) report(ex, "save(gPlayer[])");
     }
     
     private boolean hasRelation(int one, int two) {
@@ -192,7 +197,7 @@ public class CanarySource implements Datasource {
             Database.get().load(da, new String[] {"one", "two"}, new Object[] {one, two});
             return da.hasData();
         } catch (DatabaseReadException e) {
-            report(e);
+            report(e, "hasRelation(int, int)");
         }
         return false;
     }
@@ -203,8 +208,8 @@ public class CanarySource implements Datasource {
         for(Relation r : relations) {
             try {
                 RelationDataAccess da = new RelationDataAccess(r);
-                if(hasRelation(r.getOneId(), r.getTwoId())) {
-                    Database.get().update(da, new String[] {"type"}, new Object[] {r.type.ordinal()});
+                if(hasRelation(da.one, da.two)) {
+                    Database.get().update(da, new String[] {"one", "two"}, new Object[] {da.one, da.two});
                 } else {
                     Database.get().insert(da);
                 }
@@ -212,7 +217,7 @@ public class CanarySource implements Datasource {
                 ex = e;
             }
         }
-        if(ex != null) report(ex);
+        if(ex != null) report(ex, "save(Relation[])");
     }
     
     private boolean hasLand(int x, int z) {
@@ -221,7 +226,7 @@ public class CanarySource implements Datasource {
             Database.get().load(da, new String[] {"x", "z"}, new Object[] {x, z});
             return da.hasData();
         } catch (DatabaseReadException e) {
-            report(e);
+            report(e, "hasLand(int, int)");
         }
         return false;
     }
@@ -230,13 +235,13 @@ public class CanarySource implements Datasource {
     public void save(Land land) {
         try {
             LandDataAccess da = new LandDataAccess(land);
-            if(hasLand(land.getX(), land.getZ())) {
-                Database.get().update(da, LandDataAccess.getUpdateFieldNames(), da.getUpdateFieldValues());
+            if(hasLand(da.x, da.z)) {
+                Database.get().update(da, new String[] {"x", "z"}, new Object[] {da.x, da.z});
             } else {
                 Database.get().insert(da);
             }
         } catch (DatabaseWriteException e) {
-            report(e);
+            report(e, "save(Land)");
         }
     }
 
@@ -245,7 +250,7 @@ public class CanarySource implements Datasource {
         try {
             Database.get().remove(new FactionDataAccess().getName(), new String[] {"id"}, new Object[] {f.getId()});
         } catch (DatabaseWriteException e) {
-            report(e);
+            report(e, "delete(Faction)");
         }
     }
 
@@ -254,7 +259,7 @@ public class CanarySource implements Datasource {
         try {
             Database.get().remove(new LandDataAccess().getName(), new String[] {"x", "z"}, new Object[] {l.getX(), l.getZ()});
         } catch (DatabaseWriteException e) {
-            report(e);
+            report(e, "delete(Land)");
         }
     }
 
@@ -263,7 +268,7 @@ public class CanarySource implements Datasource {
         try {
             Database.get().remove(new RelationDataAccess().getName(), new String[] {"one", "two"}, new Object[] {r.getOneId(), r.getTwoId()});
         } catch (DatabaseWriteException e) {
-            report(e);
+            report(e, "delete(Relation)");
         }
     }
 
@@ -301,12 +306,14 @@ public class CanarySource implements Datasource {
         }
     }
     
-    private static void report(DatabaseReadException e) {
+    private static void report(DatabaseReadException e, String caller) {
         Utils.warning("Error reading from database: %s", e.getMessage());
+        Utils.warning("This error from: %s%n", caller);
     }
     
-    private static void report(DatabaseWriteException e) {
+    private static void report(DatabaseWriteException e, String caller) {
         Utils.warning("Error writing to database: %s", e.getMessage());
+        Utils.warning("This error from: %s%n", caller);
     }
     
     private static AdvancedPropertiesFile getProps(String name) {

@@ -851,7 +851,7 @@ public class FactionCommand implements CommandListener {
 		subCommands[38] = new FactionSubCommand(new String[] {"version"}, "View the running version of gFactions.", "", CommandUsageRank.SERVER_ADMIN) {
 			@Override
 			String[] execute(MessageReceiver caller, String[] args) {
-				return new String[] {String.format("%sYou are running gFactions version %s", TextFormat.YELLOW, gFactions.version)};
+				return new String[] {String.format("%sYou are running gFactions version %s", TextFormat.YELLOW, Utils.plugin.getVersion())};
 			}
 		};
 	}
